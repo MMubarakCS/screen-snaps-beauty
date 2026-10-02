@@ -221,7 +221,7 @@ function Campaigns() {
       {dispute && <DisputeModal onClose={() => setDispute(false)} onConfirm={() => { setDispute(false); setStatus("disputed"); showToast({ ar: "تم تقديم الاعتراض وتجميد الضمان", en: "Dispute filed — escrow frozen" }); }} />}
 
       {toast && (
-        <div className="fixed bottom-6 start-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-xl border bg-card px-4 py-3 text-sm font-semibold shadow-lift animate-in fade-in slide-in-from-bottom-2 rtl:translate-x-1/2">
+        <div className="fixed inset-x-0 bottom-6 z-50 mx-auto flex w-fit items-center gap-2 rounded-xl border bg-card px-4 py-3 text-sm font-semibold shadow-lift animate-in fade-in slide-in-from-bottom-2">
           <CheckCircle2 className="h-5 w-5 text-success" />{tr(toast)}
         </div>
       )}
