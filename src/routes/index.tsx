@@ -19,6 +19,8 @@ import {
   UserCog,
   Loader2,
   Sparkles,
+  Building2,
+  Lock,
 } from "lucide-react";
 import { BookingModal } from "@/components/vloop/BookingModal";
 import { type Lang, type L, type Creator, creators, categories, fmtBHD, t } from "@/lib/vloop-data";
@@ -57,6 +59,7 @@ function Index() {
   const [kit, setKit] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [menu, setMenu] = useState(false);
+  const [logoutDialog, setLogoutDialog] = useState(false);
 
   useEffect(() => {
     document.documentElement.lang = lang;
@@ -136,19 +139,19 @@ function Index() {
             <a className="rounded-lg bg-accent px-3 py-2 text-accent-foreground">
               {tr(t.nav.discover)}
             </a>
-            <a className="rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">
-              {tr(t.nav.campaigns)}
-            </a>
             <a className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">
-              <Wallet className="h-4 w-4 text-success" />
-              {tr(t.nav.escrow)}:{" "}
-              <span className="num font-bold text-success">{fmtBHD(350, lang)}</span>
+              {tr(t.nav.campaigns)}
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-500" title="Pending review"></span>
             </a>
             <a className="rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">
               {tr(t.nav.invoices)}
             </a>
           </nav>
           <div className="ms-auto flex items-center gap-3">
+            <div className="hidden md:flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm font-semibold text-emerald-700">
+              <Lock className="h-4 w-4" />
+              {lang === "ar" ? "في الضمان:" : "Escrow:"} <span className="num font-bold">{fmtBHD(350, lang)}</span>
+            </div>
             <button
               onClick={copyKiosk}
               className="hidden items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition hover:border-primary hover:text-primary md:inline-flex"
@@ -186,11 +189,11 @@ function Index() {
               {menu && (
                 <div className="absolute end-0 top-12 w-52 rounded-xl border bg-popover p-1.5 shadow-lift animate-in fade-in zoom-in-95">
                   {[
-                    [Settings, t.merchant.settings],
-                    [UserCog, t.merchant.team],
-                    [LogOut, t.merchant.logout],
+                    [Building2, { ar: "الملف التعريفي للشركة", en: "Company Profile" }],
+                    [Settings, { ar: "إعدادات الحساب", en: "Account Settings" }],
                   ].map(([I, l], i) => {
                     const Icon = I as typeof Settings;
+                    const label = l as L;
                     return (
                       <button
                         key={i}
@@ -198,16 +201,57 @@ function Index() {
                         className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-muted"
                       >
                         <Icon className="h-4 w-4 text-muted-foreground" />
-                        {tr(l as L)}
+                        {tr(label)}
                       </button>
                     );
                   })}
+                  <div className="border-t my-1"></div>
+                  <button
+                    onClick={() => {
+                      setMenu(false);
+                      setLogoutDialog(true);
+                    }}
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-destructive hover:bg-destructive/10 hover:text-destructive"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    {tr({ ar: "تسجيل الخروج", en: "Log out" })}
+                  </button>
                 </div>
               )}
             </div>
           </div>
         </div>
       </header>
+
+      {/* LOGOUT CONFIRMATION DIALOG */}
+      {logoutDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 backdrop-blur-sm p-4 animate-in fade-in">
+          <div className="w-full max-w-sm rounded-2xl border bg-card p-6 shadow-lift animate-in zoom-in-95" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-lg font-bold">
+              {lang === "ar" ? "تأكيد تسجيل الخروج" : "Confirm Log out"}
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {lang === "ar"
+                ? "هل أنت متأكد من رغبتك في تسجيل الخروج من حسابك؟"
+                : "Are you sure you want to log out?"}
+            </p>
+            <div className="mt-6 flex items-center justify-end gap-3">
+              <button
+                onClick={() => setLogoutDialog(false)}
+                className="rounded-lg border px-4 py-2 text-sm font-semibold transition hover:bg-muted"
+              >
+                {lang === "ar" ? "إلغاء" : "Cancel"}
+              </button>
+              <button
+                onClick={() => setLogoutDialog(false)}
+                className="rounded-lg bg-destructive px-4 py-2 text-sm font-bold text-destructive-foreground hover:bg-destructive/90"
+              >
+                {lang === "ar" ? "تأكيد الخروج" : "Log out"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <main className="mx-auto w-[92%] max-w-[1680px] space-y-8 px-4 py-8 lg:px-8 2xl:space-y-12 2xl:py-12">
         <div>
@@ -476,6 +520,7 @@ function Index() {
           lang={lang}
           fee={applied.budget}
           onClose={() => setBooking(null)}
+          selectedDate={date}
         />
       )}
     </div>
