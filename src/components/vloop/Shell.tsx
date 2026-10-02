@@ -162,7 +162,6 @@ export function AppFooter() {
   const { lang } = useLang();
   const tr = (x: L) => x[lang];
   return (
-      {/* FOOTER */}
       <footer className="mt-12 border-t bg-surface">
         <div className="mx-auto w-[92%] max-w-[1680px] grid gap-10 px-4 py-12 md:grid-cols-[1.5fr_1fr_1fr_1fr] lg:px-8 2xl:py-16">
           <div>
