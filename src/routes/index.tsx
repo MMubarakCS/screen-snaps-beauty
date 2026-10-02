@@ -22,6 +22,7 @@ import {
   Building2,
   Lock,
 } from "lucide-react";
+import { useLang } from "@/components/vloop/Shell";
 import { BookingModal } from "@/components/vloop/BookingModal";
 import { type Lang, type L, type Creator, creators, categories, fmtBHD, t } from "@/lib/vloop-data";
 
@@ -48,7 +49,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const [lang, setLang] = useState<Lang>("ar");
+  const { lang } = useLang();
   const tr = (x: L) => x[lang];
   const [budget, setBudget] = useState("150.000");
   const [cat, setCat] = useState("food");
@@ -57,15 +58,6 @@ function Index() {
   const [searching, setSearching] = useState(false);
   const [booking, setBooking] = useState<Creator | null>(null);
   const [kit, setKit] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
-  const [menu, setMenu] = useState(false);
-  const [logoutDialog, setLogoutDialog] = useState(false);
-
-  useEffect(() => {
-    document.documentElement.lang = lang;
-    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
-  }, [lang]);
-
   const results = useMemo(
     () =>
       creators.filter(
@@ -82,12 +74,6 @@ function Index() {
       setApplied({ budget: parseFloat(budget) || 0, cat });
       setSearching(false);
     }, 600);
-  };
-
-  const copyKiosk = () => {
-    navigator.clipboard?.writeText("https://vloop.bh/kiosk/flame-burger-104829");
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
   };
 
   const metrics = [
@@ -126,133 +112,6 @@ function Index() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* NAV */}
-      <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur">
-        <div className="mx-auto flex h-16 w-[92%] max-w-[1680px] items-center gap-6 px-4 lg:px-8">
-          <a href="/" className="flex shrink-0 items-center gap-2">
-            <img src="/logo.png" alt="Vloop" className="h-8 w-auto" />
-            <span className="text-lg font-extrabold">
-              Vloop <span className="font-light text-muted-foreground">|</span> ڤلوب
-            </span>
-          </a>
-          <nav className="hidden items-center gap-1 text-sm font-medium xl:flex">
-            <a className="rounded-lg bg-accent px-3 py-2 text-accent-foreground">
-              {tr(t.nav.discover)}
-            </a>
-            <a className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">
-              {tr(t.nav.campaigns)}
-              <span className="h-1.5 w-1.5 rounded-full bg-amber-500" title="Pending review"></span>
-            </a>
-            <a className="rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">
-              {tr(t.nav.invoices)}
-            </a>
-          </nav>
-          <div className="ms-auto flex items-center gap-3">
-            <div className="hidden md:flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm font-semibold text-emerald-700">
-              <Lock className="h-4 w-4" />
-              {lang === "ar" ? "في الضمان:" : "Escrow:"} <span className="num font-bold">{fmtBHD(350, lang)}</span>
-            </div>
-            <button
-              onClick={copyKiosk}
-              className="hidden items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition hover:border-primary hover:text-primary md:inline-flex"
-            >
-              {copied ? <Check className="h-4 w-4 text-success" /> : <QrCode className="h-4 w-4" />}
-              {tr(copied ? t.nav.copied : t.nav.kiosk)}
-            </button>
-            <div className="flex rounded-lg border p-0.5 text-xs font-bold">
-              {(["ar", "en"] as const).map((l) => (
-                <button
-                  key={l}
-                  onClick={() => setLang(l)}
-                  className={`rounded-md px-2.5 py-1.5 transition ${lang === l ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}
-                >
-                  {l.toUpperCase()}
-                </button>
-              ))}
-            </div>
-            <div className="relative">
-              <button
-                onClick={() => setMenu((m) => !m)}
-                className="flex items-center gap-2 rounded-lg p-1 hover:bg-muted"
-              >
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-gradient text-sm font-bold text-primary-foreground">
-                  FB
-                </span>
-                <span className="hidden text-start leading-tight lg:block">
-                  <span className="block text-sm font-bold">{tr(t.merchant.name)}</span>
-                  <span className="num block text-xs text-muted-foreground">
-                    {tr(t.merchant.cr)}
-                  </span>
-                </span>
-                <ChevronDown className="h-4 w-4 text-muted-foreground" />
-              </button>
-              {menu && (
-                <div className="absolute end-0 top-12 w-52 rounded-xl border bg-popover p-1.5 shadow-lift animate-in fade-in zoom-in-95">
-                  {[
-                    [Building2, { ar: "الملف التعريفي للشركة", en: "Company Profile" }],
-                    [Settings, { ar: "إعدادات الحساب", en: "Account Settings" }],
-                  ].map(([I, l], i) => {
-                    const Icon = I as typeof Settings;
-                    const label = l as L;
-                    return (
-                      <button
-                        key={i}
-                        onClick={() => setMenu(false)}
-                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-muted"
-                      >
-                        <Icon className="h-4 w-4 text-muted-foreground" />
-                        {tr(label)}
-                      </button>
-                    );
-                  })}
-                  <div className="border-t my-1"></div>
-                  <button
-                    onClick={() => {
-                      setMenu(false);
-                      setLogoutDialog(true);
-                    }}
-                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-destructive hover:bg-destructive/10 hover:text-destructive"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    {tr({ ar: "تسجيل الخروج", en: "Log out" })}
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* LOGOUT CONFIRMATION DIALOG */}
-      {logoutDialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 backdrop-blur-sm p-4 animate-in fade-in">
-          <div className="w-full max-w-sm rounded-2xl border bg-card p-6 shadow-lift animate-in zoom-in-95" onClick={(e) => e.stopPropagation()}>
-            <h2 className="text-lg font-bold">
-              {lang === "ar" ? "تأكيد تسجيل الخروج" : "Confirm Log out"}
-            </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {lang === "ar"
-                ? "هل أنت متأكد من رغبتك في تسجيل الخروج من حسابك؟"
-                : "Are you sure you want to log out?"}
-            </p>
-            <div className="mt-6 flex items-center justify-end gap-3">
-              <button
-                onClick={() => setLogoutDialog(false)}
-                className="rounded-lg border px-4 py-2 text-sm font-semibold transition hover:bg-muted"
-              >
-                {lang === "ar" ? "إلغاء" : "Cancel"}
-              </button>
-              <button
-                onClick={() => setLogoutDialog(false)}
-                className="rounded-lg bg-destructive px-4 py-2 text-sm font-bold text-destructive-foreground hover:bg-destructive/90"
-              >
-                {lang === "ar" ? "تأكيد الخروج" : "Log out"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       <main className="mx-auto w-[92%] max-w-[1680px] space-y-8 px-4 py-8 lg:px-8 2xl:space-y-12 2xl:py-12">
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl 2xl:text-5xl">
@@ -465,54 +324,6 @@ function Index() {
           )}
         </section>
       </main>
-
-      {/* FOOTER */}
-      <footer className="mt-12 border-t bg-surface">
-        <div className="mx-auto w-[92%] max-w-[1680px] grid gap-10 px-4 py-12 md:grid-cols-[1.5fr_1fr_1fr_1fr] lg:px-8 2xl:py-16">
-          <div>
-            <div className="flex items-center gap-2">
-              <img src="/logo.png" alt="Vloop" className="h-8 w-auto" />
-              <span className="text-lg font-extrabold">
-                Vloop <span className="font-light text-muted-foreground">|</span> ڤلوب
-              </span>
-            </div>
-            <p className="mt-3 max-w-xs text-sm leading-relaxed text-muted-foreground">
-              {tr(t.footer.desc)}
-            </p>
-          </div>
-          {(
-            [
-              [t.footer.platform, t.footerLinks.platform],
-              [t.footer.creators, t.footerLinks.creators],
-              [t.footer.legal, t.footerLinks.legal],
-            ] as [L, L[]][]
-          ).map(([h, links]) => (
-            <div key={h.en}>
-              <h4 className="mb-3 text-sm font-bold">{tr(h)}</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                {links.map((l) => (
-                  <li key={l.en}>
-                    <a className="cursor-pointer hover:text-primary">{tr(l)}</a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-        <div className="border-t">
-          <div className="mx-auto flex w-[92%] max-w-[1680px] flex-col items-center justify-between gap-3 px-4 py-5 text-xs text-muted-foreground sm:flex-row lg:px-8 2xl:py-8 2xl:text-sm">
-            <p>{tr(t.footer.rights)}</p>
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="font-semibold text-foreground">{tr(t.footer.made)}</span>
-              {["BenefitPay", "Mada", "VISA", "Mastercard"].map((p) => (
-                <span key={p} className="rounded-md border bg-card px-2 py-1 font-bold">
-                  {p}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-      </footer>
 
       {booking && (
         <BookingModal
