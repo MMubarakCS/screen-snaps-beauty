@@ -259,19 +259,21 @@ function Index() {
                         loading="lazy"
                         width={816}
                         height={816}
-                        className="h-14 w-14 rounded-full object-cover ring-2 ring-accent 2xl:h-20 2xl:w-20"
+                        className="size-12 rounded-full object-cover shrink-0 ring-2 ring-accent 2xl:size-16"
                       />
-                      <div className="min-w-0 text-left">
-                        <p className="flex items-center gap-1 truncate font-bold 2xl:text-xl">
-                          {tr(c.name)}
-                          <BadgeCheck className="h-4 w-4 shrink-0 fill-primary text-primary-foreground 2xl:h-5 2xl:w-5" />
-                        </p>
-                        <p
-                          dir="ltr"
-                          className="text-left text-sm text-muted-foreground 2xl:text-base"
+                      <div className="flex flex-col items-start text-start min-w-0 pb-1">
+                        <div className="flex items-center gap-1.5">
+                          <h3 className="font-bold text-base text-foreground leading-normal 2xl:text-xl">
+                            {tr(c.name)}
+                          </h3>
+                          <BadgeCheck className="size-4 text-primary shrink-0 fill-primary text-primary-foreground 2xl:size-5" />
+                        </div>
+                        <span
+                          className="text-xs text-muted-foreground font-medium mt-0.5"
+                          style={{ direction: "ltr", unicodeBidi: "isolate" }}
                         >
                           {c.handle}
-                        </p>
+                        </span>
                       </div>
                     </div>
                     <div

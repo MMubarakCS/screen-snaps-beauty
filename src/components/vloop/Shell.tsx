@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { QrCode, ChevronDown, Check, LogOut, Settings, Building2, Lock } from "lucide-react";
+import { QrCode, ChevronDown, Check, LogOut, Settings, Building2, Lock, Menu, X } from "lucide-react";
 import { type Lang, type L, fmtBHD, t } from "@/lib/vloop-data";
 
 const LangCtx = createContext<{ lang: Lang; setLang: (l: Lang) => void }>({ lang: "ar", setLang: () => {} });
@@ -20,6 +20,7 @@ export function AppHeader() {
   const tr = (x: L) => x[lang];
   const [copied, setCopied] = useState(false);
   const [menu, setMenu] = useState(false);
+  const [mobileMenu, setMobileMenu] = useState(false);
   const [logoutDialog, setLogoutDialog] = useState(false);
   const copyKiosk = () => {
     navigator.clipboard?.writeText("https://vloop.bh/kiosk/flame-burger-104829");
@@ -37,7 +38,7 @@ export function AppHeader() {
               Vloop <span className="font-light text-muted-foreground">|</span> ڤلوب
             </span>
           </Link>
-          <nav className="hidden items-center gap-1 text-sm font-medium xl:flex">
+          <nav className="hidden items-center gap-1 text-sm font-medium lg:flex">
             <Link to="/" activeOptions={{ exact: true }} className="rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
               {tr(t.nav.discover)}
             </Link>
@@ -61,7 +62,7 @@ export function AppHeader() {
               {copied ? <Check className="h-4 w-4 text-success" /> : <QrCode className="h-4 w-4" />}
               {tr(copied ? t.nav.copied : t.nav.kiosk)}
             </button>
-            <div className="flex rounded-lg border p-0.5 text-xs font-bold">
+            <div className="hidden lg:flex rounded-lg border p-0.5 text-xs font-bold">
               {(["ar", "en"] as const).map((l) => (
                 <button
                   key={l}
@@ -121,9 +122,73 @@ export function AppHeader() {
                 </div>
               )}
             </div>
+            <button
+              onClick={() => setMobileMenu(true)}
+              className="lg:hidden p-1.5 -me-1 rounded-lg hover:bg-muted text-foreground"
+            >
+              <Menu className="h-6 w-6" />
+            </button>
           </div>
         </div>
       </header>
+
+      {/* MOBILE DRAWER */}
+      {mobileMenu && (
+        <div className="fixed inset-0 z-50 flex lg:hidden animate-in fade-in" onClick={() => setMobileMenu(false)}>
+          <div className="fixed inset-0 bg-background/80 backdrop-blur-sm" />
+          <div 
+            className="absolute top-0 bottom-0 start-0 w-[280px] max-w-[80vw] bg-background border-e shadow-2xl animate-in slide-in-from-start-full duration-300 p-6 flex flex-col gap-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xl font-extrabold flex items-center gap-2">
+                <img src="/logo.png" alt="Vloop" className="h-8 w-auto" />
+              </span>
+              <button onClick={() => setMobileMenu(false)} className="p-2 -me-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground">
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+
+            <nav className="flex flex-col gap-1">
+              <Link to="/" onClick={() => setMobileMenu(false)} className="px-4 py-3 text-lg font-semibold rounded-xl hover:bg-muted" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
+                {tr(t.nav.discover)}
+              </Link>
+              <Link to="/campaigns" onClick={() => setMobileMenu(false)} className="flex items-center justify-between px-4 py-3 text-lg font-semibold rounded-xl hover:bg-muted" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
+                {tr(t.nav.campaigns)}
+                <span className="h-2 w-2 rounded-full bg-warning"></span>
+              </Link>
+              <a onClick={() => setMobileMenu(false)} className="px-4 py-3 text-lg font-semibold rounded-xl hover:bg-muted cursor-pointer">
+                {tr(t.nav.invoices)}
+              </a>
+            </nav>
+
+            <div className="mt-auto flex flex-col gap-4 pt-6 border-t">
+              <div className="flex items-center gap-2 rounded-xl border border-success/30 bg-success-soft px-4 py-3 text-base font-semibold text-success">
+                <Lock className="h-5 w-5" />
+                {lang === "ar" ? "في الضمان:" : "Escrow:"} <span className="num font-bold">{fmtBHD(350, lang)}</span>
+              </div>
+              <button
+                onClick={() => { copyKiosk(); setMobileMenu(false); }}
+                className="flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-base font-bold text-primary-foreground shadow-soft transition hover:bg-primary/90"
+              >
+                {copied ? <Check className="h-5 w-5" /> : <QrCode className="h-5 w-5" />}
+                {tr(copied ? t.nav.copied : t.nav.kiosk)}
+              </button>
+              <div className="flex rounded-xl border p-1 text-sm font-bold bg-muted/50">
+                {(["ar", "en"] as const).map((l) => (
+                  <button
+                    key={l}
+                    onClick={() => { setLang(l); setMobileMenu(false); }}
+                    className={`flex-1 rounded-lg py-2.5 transition ${lang === l ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+                  >
+                    {l.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* LOGOUT CONFIRMATION DIALOG */}
       {logoutDialog && (

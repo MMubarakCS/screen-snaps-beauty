@@ -126,7 +126,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <LangProvider>
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen flex flex-col justify-between bg-background">
           <AppHeader />
           <Outlet />
           <AppFooter />

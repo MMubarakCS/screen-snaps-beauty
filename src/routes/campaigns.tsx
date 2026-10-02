@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { BadgeCheck, Lock, Calendar, ExternalLink, Ticket, Hourglass, Check, ChevronDown, AlertTriangle, X, CheckCircle2, Timer, Footprints, CalendarClock, FileText, ShieldCheck } from "lucide-react";
+import { BadgeCheck, Lock, Calendar, ExternalLink, Ticket, Hourglass, Check, ChevronDown, ChevronLeft, ChevronRight, AlertTriangle, X, CheckCircle2, Timer, Footprints, CalendarClock, FileText, ShieldCheck, Instagram, Video, Download } from "lucide-react";
 import { useLang } from "@/components/vloop/Shell";
 import { creators, fmtBHD, type L } from "@/lib/vloop-data";
 
@@ -40,6 +40,9 @@ function Campaigns() {
   const [open, setOpen] = useState(true);
   const [dispute, setDispute] = useState(false);
   const [toast, setToast] = useState<L | null>(null);
+  const [briefModal, setBriefModal] = useState(false);
+  const [completedPage, setCompletedPage] = useState(1);
+  const COMPLETED_PER_PAGE = 4;
 
   useEffect(() => {
     if (status !== "pending") return;
@@ -69,23 +72,23 @@ function Campaigns() {
   ];
 
   return (
-    <main className="mx-auto w-[92%] max-w-[1680px] space-y-8 px-4 py-8 lg:px-8">
+    <main className="mx-auto w-full max-w-full overflow-x-hidden flex-1 space-y-8 px-4 sm:px-6 py-8 lg:px-8 2xl:space-y-12 2xl:py-12">
       <div>
-        <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">{tr({ ar: "إدارة ومتابعة الحملات", en: "My Campaigns & Reviews" })}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{tr({ ar: "تتبع حالة الضمان المالي، مراجعة روابط المحتوى، ومراقبة زيارات المتجر الميدانية.", en: "Track escrow status, review proof links, and monitor live in-store footfall." })}</p>
+        <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl 2xl:text-5xl">{tr({ ar: "إدارة ومتابعة الحملات", en: "My Campaigns & Reviews" })}</h1>
+        <p className="mt-1 text-sm text-muted-foreground 2xl:mt-3 2xl:text-lg">{tr({ ar: "تتبع حالة الضمان المالي، مراجعة روابط المحتوى، ومراقبة زيارات المتجر الميدانية.", en: "Track escrow status, review proof links, and monitor live in-store footfall." })}</p>
       </div>
 
-      <section className="grid gap-4 md:grid-cols-3">
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 2xl:gap-8">
         {summary.map((c, i) => (
-          <div key={i} className="rounded-2xl border bg-card p-5 shadow-soft">
+          <div key={i} className="rounded-2xl border bg-card p-5 shadow-soft transition hover:shadow-lift 2xl:p-8">
             <div className="flex items-center justify-between">
-              <p className="text-sm font-semibold text-muted-foreground">{tr(c.label)}</p>
-              <span className={`flex h-9 w-9 items-center justify-center rounded-lg ${c.tone}`}><c.icon className="h-4 w-4" /></span>
+              <p className="text-sm font-semibold text-muted-foreground 2xl:text-base">{tr(c.label)}</p>
+              <span className={`flex h-9 w-9 items-center justify-center rounded-lg 2xl:h-12 2xl:w-12 ${c.tone}`}><c.icon className="h-4.5 w-4.5 2xl:h-6 2xl:w-6" /></span>
             </div>
-            <p className="num mt-3 text-3xl font-extrabold">{c.value} {c.unit && <span className="text-base font-semibold text-muted-foreground">{c.unit}</span>}</p>
-            {c.sub && <p className="mt-2 text-xs text-muted-foreground">{c.sub}</p>}
+            <p className="num mt-3 text-3xl font-extrabold 2xl:mt-5 2xl:text-5xl">{c.value} {c.unit && <span className="text-base font-semibold text-muted-foreground 2xl:text-xl">{c.unit}</span>}</p>
+            {c.sub && <p className="mt-2 text-xs leading-relaxed text-muted-foreground 2xl:text-sm">{c.sub}</p>}
             {c.badge && (
-              <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-warning-soft px-2.5 py-1 text-xs font-semibold text-warning">
+              <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-warning-soft px-2.5 py-1 text-xs font-semibold text-warning 2xl:px-3 2xl:py-1.5 2xl:text-sm">
                 <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-warning opacity-60" /><span className="relative h-2 w-2 rounded-full bg-warning" /></span>
                 {tr(c.badge)}
               </span>
@@ -95,7 +98,7 @@ function Campaigns() {
       </section>
 
       <section>
-        <div className="mb-5 flex gap-1 overflow-x-auto border-b">
+        <div className="mb-5 flex w-full overflow-x-auto no-scrollbar border-b gap-3 pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 whitespace-nowrap">
           {tabs.map((x) => (
             <button key={x.id} onClick={() => setTab(x.id)} className={`-mb-px whitespace-nowrap border-b-2 px-4 py-3 text-sm font-semibold transition ${tab === x.id ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
               {tr(x.label)}
@@ -105,30 +108,41 @@ function Campaigns() {
 
         {tab === "review" && (status === "pending" ? (
           <article className="overflow-hidden rounded-2xl border bg-card shadow-soft">
-            <header className="flex flex-wrap items-center gap-4 border-b p-5">
-              <img src={yousif.img} alt="" className="h-14 w-14 rounded-full object-cover ring-2 ring-accent" />
-              <div className="min-w-0 flex-1">
-                <p className="flex items-center gap-1 text-lg font-bold">{tr(yousif.name)}<BadgeCheck className="h-5 w-5 fill-primary text-primary-foreground" /></p>
-                <p dir="ltr" className="text-start text-sm text-muted-foreground">{yousif.handle}</p>
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {[{ ar: "ستوري إنستغرام (3 لقطات)", en: "Instagram Story (3 frames)" }, { ar: "فيديو تيك توك", en: "TikTok Video" }].map((f) => (
-                    <span key={f.en} className="rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">{tr(f)}</span>
-                  ))}
+            <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b p-5">
+              <div className="flex items-center gap-3">
+                <img src={yousif.img} alt="" className="size-12 shrink-0 rounded-full object-cover ring-2 ring-accent" />
+                <div className="flex flex-col items-start leading-tight">
+                  <div className="flex items-center gap-1.5">
+                    <h3 className="text-base font-bold">{tr(yousif.name)}</h3>
+                    <BadgeCheck className="size-4 text-primary fill-primary text-primary-foreground" />
+                  </div>
+                  <p className="text-xs text-muted-foreground" dir="ltr">{yousif.handle}</p>
+                  <div className="flex gap-1 mt-1.5">
+                    {[{ ar: "ستوري إنستغرام", en: "Instagram Story" }, { ar: "فيديو تيك توك", en: "TikTok Video" }].map((f) => (
+                      <span key={f.en} className="text-[11px] px-2 py-0.5 rounded-md bg-muted text-muted-foreground">{tr(f)}</span>
+                    ))}
+                  </div>
                 </div>
               </div>
-              <div className="flex flex-col items-end gap-2">
+              <div className="flex flex-col items-start sm:items-end gap-2 shrink-0 w-full sm:w-auto mt-2 sm:mt-0">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-success-soft px-3 py-1.5 text-sm font-bold text-success"><Lock className="h-3.5 w-3.5" />{tr({ ar: "محجوز في الضمان:", en: "Held in Escrow:" })} <span className="num">{fmtBHD(150, lang)}</span></span>
                 <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground"><Calendar className="h-3.5 w-3.5" />{tr({ ar: "موعد النشر: اليوم", en: "Scheduled: Today" })}</span>
               </div>
             </header>
 
             <div className="grid gap-5 p-5 lg:grid-cols-2">
-              <div className="space-y-4 rounded-xl border bg-surface p-4">
+              <div className="flex flex-col gap-2 w-full rounded-xl border bg-surface p-3 sm:p-4">
                 <div>
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{tr({ ar: "رابط إثبات النشر", en: "Proof of Delivery Link" })}</p>
-                  <div className="flex items-center gap-2">
-                    <code dir="ltr" className="min-w-0 flex-1 truncate rounded-lg border bg-card px-3 py-2 text-xs">https://instagram.com/stories/yousif.bites/348291...</code>
-                    <a href="https://instagram.com/stories/yousif.bites/" target="_blank" rel="noreferrer" className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border bg-card px-3 py-2 text-xs font-semibold hover:border-primary hover:text-primary"><ExternalLink className="h-3.5 w-3.5" />{tr({ ar: "افتح الفيديو", en: "View Story" })}</a>
+                  <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{tr({ ar: "روابط إثبات النشر", en: "Proof of Delivery Links" })}</p>
+                  <div className="space-y-2">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-lg border bg-card p-3">
+                      <span className="text-xs font-bold text-foreground flex items-center gap-2"><Instagram className="h-4 w-4" /> Instagram Story</span>
+                      <a href="https://instagram.com/stories/yousif.bites/" target="_blank" rel="noreferrer" className="inline-flex w-full sm:w-auto shrink-0 justify-center items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-xs font-semibold hover:border-primary hover:text-primary transition">↗ {tr({ ar: "فتح الرابط والمشاهدة", en: "View Content" })}</a>
+                    </div>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-lg border bg-card p-3">
+                      <span className="text-xs font-bold text-foreground flex items-center gap-2"><Video className="h-4 w-4" /> TikTok Video</span>
+                      <a href="https://tiktok.com/@yousif.bites/video/784729183" target="_blank" rel="noreferrer" className="inline-flex w-full sm:w-auto shrink-0 justify-center items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-xs font-semibold hover:border-primary hover:text-primary transition">↗ {tr({ ar: "فتح الرابط والمشاهدة", en: "View Content" })}</a>
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 rounded-lg bg-card p-3">
@@ -141,12 +155,12 @@ function Campaigns() {
                 </div>
               </div>
 
-              <div className="rounded-xl border border-warning/30 bg-warning-soft p-4">
-                <p className="flex items-center gap-2 text-sm font-bold text-warning"><Hourglass className="h-4 w-4" />{tr({ ar: "محرك التسوية خلال 24 ساعة", en: "24-Hour Settlement Engine" })}</p>
-                <p className="num mt-3 text-3xl font-extrabold text-foreground" dir="ltr">{String(h).padStart(2, "0")}:{String(m).padStart(2, "0")}:{String(s).padStart(2, "0")}</p>
-                <p className="mt-1 text-sm font-semibold text-foreground">{tr({ ar: `متبقي على الاعتماد التلقائي وتحرير الضمان: ${h} ساعة و ${m} دقيقة`, en: `Auto-release countdown: ${h}h ${m}m remaining` })}</p>
-                <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-card"><div className="h-full rounded-full bg-warning transition-all" style={{ width: `${pct}%` }} /></div>
-                <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{tr({ ar: "سيتم تحرير أتعاب صانع المحتوى تلقائياً بانتهاء المؤقت إذا لم يتم تقديم اعتراض مستند للشروط.", en: "The creator's fee will be released automatically when the timer ends unless a dispute based on the terms is filed." })}</p>
+              <div className="flex flex-col gap-2 p-4 w-full rounded-xl border border-warning/30 bg-warning-soft text-center">
+                <p className="flex items-center justify-center gap-2 text-sm font-bold text-warning">{tr({ ar: "محرّك التسوية خلال 24 ساعة", en: "24-Hour Settlement Engine" })} ⏳</p>
+                <p className="num mt-1 text-4xl font-extrabold text-foreground" dir="ltr">{String(h).padStart(2, "0")}:{String(m).padStart(2, "0")}:{String(s).padStart(2, "0")}</p>
+                <p className="mt-1 text-sm font-semibold text-foreground text-wrap">{tr({ ar: `متبقي على الاعتماد التلقائي وتحرير الضمان`, en: `Auto-release countdown` })}</p>
+                <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-card"><div className="h-full rounded-full bg-warning transition-all" style={{ width: `${pct}%` }} /></div>
+                <p className="mt-2 text-xs leading-relaxed text-muted-foreground text-wrap">{tr({ ar: "سيتم تحرير أتعاب صانع المحتوى تلقائياً بانتهاء المؤقت إذا لم يتم تقديم اعتراض مستند للشروط.", en: "The creator's fee will be released automatically when the timer ends unless a dispute based on the terms is filed." })}</p>
               </div>
             </div>
 
@@ -164,11 +178,11 @@ function Campaigns() {
               )}
             </div>
 
-            <footer className="flex flex-col gap-3 p-5 sm:flex-row">
-              <button onClick={() => { setStatus("released"); showToast({ ar: "تم تحرير 150.000 د.ب بنجاح لصانع المحتوى", en: "150.000 BHD successfully released to the creator" }); }} className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-success px-5 py-3 text-sm font-bold text-primary-foreground shadow-soft hover:bg-success/90">
+            <footer className="flex flex-col sm:flex-row gap-2.5 w-full p-5">
+              <button onClick={() => { setStatus("released"); showToast({ ar: "تم تحرير 150.000 د.ب بنجاح لصانع المحتوى", en: "150.000 BHD successfully released to the creator" }); }} className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-success px-5 py-3 text-sm font-bold text-primary-foreground shadow-soft hover:bg-success/90">
                 <CheckCircle2 className="h-4 w-4" />{tr({ ar: "اعتماد الإعلان وتحرير الضمان", en: "Approve & Release Escrow" })}
               </button>
-              <button onClick={() => setDispute(true)} className="inline-flex items-center justify-center gap-2 rounded-lg border border-destructive/40 px-5 py-3 text-sm font-bold text-destructive hover:bg-destructive/5">
+              <button onClick={() => setDispute(true)} className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-destructive/40 px-5 py-3 text-sm font-bold text-destructive hover:bg-destructive/5">
                 <AlertTriangle className="h-4 w-4" />{tr({ ar: "تقديم اعتراض", en: "Dispute Deliverables" })}
               </button>
             </footer>
@@ -185,40 +199,94 @@ function Campaigns() {
           <div className="grid gap-5 md:grid-cols-2">
             {[{ c: fatima, date: { ar: "15 أكتوبر 2026", en: "15 Oct 2026" } }, { c: noor, date: { ar: "22 أكتوبر 2026", en: "22 Oct 2026" } }].map(({ c, date }) => (
               <article key={c.id} className="rounded-2xl border bg-card p-5 shadow-soft">
-                <div className="flex items-center gap-3">
-                  <img src={c.img} alt="" className="h-12 w-12 rounded-full object-cover" />
-                  <div className="flex-1">
-                    <p className="flex items-center gap-1 font-bold">{tr(c.name)}<BadgeCheck className="h-4 w-4 fill-primary text-primary-foreground" /></p>
-                    <p dir="ltr" className="text-start text-sm text-muted-foreground">{c.handle}</p>
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <img src={c.img} alt="" className="size-12 shrink-0 rounded-full object-cover" />
+                    <div className="flex flex-col items-start leading-tight">
+                      <div className="flex items-center gap-1.5">
+                        <h3 className="text-base font-bold">{tr(c.name)}</h3>
+                        <BadgeCheck className="size-4 text-primary fill-primary text-primary-foreground" />
+                      </div>
+                      <p className="text-xs text-muted-foreground" dir="ltr">{c.handle}</p>
+                    </div>
                   </div>
-                  <span className="rounded-full bg-accent px-3 py-1 text-xs font-bold text-accent-foreground">{tr({ ar: "مجدولة", en: "Scheduled" })}</span>
+                  <span className="shrink-0 rounded-full bg-accent px-3 py-1 text-xs font-bold text-accent-foreground">{tr({ ar: "مجدولة", en: "Scheduled" })}</span>
                 </div>
                 <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
                   <div className="rounded-lg bg-surface p-3"><dt className="text-xs text-muted-foreground">{tr({ ar: "التاريخ", en: "Date" })}</dt><dd className="mt-1 font-bold">{tr(date)}</dd></div>
                   <div className="rounded-lg bg-surface p-3"><dt className="text-xs text-muted-foreground">{tr({ ar: "الضمان", en: "Escrow" })}</dt><dd className="num mt-1 flex items-center gap-1 font-bold text-success"><Lock className="h-3.5 w-3.5" />{fmtBHD(150, lang)} HELD</dd></div>
                 </dl>
                 <p className="mt-3 text-sm text-muted-foreground">{tr({ ar: "بانتظار حضور صانع المحتوى ونشر التغطية", en: "Awaiting the creator's visit and coverage publishing" })}</p>
-                <button className="mt-4 inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-semibold hover:border-primary hover:text-primary"><FileText className="h-3.5 w-3.5" />{tr({ ar: "تعديل الملاحظات", en: "View Brief" })}</button>
+                <button onClick={() => setBriefModal(true)} className="mt-4 inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-semibold hover:border-primary hover:text-primary"><ShieldCheck className="h-3.5 w-3.5" />{tr({ ar: "عرض الشروط المعتمدة", en: "View Agreed Brief" })}</button>
               </article>
             ))}
           </div>
         )}
 
-        {tab === "completed" && (
-          <div className="overflow-hidden rounded-2xl border bg-card shadow-soft">
-            {[...(status === "released" ? [{ c: yousif, date: { ar: "اليوم", en: "Today" }, ft: 42 }] : []), { c: creators[3]!, date: { ar: "28 سبتمبر 2026", en: "28 Sep 2026" }, ft: 118 }, { c: fatima, date: { ar: "12 سبتمبر 2026", en: "12 Sep 2026" }, ft: 204 }, { c: noor, date: { ar: "30 أغسطس 2026", en: "30 Aug 2026" }, ft: 166 }].map(({ c, date, ft }, i) => (
-              <div key={i} className="flex flex-wrap items-center gap-3 border-b p-4 last:border-0">
-                <img src={c.img} alt="" className="h-10 w-10 rounded-full object-cover" />
-                <div className="flex-1"><p className="text-sm font-bold">{tr(c.name)}</p><p className="text-xs text-muted-foreground">{tr(date)}</p></div>
-                <span className="num text-sm text-muted-foreground">+{ft} Footfall</span>
-                <span className="num rounded-full bg-success-soft px-3 py-1 text-xs font-bold text-success">{tr({ ar: "تم التحرير", en: "Released" })} · {fmtBHD(150, lang)}</span>
+        {tab === "completed" && (() => {
+          const allCompleted = [...(status === "released" ? [{ c: yousif, date: { ar: "اليوم", en: "Today" }, ft: 42 }] : []), { c: creators[3]!, date: { ar: "28 سبتمبر 2026", en: "28 Sep 2026" }, ft: 118 }, { c: fatima, date: { ar: "12 سبتمبر 2026", en: "12 Sep 2026" }, ft: 204 }, { c: noor, date: { ar: "30 أغسطس 2026", en: "30 Aug 2026" }, ft: 166 },
+            { c: creators[0]!, date: { ar: "18 أغسطس 2026", en: "18 Aug 2026" }, ft: 97 },
+            { c: creators[1]!, date: { ar: "5 أغسطس 2026", en: "5 Aug 2026" }, ft: 153 },
+            { c: creators[2]!, date: { ar: "22 يوليو 2026", en: "22 Jul 2026" }, ft: 89 },
+            { c: creators[3]!, date: { ar: "10 يوليو 2026", en: "10 Jul 2026" }, ft: 211 },
+            { c: creators[0]!, date: { ar: "28 يونيو 2026", en: "28 Jun 2026" }, ft: 134 },
+            { c: creators[1]!, date: { ar: "15 يونيو 2026", en: "15 Jun 2026" }, ft: 78 },
+            { c: creators[2]!, date: { ar: "2 يونيو 2026", en: "2 Jun 2026" }, ft: 192 },
+          ];
+          const totalPages = Math.max(1, Math.ceil(allCompleted.length / COMPLETED_PER_PAGE));
+          const safePage = Math.min(completedPage, totalPages);
+          const pageItems = allCompleted.slice((safePage - 1) * COMPLETED_PER_PAGE, safePage * COMPLETED_PER_PAGE);
+          return (
+            <div>
+              <div className="overflow-hidden rounded-2xl border bg-card shadow-soft">
+                {pageItems.map(({ c, date, ft }, i) => (
+                  <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-4 border-b p-5 last:border-0 transition hover:bg-muted/30">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <img src={c.img} alt="" className="h-12 w-12 rounded-full object-cover ring-2 ring-accent" />
+                      <div className="min-w-0">
+                        <p className="flex items-center gap-1 text-sm font-bold truncate">{tr(c.name)}<BadgeCheck className="h-3.5 w-3.5 fill-primary text-primary-foreground" /></p>
+                        <p className="text-xs text-muted-foreground">{tr(date)}</p>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3 sm:gap-6">
+                      <span className="flex items-center gap-1.5 text-sm font-semibold text-success bg-success-soft px-3 py-1.5 rounded-lg">
+                        <Footprints className="h-4 w-4" /> +{ft} {tr({ ar: "زائر موثق", en: "Footfall" })}
+                      </span>
+                      <span className="num flex items-center gap-1.5 rounded-full border border-success/30 bg-success-soft px-3 py-1.5 text-xs font-bold text-success">
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                        {tr({ ar: "تم التحرير:", en: "Released:" })} {fmtBHD(150, lang)}
+                      </span>
+                      <button className="inline-flex items-center gap-1.5 rounded-lg border bg-card px-4 py-2 text-xs font-semibold shadow-soft hover:bg-accent hover:text-accent-foreground transition">
+                        <Download className="h-3.5 w-3.5" />
+                        {tr({ ar: "تحميل الفاتورة (PDF)", en: "Tax Invoice" })}
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        )}
+              {totalPages > 1 && (
+                <div className="mt-4 flex items-center justify-center gap-3">
+                  <button onClick={() => setCompletedPage((p) => Math.max(1, p - 1))} disabled={safePage <= 1} className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-sm font-semibold transition hover:border-primary hover:text-primary disabled:opacity-40 disabled:pointer-events-none">
+                    <ChevronRight className="h-4 w-4" />
+                    {tr({ ar: "السابق", en: "Previous" })}
+                  </button>
+                  <span className="num text-sm text-muted-foreground">
+                    {tr({ ar: `صفحة ${safePage} من ${totalPages}`, en: `Page ${safePage} of ${totalPages}` })}
+                  </span>
+                  <button onClick={() => setCompletedPage((p) => Math.min(totalPages, p + 1))} disabled={safePage >= totalPages} className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-sm font-semibold transition hover:border-primary hover:text-primary disabled:opacity-40 disabled:pointer-events-none">
+                    {tr({ ar: "التالي", en: "Next" })}
+                    <ChevronLeft className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
+            </div>
+          );
+        })()}
       </section>
 
       {dispute && <DisputeModal onClose={() => setDispute(false)} onConfirm={() => { setDispute(false); setStatus("disputed"); showToast({ ar: "تم تقديم الاعتراض وتجميد الضمان", en: "Dispute filed — escrow frozen" }); }} />}
+
+      {briefModal && <BriefModal onClose={() => setBriefModal(false)} />}
 
       {toast && (
         <div className="fixed inset-x-0 bottom-6 z-50 mx-auto flex w-fit items-center gap-2 rounded-xl border bg-card px-4 py-3 text-sm font-semibold shadow-lift animate-in fade-in slide-in-from-bottom-2">
@@ -269,6 +337,53 @@ function DisputeModal({ onClose, onConfirm }: { onClose: () => void; onConfirm: 
         <footer className="flex justify-end gap-3 border-t px-6 py-4">
           <button onClick={onClose} className="rounded-lg border px-4 py-2 text-sm font-semibold hover:bg-muted">{tr({ ar: "إلغاء", en: "Cancel" })}</button>
           <button disabled={!valid} onClick={onConfirm} className="rounded-lg bg-destructive px-4 py-2 text-sm font-bold text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50">{tr({ ar: "تأكيد الاعتراض وتجميد الضمان", en: "Confirm Dispute & Freeze Escrow" })}</button>
+        </footer>
+      </div>
+    </div>
+  );
+}
+
+function BriefModal({ onClose }: { onClose: () => void }) {
+  const { lang } = useLang();
+  const tr = (x: L) => x[lang];
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4 backdrop-blur-sm animate-in fade-in" onClick={onClose}>
+      <div className="w-full max-w-lg rounded-2xl border bg-card shadow-lift animate-in zoom-in-95" onClick={(e) => e.stopPropagation()}>
+        <header className="flex items-center justify-between border-b px-6 py-4">
+          <h2 className="flex items-center gap-2 font-bold"><ShieldCheck className="h-5 w-5 text-success" />{tr({ ar: "الشروط والعقد الرقمي المعتمد", en: "Approved Terms & Digital Contract" })}</h2>
+          <button onClick={onClose} aria-label="Close" className="rounded-lg p-2 text-muted-foreground hover:bg-muted"><X className="h-5 w-5" /></button>
+        </header>
+        <div className="space-y-5 p-6">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-lg bg-surface p-3">
+              <p className="text-xs text-muted-foreground">{tr({ ar: "تاريخ الحملة", en: "Campaign Date" })}</p>
+              <p className="mt-1 text-sm font-bold">{tr({ ar: "15 أكتوبر 2026", en: "15 Oct 2026" })}</p>
+            </div>
+            <div className="rounded-lg bg-surface p-3">
+              <p className="text-xs text-muted-foreground">{tr({ ar: "صانع المحتوى", en: "Creator" })}</p>
+              <p className="mt-1 text-sm font-bold">{tr(creators[0]!.name)}</p>
+            </div>
+          </div>
+
+          <div>
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{tr({ ar: "المخرجات المعتمدة والملزمة", en: "Locked Deliverables Checklist" })}</p>
+            <ul className="space-y-2">
+              {deliverables.map((d) => (
+                <li key={d.en} className="flex items-start gap-2 text-sm">
+                  <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded bg-success text-primary-foreground"><Check className="h-3 w-3" /></span>
+                  {tr(d)}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="flex items-start gap-2 rounded-lg border border-warning/30 bg-warning-soft p-3 text-sm">
+            <Lock className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
+            <p>{tr({ ar: "هذه الشروط ملزمة وغير قابلة للتعديل بعد دفع الضمان.", en: "These terms are binding and cannot be modified after escrow payment." })}</p>
+          </div>
+        </div>
+        <footer className="flex justify-end border-t px-6 py-4">
+          <button onClick={onClose} className="rounded-lg border px-4 py-2 text-sm font-semibold hover:bg-muted">{tr({ ar: "إغلاق", en: "Close" })}</button>
         </footer>
       </div>
     </div>
