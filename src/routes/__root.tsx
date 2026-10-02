@@ -11,6 +11,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import { LangProvider, AppHeader, AppFooter } from "../components/vloop/Shell";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
@@ -124,7 +125,13 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <LangProvider>
+        <div className="min-h-screen bg-background">
+          <AppHeader />
+          <Outlet />
+          <AppFooter />
+        </div>
+      </LangProvider>
     </QueryClientProvider>
   );
 }
