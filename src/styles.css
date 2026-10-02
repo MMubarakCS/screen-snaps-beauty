@@ -68,8 +68,10 @@
   --input: oklch(0.929 0.013 255.508);
   --ring: oklch(0.546 0.215 262.881);
   --gradient-brand: linear-gradient(135deg, var(--sky), var(--primary));
-  --shadow-soft: 0 1px 2px oklch(0.208 0.042 265.755 / 0.04), 0 4px 16px -6px oklch(0.208 0.042 265.755 / 0.08);
-  --shadow-lift: 0 2px 4px oklch(0.208 0.042 265.755 / 0.04), 0 16px 32px -12px oklch(0.546 0.215 262.881 / 0.18);
+  --shadow-soft:
+    0 1px 2px oklch(0.208 0.042 265.755 / 0.04), 0 4px 16px -6px oklch(0.208 0.042 265.755 / 0.08);
+  --shadow-lift:
+    0 2px 4px oklch(0.208 0.042 265.755 / 0.04), 0 16px 32px -12px oklch(0.546 0.215 262.881 / 0.18);
 }
 
 html[lang="en"] {
