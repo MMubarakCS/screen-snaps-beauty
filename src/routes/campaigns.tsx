@@ -18,9 +18,9 @@ export const Route = createFileRoute("/campaigns")({
   component: Campaigns,
 });
 
-const yousif = creators[1];
-const fatima = creators[0];
-const noor = creators[2];
+const yousif = creators[1]!;
+const fatima = creators[0]!;
+const noor = creators[2]!;
 
 const deliverables: L[] = [
   { ar: "الإشارة للحساب الرسمي (@flame_burger) وملصق رابط القسيمة.", en: "Mention the official account (@flame_burger) and the voucher link sticker." },
@@ -206,7 +206,7 @@ function Campaigns() {
 
         {tab === "completed" && (
           <div className="overflow-hidden rounded-2xl border bg-card shadow-soft">
-            {[...(status === "released" ? [{ c: yousif, date: { ar: "اليوم", en: "Today" }, ft: 42 }] : []), { c: creators[3], date: { ar: "28 سبتمبر 2026", en: "28 Sep 2026" }, ft: 118 }, { c: fatima, date: { ar: "12 سبتمبر 2026", en: "12 Sep 2026" }, ft: 204 }, { c: noor, date: { ar: "30 أغسطس 2026", en: "30 Aug 2026" }, ft: 166 }].map(({ c, date, ft }, i) => (
+            {[...(status === "released" ? [{ c: yousif, date: { ar: "اليوم", en: "Today" }, ft: 42 }] : []), { c: creators[3]!, date: { ar: "28 سبتمبر 2026", en: "28 Sep 2026" }, ft: 118 }, { c: fatima, date: { ar: "12 سبتمبر 2026", en: "12 Sep 2026" }, ft: 204 }, { c: noor, date: { ar: "30 أغسطس 2026", en: "30 Aug 2026" }, ft: 166 }].map(({ c, date, ft }, i) => (
               <div key={i} className="flex flex-wrap items-center gap-3 border-b p-4 last:border-0">
                 <img src={c.img} alt="" className="h-10 w-10 rounded-full object-cover" />
                 <div className="flex-1"><p className="text-sm font-bold">{tr(c.name)}</p><p className="text-xs text-muted-foreground">{tr(date)}</p></div>
