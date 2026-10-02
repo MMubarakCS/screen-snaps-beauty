@@ -29,7 +29,7 @@ export function AppHeader() {
   return (
     <>
       {/* NAV */}
-      <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur">
+      <header className="sticky top-0 z-40 whitespace-nowrap border-b bg-background/90 backdrop-blur">
         <div className="mx-auto flex h-16 w-[92%] max-w-[1680px] items-center gap-6 px-4 lg:px-8">
           <Link to="/" className="flex shrink-0 items-center gap-2">
             <img src="/logo.png" alt="Vloop" className="h-8 w-auto" />
