@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { QrCode, ChevronDown, Check, LogOut, Settings, Building2, Lock, Menu, X } from "lucide-react";
+import { toast } from "sonner";
+import { CompanyProfileModal, AccountSettingsModal } from "@/components/vloop/AccountModals";
 import { type Lang, type L, fmtBHD, t } from "@/lib/vloop-data";
 
 const LangCtx = createContext<{ lang: Lang; setLang: (l: Lang) => void }>({ lang: "ar", setLang: () => {} });
@@ -22,6 +24,7 @@ export function AppHeader() {
   const [menu, setMenu] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
   const [logoutDialog, setLogoutDialog] = useState(false);
+  const [modal, setModal] = useState<"company" | "settings" | null>(null);
   const copyKiosk = () => {
     navigator.clipboard?.writeText("https://vloop.bh/kiosk/flame-burger-104829");
     setCopied(true);
@@ -92,29 +95,29 @@ export function AppHeader() {
               {menu && (
                 <div className="absolute end-0 top-12 w-52 rounded-xl border bg-popover p-1.5 shadow-lift animate-in fade-in zoom-in-95">
                   {[
-                    [Building2, { ar: "الملف التعريفي للشركة", en: "Company Profile" }],
-                    [Settings, { ar: "إعدادات الحساب", en: "Account Settings" }],
-                  ].map(([I, l], i) => {
+                    [Building2, { ar: "الملف التعريفي للمنشأة", en: "Company Profile" }, "company"],
+                    [Settings, { ar: "إعدادات الحساب", en: "Account Settings" }, "settings"],
+                  ].map(([I, l, k], i) => {
                     const Icon = I as typeof Settings;
                     const label = l as L;
                     return (
                       <button
                         key={i}
-                        onClick={() => setMenu(false)}
-                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-muted"
+                        onClick={() => { setMenu(false); setModal(k as "company" | "settings"); }}
+                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium hover:bg-muted"
                       >
                         <Icon className="h-4 w-4 text-muted-foreground" />
                         {tr(label)}
                       </button>
                     );
                   })}
-                  <div className="border-t my-1"></div>
+                  <div className="my-1 border-t border-border"></div>
                   <button
                     onClick={() => {
                       setMenu(false);
                       setLogoutDialog(true);
                     }}
-                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-destructive hover:bg-destructive/10 hover:text-destructive"
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 hover:text-destructive"
                   >
                     <LogOut className="h-4 w-4" />
                     {tr({ ar: "تسجيل الخروج", en: "Log out" })}
@@ -192,15 +195,15 @@ export function AppHeader() {
 
       {/* LOGOUT CONFIRMATION DIALOG */}
       {logoutDialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 backdrop-blur-sm p-4 animate-in fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center whitespace-normal bg-foreground/40 p-4 backdrop-blur-sm animate-in fade-in" onClick={() => setLogoutDialog(false)}>
           <div className="w-full max-w-sm rounded-2xl border bg-card p-6 shadow-lift animate-in zoom-in-95" onClick={(e) => e.stopPropagation()}>
             <h2 className="text-lg font-bold">
-              {lang === "ar" ? "تأكيد تسجيل الخروج" : "Confirm Log out"}
+              {lang === "ar" ? "تسجيل الخروج من الحساب" : "Log out of your account"}
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
               {lang === "ar"
-                ? "هل أنت متأكد من رغبتك في تسجيل الخروج من حسابك؟"
-                : "Are you sure you want to log out?"}
+                ? "هل أنت متأكد من رغبتك في تسجيل الخروج؟ ستحتاج إلى تسجيل الدخول مرة أخرى للوصول إلى لوحة التحكم."
+                : "Are you sure you want to log out? You will need to sign in again to access the dashboard."}
             </p>
             <div className="mt-6 flex items-center justify-end gap-3">
               <button
@@ -210,7 +213,7 @@ export function AppHeader() {
                 {lang === "ar" ? "إلغاء" : "Cancel"}
               </button>
               <button
-                onClick={() => setLogoutDialog(false)}
+                onClick={() => { setLogoutDialog(false); toast(lang === "ar" ? "تم تسجيل الخروج. إلى اللقاء 👋" : "You've been logged out. Goodbye 👋"); }}
                 className="rounded-lg bg-destructive px-4 py-2 text-sm font-bold text-destructive-foreground hover:bg-destructive/90"
               >
                 {lang === "ar" ? "تأكيد الخروج" : "Log out"}
@@ -219,6 +222,8 @@ export function AppHeader() {
           </div>
         </div>
       )}
+      {modal === "company" && <CompanyProfileModal onClose={() => setModal(null)} />}
+      {modal === "settings" && <AccountSettingsModal onClose={() => setModal(null)} />}
     </>
   );
 }
