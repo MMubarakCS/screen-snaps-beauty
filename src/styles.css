@@ -109,3 +109,49 @@ html[lang="en"] {
     unicode-bidi: isolate;
   }
 }
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 15mm;
+  }
+
+  /* 1. Completely remove the background dashboard from the print flow */
+  .no-print-background,
+  header,
+  footer,
+  nav,
+  .no-print {
+    display: none !important;
+  }
+
+  /* 2. Convert the modal from 'fixed' to 'static' so it NEVER repeats across pages */
+  .printable-invoice-modal {
+    position: static !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  #tax-invoice-printable {
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    padding: 16px !important;
+    box-shadow: none !important;
+    border: 1px solid #e2e8f0 !important;
+    background: white !important;
+    page-break-inside: avoid !important;
+  }
+
+  html, body {
+    height: auto !important;
+    overflow: visible !important;
+    background: white !important;
+  }
+}

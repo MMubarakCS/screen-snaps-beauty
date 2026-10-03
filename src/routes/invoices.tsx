@@ -21,11 +21,11 @@ export const Route = createFileRoute("/invoices")({
 type Inv = { id: string; campaign: L; creator: (typeof creators)[number]; date: L; iso: string; net: number };
 
 const invoices: Inv[] = [
-  { id: "VLP-2026-0841", campaign: { ar: "عرض الغداء", en: "Lunch Deal" }, creator: creators[1]!, date: { ar: "28 سبتمبر 2026", en: "28 Sep 2026" }, iso: "2026-09-28", net: 150 },
-  { id: "VLP-2026-0812", campaign: { ar: "إطلاق برجر الترافل", en: "Truffle Burger Launch" }, creator: creators[0]!, date: { ar: "12 سبتمبر 2026", en: "12 Sep 2026" }, iso: "2026-09-12", net: 140 },
-  { id: "VLP-2026-0779", campaign: { ar: "برنش نهاية الأسبوع", en: "Weekend Brunch" }, creator: creators[2]!, date: { ar: "30 أغسطس 2026", en: "30 Aug 2026" }, iso: "2026-08-30", net: 150 },
-  { id: "VLP-2026-0703", campaign: { ar: "ليالي السوق", en: "Market Nights" }, creator: creators[3]!, date: { ar: "14 يوليو 2026", en: "14 Jul 2026" }, iso: "2026-07-14", net: 95 },
-  { id: "VLP-2026-0651", campaign: { ar: "عرض الافتتاح", en: "Grand Opening" }, creator: creators[1]!, date: { ar: "2 يونيو 2026", en: "2 Jun 2026" }, iso: "2026-06-02", net: 120 },
+  { id: "VLP-2026-0841", campaign: { ar: "ستوري إنستغرام", en: "Instagram Story" }, creator: creators[1]!, date: { ar: "28 سبتمبر 2026", en: "28 Sep 2026" }, iso: "2026-09-28", net: 150 },
+  { id: "VLP-2026-0812", campaign: { ar: "تيك توك", en: "TikTok" }, creator: creators[0]!, date: { ar: "12 سبتمبر 2026", en: "12 Sep 2026" }, iso: "2026-09-12", net: 140 },
+  { id: "VLP-2026-0779", campaign: { ar: "فيديو ريلز", en: "Reels Video" }, creator: creators[2]!, date: { ar: "30 أغسطس 2026", en: "30 Aug 2026" }, iso: "2026-08-30", net: 150 },
+  { id: "VLP-2026-0703", campaign: { ar: "تغطية ميدانية", en: "Field Coverage" }, creator: creators[3]!, date: { ar: "14 يوليو 2026", en: "14 Jul 2026" }, iso: "2026-07-14", net: 95 },
+  { id: "VLP-2026-0651", campaign: { ar: "سناب شات", en: "Snapchat" }, creator: creators[1]!, date: { ar: "2 يونيو 2026", en: "2 Jun 2026" }, iso: "2026-06-02", net: 120 },
 ];
 const fee = (n: number) => n * 0.08;
 const vat = (n: number) => fee(n) * 0.1;
@@ -77,33 +77,33 @@ function Invoices() {
   );
 
   return (
-    <main className="mx-auto w-[92%] max-w-[1680px] space-y-8 px-4 py-8 lg:px-8 2xl:space-y-12 2xl:py-12">
+    <>
+      <main className="no-print-background mx-auto w-[92%] max-w-[1680px] space-y-8 px-4 py-8 lg:px-8 2xl:space-y-12 2xl:py-12">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl 2xl:text-5xl">{tr({ ar: "الفواتير الضريبية والمعاملات", en: "Tax Invoices & Billing" })}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">{tr({ ar: "فواتير رسمية متوافقة مع متطلبات الجهاز الوطني للإيرادات (NBR) في مملكة البحرين.", en: "Official tax invoices compliant with Bahrain National Bureau for Revenue (NBR) standards." })}</p>
+          <p className="mt-1 text-sm text-muted-foreground 2xl:mt-3 2xl:text-lg">{tr({ ar: "فواتير رسمية متوافقة مع متطلبات الجهاز الوطني للإيرادات (NBR) في مملكة البحرين.", en: "Official tax invoices compliant with Bahrain National Bureau for Revenue (NBR) standards." })}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <span className="num rounded-full border bg-surface px-3 py-1.5 text-xs text-muted-foreground">{tr({ ar: "س.ت 104829-1 | الرقم الضريبي: 200019283100003", en: "CR 104829-1 | VAT No: 200019283100003" })}</span>
-          <button onClick={exportCsv} className="inline-flex items-center gap-2 rounded-lg border bg-card px-3.5 py-2 text-sm font-semibold hover:border-primary hover:text-primary"><FileSpreadsheet className="h-4 w-4" />{tr({ ar: "تصدير كشف الحساب (Excel / CSV)", en: "Export Statement (Excel / CSV)" })}</button>
         </div>
       </div>
 
-      <section className="grid gap-4 md:grid-cols-3">
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:gap-8">
         {stats.map((c, i) => (
-          <div key={i} className="rounded-2xl border bg-card p-5 shadow-soft">
+          <div key={i} className="rounded-2xl border bg-card p-5 shadow-soft transition hover:shadow-lift 2xl:p-8">
             <div className="flex items-center justify-between">
-              <p className="text-sm font-semibold text-muted-foreground">{tr(c.label)}</p>
-              <span className={`flex h-9 w-9 items-center justify-center rounded-lg ${c.tone}`}><c.icon className="h-4 w-4" /></span>
+              <p className="text-sm font-semibold text-muted-foreground 2xl:text-base">{tr(c.label)}</p>
+              <span className={`flex h-9 w-9 items-center justify-center rounded-lg 2xl:h-12 2xl:w-12 ${c.tone}`}><c.icon className="h-4.5 w-4.5 2xl:h-6 2xl:w-6" /></span>
             </div>
-            <p className="num mt-3 text-3xl font-extrabold">{c.value}</p>
+            <p className="num mt-3 text-3xl font-extrabold 2xl:mt-5 2xl:text-5xl">{c.value}</p>
             <p className="mt-2 text-xs text-muted-foreground">{tr(c.sub)}</p>
           </div>
         ))}
       </section>
 
       <section className="space-y-4">
-        <div className="grid gap-3 rounded-2xl border bg-surface p-4 md:grid-cols-[1fr_auto_auto]">
+        <div className="grid gap-3 rounded-2xl border bg-surface p-4 md:grid-cols-[1fr_auto_auto_auto]">
           <div className="flex items-center gap-2 rounded-lg border bg-card px-3 focus-within:border-primary">
             <Search className="h-4 w-4 text-muted-foreground" />
             <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={tr({ ar: "ابحث برقم الفاتورة، اسم الحملة، أو صانع المحتوى...", en: "Search by invoice no., campaign, or creator..." })} className="w-full bg-transparent py-2.5 text-sm outline-none" />
@@ -118,6 +118,7 @@ function Invoices() {
             <option value="all">{tr({ ar: "الكل", en: "All" })}</option>
             <option value="paid">{tr({ ar: "مدفوعة ومكتملة", en: "Paid" })}</option>
           </select>
+          <button onClick={exportCsv} className="inline-flex items-center gap-2 rounded-lg border bg-card px-3.5 py-2.5 text-sm font-semibold hover:border-primary hover:text-primary"><FileSpreadsheet className="h-4 w-4" />{tr({ ar: "تصدير كشف الحساب", en: "Export (CSV)" })}</button>
         </div>
 
         {rows.length === 0 ? (
@@ -133,11 +134,11 @@ function Invoices() {
                   {rows.map((i) => (
                     <tr key={i.id} className="transition hover:bg-surface">
                       <td dir="ltr" className="px-4 py-3 text-start font-mono font-bold">#{i.id}</td>
-                      <td className="px-4 py-3"><div className="flex items-center gap-2.5"><img src={i.creator.img} alt="" className="h-9 w-9 rounded-full object-cover" /><div><p className="font-semibold">{tr(i.campaign)} - {tr(i.creator.name)}</p><p dir="ltr" className="text-start text-xs text-muted-foreground">{i.creator.handle}</p></div></div></td>
+                      <td className="px-4 py-3"><div className="flex items-center gap-3"><img src={i.creator.img} className="size-10 shrink-0 rounded-full object-cover" /><div className="flex flex-col items-start text-start"><span className="flex items-center gap-1 text-sm font-bold">{tr(i.creator.name)} <BadgeCheck className="size-3.5 text-primary" /></span><span className="text-xs text-muted-foreground" style={{ direction: "ltr", unicodeBidi: "isolate" }}>{i.creator.handle}</span><span className="mt-0.5 text-[11px] text-muted-foreground/80">{tr({ ar: "خدمات تسويق وترويج رقمي", en: "Digital Marketing Services" })}</span></div></div></td>
                       <td className="px-4 py-3 text-muted-foreground">{tr(i.date)}</td>
-                      <td className="num px-4 py-3">{fmtBHD(i.net, lang)}</td>
-                      <td className="num px-4 py-3">{fmtBHD(fee(i.net), lang)}<span className="block text-xs text-muted-foreground">+{fmtBHD(vat(i.net), lang)} VAT</span></td>
-                      <td className="num px-4 py-3 font-extrabold">{fmtBHD(total(i.net), lang)}</td>
+                      <td className="num px-4 py-3 text-start">{fmtBHD(i.net, lang)}</td>
+                      <td className="num px-4 py-3 text-start">{fmtBHD(fee(i.net), lang)}<span className="block text-xs text-muted-foreground">+{fmtBHD(vat(i.net), lang)} VAT</span></td>
+                      <td className="num px-4 py-3 text-start font-extrabold">{fmtBHD(total(i.net), lang)}</td>
                       <td className="px-4 py-3"><Paid /></td>
                       <td className="px-4 py-3"><Actions i={i} /></td>
                     </tr>
@@ -148,8 +149,8 @@ function Invoices() {
             <div className="space-y-3 lg:hidden">
               {rows.map((i) => (
                 <article key={i.id} className="rounded-2xl border bg-card p-4 shadow-soft">
-                  <div className="flex items-center justify-between"><span dir="ltr" className="font-mono text-sm font-bold">#{i.id}</span><Paid /></div>
-                  <div className="mt-3 flex items-center gap-2.5"><img src={i.creator.img} alt="" className="h-10 w-10 rounded-full object-cover" /><div><p className="text-sm font-semibold">{tr(i.campaign)} - {tr(i.creator.name)}</p><p className="text-xs text-muted-foreground">{tr(i.date)}</p></div></div>
+                  <div className="flex items-center justify-between"><span dir="ltr" className="font-mono text-sm font-bold">#{i.id}</span><div className="flex items-center gap-2"><span className="text-xs text-muted-foreground">{tr(i.date)}</span><Paid /></div></div>
+                  <div className="mt-3 flex items-center gap-3"><img src={i.creator.img} className="size-10 shrink-0 rounded-full object-cover" /><div className="flex flex-col items-start text-start"><span className="flex items-center gap-1 text-sm font-bold">{tr(i.creator.name)} <BadgeCheck className="size-3.5 text-primary" /></span><span className="text-xs text-muted-foreground" style={{ direction: "ltr", unicodeBidi: "isolate" }}>{i.creator.handle}</span><span className="mt-0.5 text-[11px] text-muted-foreground/80">{tr({ ar: "خدمات تسويق وترويج رقمي", en: "Digital Marketing Services" })}</span></div></div>
                   <dl className="mt-3 grid grid-cols-2 gap-2 text-xs">
                     <div className="rounded-lg bg-surface p-2"><dt className="text-muted-foreground">{tr({ ar: "أجر الحملة", en: "Net" })}</dt><dd className="num font-semibold">{fmtBHD(i.net, lang)}</dd></div>
                     <div className="rounded-lg bg-surface p-2"><dt className="text-muted-foreground">{tr({ ar: "الرسوم + الضريبة", en: "Fee + VAT" })}</dt><dd className="num font-semibold">{fmtBHD(fee(i.net) + vat(i.net), lang)}</dd></div>
@@ -158,12 +159,19 @@ function Invoices() {
                 </article>
               ))}
             </div>
+
+            <div className="mt-4 flex items-center justify-between rounded-2xl border bg-card px-4 py-3 text-sm shadow-soft">
+              <button className="rounded-lg border bg-surface px-4 py-2 font-semibold hover:bg-muted disabled:opacity-50" disabled>{tr({ ar: "السابق", en: "Previous" })}</button>
+              <span className="font-medium text-muted-foreground">{tr({ ar: "صفحة 1 من 3", en: "Page 1 of 3" })}</span>
+              <button className="rounded-lg border bg-surface px-4 py-2 font-semibold hover:bg-muted">{tr({ ar: "التالي", en: "Next" })}</button>
+            </div>
           </>
         )}
       </section>
 
+      </main>
       {view && <InvoiceModal inv={view} onClose={() => setView(null)} />}
-    </main>
+    </>
   );
 }
 
@@ -175,10 +183,11 @@ function InvoiceModal({ inv, onClose }: { inv: Inv; onClose: () => void }) {
     [{ ar: "ضريبة القيمة المضافة (10% على الخدمة)", en: "10% VAT on Service" }, vat(inv.net)],
     [{ ar: "أمانات أجر صانع المحتوى", en: "Disbursement / Passthrough to Creator" }, inv.net],
   ];
+
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/40 backdrop-blur-sm animate-in fade-in sm:items-center sm:p-4 print:static print:bg-transparent" onClick={onClose}>
+    <div className="printable-invoice-modal fixed inset-0 z-50 flex items-end justify-center bg-foreground/40 backdrop-blur-sm animate-in fade-in sm:items-center sm:p-4" onClick={onClose}>
       <div className="flex max-h-[94vh] w-full max-w-2xl flex-col overflow-hidden rounded-t-2xl border bg-card shadow-lift sm:rounded-2xl" onClick={(e) => e.stopPropagation()}>
-        <div className="flex-1 overflow-y-auto p-6 sm:p-8">
+        <div id="tax-invoice-printable" className="flex-1 overflow-y-auto p-6 sm:p-8">
           <div className="flex flex-wrap items-start justify-between gap-4 border-b pb-5">
             <div className="flex items-center gap-2"><img src="/logo.png" alt="Vloop" className="h-9 w-auto" /><span className="text-lg font-extrabold">Vloop | ڤلوب</span></div>
             <div className="text-end">
@@ -201,7 +210,20 @@ function InvoiceModal({ inv, onClose }: { inv: Inv; onClose: () => void }) {
               <p className="num text-muted-foreground">{tr({ ar: "الرقم الضريبي:", en: "VAT No:" })} 210084920100003</p>
             </div>
           </div>
-          <p className="mb-2 flex items-center gap-1.5 text-xs text-muted-foreground"><BadgeCheck className="h-3.5 w-3.5 text-primary" />{tr(inv.campaign)} · {tr(inv.creator.name)} <span dir="ltr">({inv.creator.handle})</span></p>
+          <div className="mb-4 flex items-center gap-3">
+            <img src={inv.creator.img} className="size-10 shrink-0 rounded-full object-cover" />
+            <div className="flex flex-col items-start text-start">
+              <span className="flex items-center gap-1 text-sm font-bold">
+                {tr(inv.creator.name)} <BadgeCheck className="size-3.5 text-primary" />
+              </span>
+              <span className="text-xs text-muted-foreground" style={{ direction: "ltr", unicodeBidi: "isolate" }}>
+                {inv.creator.handle}
+              </span>
+              <span className="mt-0.5 text-[11px] text-muted-foreground/80">
+                {tr({ ar: "خدمات تسويق وترويج رقمي", en: "Digital Marketing Services" })}
+              </span>
+            </div>
+          </div>
           <dl className="divide-y rounded-xl border text-sm">
             {lines.map(([k, v]) => <div key={k.en} className="flex justify-between gap-4 px-4 py-3"><dt>{tr(k)}</dt><dd className="num whitespace-nowrap font-medium">{fmtBHD(v, lang)}</dd></div>)}
             <div className="flex justify-between gap-4 bg-surface px-4 py-3.5"><dt className="font-bold">{tr({ ar: "الإجمالي المدفوع", en: "Total Paid" })}<span className="block text-xs font-normal text-muted-foreground">{tr({ ar: "عبر BenefitPay / بوابة البطاقات", en: "via BenefitPay / Card Gateway" })}</span></dt><dd className="num text-lg font-extrabold text-success">{fmtBHD(total(inv.net), lang)}</dd></div>
@@ -210,7 +232,7 @@ function InvoiceModal({ inv, onClose }: { inv: Inv; onClose: () => void }) {
             <Stamp className="h-5 w-5" />{tr({ ar: "تمت التسوية بنجاح عبر حساب الضمان المالي - ڤلوب البحرين", en: "Successfully settled via Vloop Bahrain escrow account" })}
           </div>
         </div>
-        <footer className="flex justify-end gap-3 border-t px-6 py-4 print:hidden">
+        <footer className="no-print flex justify-end gap-3 border-t px-6 py-4">
           <button onClick={onClose} className="inline-flex items-center gap-1.5 rounded-lg border px-4 py-2 text-sm font-semibold hover:bg-muted"><X className="h-4 w-4" />{tr({ ar: "إغلاق", en: "Close" })}</button>
           <button onClick={() => window.print()} className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-foreground hover:bg-primary/90"><Printer className="h-4 w-4" />{tr({ ar: "طباعة / تحميل PDF", en: "Print / Download PDF" })}</button>
         </footer>
