@@ -46,9 +46,9 @@ export function AppHeader() {
               {tr(t.nav.campaigns)}
               <span className="h-1.5 w-1.5 rounded-full bg-warning" title="Pending review"></span>
             </Link>
-            <a className="rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">
+            <Link to="/invoices" className="rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
               {tr(t.nav.invoices)}
-            </a>
+            </Link>
           </nav>
           <div className="ms-auto flex items-center gap-3">
             <div className="hidden md:flex items-center gap-2 rounded-full border border-success/30 bg-success-soft px-3 py-1.5 text-sm font-semibold text-success">
@@ -157,9 +157,9 @@ export function AppHeader() {
                 {tr(t.nav.campaigns)}
                 <span className="h-2 w-2 rounded-full bg-warning"></span>
               </Link>
-              <a onClick={() => setMobileMenu(false)} className="px-4 py-3 text-lg font-semibold rounded-xl hover:bg-muted cursor-pointer">
+              <Link to="/invoices" onClick={() => setMobileMenu(false)} className="px-4 py-3 text-lg font-semibold rounded-xl hover:bg-muted" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
                 {tr(t.nav.invoices)}
-              </a>
+              </Link>
             </nav>
 
             <div className="mt-auto flex flex-col gap-4 pt-6 border-t">
