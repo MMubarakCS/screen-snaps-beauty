@@ -96,13 +96,19 @@ export function AppHeader() {
   const location = useLocation();
   const router = useRouter();
   const isPublic = location.pathname === "/";
+  const isCreator = location.pathname.startsWith("/creator");
   const tr = (x: L) => x[lang];
   const [copied, setCopied] = useState(false);
+  const [available, setAvailable] = useState(true);
   const [menu, setMenu] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
   const [logoutDialog, setLogoutDialog] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+<<<<<<< HEAD
   const [modal, setModal] = useState<"company" | "settings" | AuthModal | "auth-login" | "creator-profile" | "creator-settings" | null>(null);
+=======
+  const [modal, setModal] = useState<"company" | "settings" | "creator-profile" | "creator-settings" | AuthModal | "auth-login" | null>(null);
+>>>>>>> 5728e663845c12a065823f7ec2f1797264796aac
   const handleNavClick = (e: MouseEvent<HTMLAnchorElement>, targetId: string) => {
     e.preventDefault();
     const target = document.getElementById(targetId);
@@ -164,8 +170,9 @@ export function AppHeader() {
                 {lang === "ar" ? "الأسئلة الشائعة" : "FAQ"}
               </a>
             </nav>
-          ) : (
+          ) : isCreator ? null : (
             <nav className="hidden items-center gap-1 text-sm font-medium lg:flex">
+<<<<<<< HEAD
               {location.pathname.startsWith("/creator") ? null : (
                 <>
                   <Link to="/merchant" activeOptions={{ exact: true }} className="rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
@@ -180,6 +187,18 @@ export function AppHeader() {
                   </Link>
                 </>
               )}
+=======
+              <Link to="/merchant" activeOptions={{ exact: true }} className="rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
+                {tr(t.nav.discover)}
+              </Link>
+              <Link to="/campaigns" className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
+                {tr(t.nav.campaigns)}
+                <span className="h-1.5 w-1.5 rounded-full bg-warning" title="Pending review"></span>
+              </Link>
+              <Link to="/invoices" className="rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
+                {tr(t.nav.invoices)}
+              </Link>
+>>>>>>> 5728e663845c12a065823f7ec2f1797264796aac
             </nav>
           )}
           <div className="ms-auto flex items-center gap-3">
@@ -203,24 +222,33 @@ export function AppHeader() {
                   {lang === "ar" ? "ابدأ الآن" : "Get Started"}
                 </button>
               </>
-            ) : location.pathname.startsWith("/creator") ? (
+            ) : isCreator ? (
               <>
                 <button
-                  className="hidden md:flex items-center gap-2 rounded-full border border-success/30 bg-success-soft px-3 py-1.5 text-sm font-bold text-success"
+                  onClick={() => {
+                    setAvailable((v) => !v);
+                    toast.success(available
+                      ? (lang === "ar" ? "تم إيقاف استقبال الحجوزات مؤقتاً" : "Bookings paused")
+                      : (lang === "ar" ? "أنت متاح الآن للحجوزات" : "You're now available for bookings"));
+                  }}
+                  aria-pressed={available}
+                  className={`hidden md:flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-bold transition ${available ? "border-success/30 bg-success-soft text-success" : "border-border bg-muted text-muted-foreground"}`}
                 >
-                  <div className="h-2 w-2 rounded-full bg-success"></div>
-                  {lang === "ar" ? "متاح للحجوزات" : "Available"}
+                  <span className={`h-2 w-2 rounded-full ${available ? "bg-success" : "bg-muted-foreground"}`}></span>
+                  {available
+                    ? (lang === "ar" ? "متاح للحجوزات" : "Available for Bookings")
+                    : (lang === "ar" ? "غير متاح حالياً" : "Unavailable")}
                 </button>
                 <button
                   onClick={() => {
-                    navigator.clipboard?.writeText("vloop.me/@yousif.bites");
+                    navigator.clipboard?.writeText("https://vloop.me/@yousif.bites");
                     toast.success(lang === "ar" ? "تم نسخ الرابط!" : "Link copied!");
                   }}
                   className="hidden md:flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm font-bold text-foreground transition hover:bg-muted"
                   title="Copy Bio-Link"
                 >
                   <LinkIcon className="h-4 w-4" />
-                  vloop.me/@yousif.bites
+                  <span dir="ltr">vloop.me/@yousif.bites</span>
                 </button>
                 <div className="relative">
                   <button
