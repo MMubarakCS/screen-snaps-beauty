@@ -120,7 +120,7 @@ function PublicLanding() {
       </section>
 
       {/* TRUST PILLARS STRIP */}
-      <section className="border-y bg-surface py-8">
+      <section className="border-y bg-surface py-6">
         <div className="mx-auto flex w-[92%] max-w-[1680px] flex-wrap items-start justify-center gap-6 lg:gap-12">
           {[
             {
@@ -156,19 +156,19 @@ function PublicLanding() {
       </section>
 
       {/* TRUSTED LOCAL BRANDS */}
-      <section className="my-10 border-y border-border/40 bg-muted/20 py-6">
-        <div className="mx-auto w-[92%] max-w-[1200px]">
-          <h2 className="mb-5 text-center text-xs font-bold uppercase tracking-wider text-muted-foreground/80">
+      <section className="my-8 w-full border-y border-slate-200/60 bg-slate-50/70 py-6">
+        <div className="mx-auto max-w-6xl px-4 text-center">
+          <p className="mb-4 text-xs font-bold uppercase tracking-wide text-muted-foreground/80">
             {isAr
               ? "تثق بنا نخبة من أبرز المطاعم والمتاجر المحلية في مملكة البحرين"
               : "Trusted by leading local restaurants and retailers across the Kingdom of Bahrain"}
-          </h2>
-          <div className="flex flex-wrap items-center justify-center gap-8 md:gap-14">
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-8 text-sm font-extrabold tracking-tight text-muted-foreground/60 md:gap-14 md:text-base">
             {["FLAME BURGER CO.", "BREW & CO. CAFE", "CRUST ARTISAN PIZZA", "MESA TAQUERIA", "HEALTHY BITES BH"].map((b) => (
               <span
                 key={b}
                 dir="ltr"
-                className="cursor-default select-none text-base font-extrabold tracking-tight text-muted-foreground/60 transition-colors duration-200 hover:text-foreground md:text-lg"
+                className="cursor-default transition-colors hover:text-foreground"
               >
                 {b}
               </span>
@@ -178,7 +178,7 @@ function PublicLanding() {
       </section>
 
       {/* 3-STEP LOOP */}
-      <section id="how-it-works" className="mx-auto w-[92%] max-w-[1200px] scroll-mt-24 py-20 lg:py-32">
+      <section id="how-it-works" className="mx-auto mt-8 w-[92%] max-w-[1200px] scroll-mt-24 pb-12 lg:pb-16">
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-extrabold mb-4">{isAr ? "كيف تعمل المنصة (The 3-Step Guaranteed Loop)" : "How It Works (The 3-Step Guaranteed Loop)"}</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
