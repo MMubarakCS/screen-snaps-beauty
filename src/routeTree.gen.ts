@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CampaignsRouteImport } from './routes/campaigns'
+import { Route as CreatorRouteImport } from './routes/creator'
 import { Route as InvoicesRouteImport } from './routes/invoices'
 import { Route as MerchantRouteImport } from './routes/merchant'
 
@@ -22,6 +23,11 @@ const IndexRoute = IndexRouteImport.update({
 const CampaignsRoute = CampaignsRouteImport.update({
   id: '/campaigns',
   path: '/campaigns',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CreatorRoute = CreatorRouteImport.update({
+  id: '/creator',
+  path: '/creator',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InvoicesRoute = InvoicesRouteImport.update({
@@ -38,12 +44,14 @@ const MerchantRoute = MerchantRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/campaigns': typeof CampaignsRoute
+  '/creator': typeof CreatorRoute
   '/invoices': typeof InvoicesRoute
   '/merchant': typeof MerchantRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/campaigns': typeof CampaignsRoute
+  '/creator': typeof CreatorRoute
   '/invoices': typeof InvoicesRoute
   '/merchant': typeof MerchantRoute
 }
@@ -51,20 +59,22 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/campaigns': typeof CampaignsRoute
+  '/creator': typeof CreatorRoute
   '/invoices': typeof InvoicesRoute
   '/merchant': typeof MerchantRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/campaigns' | '/invoices' | '/merchant'
+  fullPaths: '/' | '/campaigns' | '/creator' | '/invoices' | '/merchant'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/campaigns' | '/invoices' | '/merchant'
-  id: '__root__' | '/' | '/campaigns' | '/invoices' | '/merchant'
+  to: '/' | '/campaigns' | '/creator' | '/invoices' | '/merchant'
+  id: '__root__' | '/' | '/campaigns' | '/creator' | '/invoices' | '/merchant'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CampaignsRoute: typeof CampaignsRoute
+  CreatorRoute: typeof CreatorRoute
   InvoicesRoute: typeof InvoicesRoute
   MerchantRoute: typeof MerchantRoute
 }
@@ -83,6 +93,13 @@ declare module '@tanstack/react-router' {
       path: '/campaigns'
       fullPath: '/campaigns'
       preLoaderRoute: typeof CampaignsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/creator': {
+      id: '/creator'
+      path: '/creator'
+      fullPath: '/creator'
+      preLoaderRoute: typeof CreatorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/invoices': {
@@ -105,6 +122,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CampaignsRoute: CampaignsRoute,
+  CreatorRoute: CreatorRoute,
   InvoicesRoute: InvoicesRoute,
   MerchantRoute: MerchantRoute,
 }

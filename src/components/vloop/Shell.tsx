@@ -1,10 +1,11 @@
 import { createContext, useContext, useEffect, useState, type MouseEvent, type ReactNode } from "react";
 import { Link, useLocation, useRouter } from "@tanstack/react-router";
-import { QrCode, ChevronDown, Check, LogOut, Settings, Building2, Lock, Menu, X, Store, Video, CircleHelp } from "lucide-react";
+import { QrCode, ChevronDown, Check, LogOut, Settings, Building2, Lock, Menu, X, Store, Video, CircleHelp, UserCog, Link as LinkIcon } from "lucide-react";
 import { toast } from "sonner";
 import { CompanyProfileModal, AccountSettingsModal } from "@/components/vloop/AccountModals";
 import { HelpModal } from "@/components/vloop/HelpModal";
-import { categories, type Lang, type L, fmtBHD, t } from "@/lib/vloop-data";
+import c2 from "@/assets/creator-2.jpg";
+import { type Lang, type L, fmtBHD, t, categories } from "@/lib/vloop-data";
 
 const LangCtx = createContext<{ lang: Lang; setLang: (l: Lang) => void }>({ lang: "ar", setLang: () => {} });
 export const useLang = () => useContext(LangCtx);
@@ -163,16 +164,33 @@ export function AppHeader() {
             </nav>
           ) : (
             <nav className="hidden items-center gap-1 text-sm font-medium lg:flex">
-              <Link to="/merchant" activeOptions={{ exact: true }} className="rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
-                {tr(t.nav.discover)}
-              </Link>
-              <Link to="/campaigns" className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
-                {tr(t.nav.campaigns)}
-                <span className="h-1.5 w-1.5 rounded-full bg-warning" title="Pending review"></span>
-              </Link>
-              <Link to="/invoices" className="rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
-                {tr(t.nav.invoices)}
-              </Link>
+              {location.pathname.startsWith("/creator") ? (
+                <>
+                  <Link to="/creator" activeOptions={{ exact: true }} className="rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
+                    {lang === "ar" ? "لوحة التحكم" : "Dashboard"}
+                  </Link>
+                  <Link to="/creator" className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
+                    {lang === "ar" ? "إدارة الطلبات" : "Campaign Requests"}
+                    <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">1</span>
+                  </Link>
+                  <Link to="/creator" className="rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
+                    {lang === "ar" ? "المحفظة والسحب" : "Wallet & Payouts"}
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link to="/merchant" activeOptions={{ exact: true }} className="rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
+                    {tr(t.nav.discover)}
+                  </Link>
+                  <Link to="/campaigns" className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
+                    {tr(t.nav.campaigns)}
+                    <span className="h-1.5 w-1.5 rounded-full bg-warning" title="Pending review"></span>
+                  </Link>
+                  <Link to="/invoices" className="rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
+                    {tr(t.nav.invoices)}
+                  </Link>
+                </>
+              )}
             </nav>
           )}
           <div className="ms-auto flex items-center gap-3">
@@ -195,6 +213,67 @@ export function AppHeader() {
                 <button onClick={() => setModal("auth-start")} className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-soft transition hover:bg-primary/90">
                   {lang === "ar" ? "ابدأ الآن" : "Get Started"}
                 </button>
+              </>
+            ) : location.pathname.startsWith("/creator") ? (
+              <>
+                <button
+                  className="hidden md:flex items-center gap-2 rounded-full border border-success/30 bg-success-soft px-3 py-1.5 text-sm font-bold text-success"
+                >
+                  <div className="h-2 w-2 rounded-full bg-success"></div>
+                  {lang === "ar" ? "متاح للحجوزات" : "Available"}
+                </button>
+                <button
+                  onClick={() => {
+                    navigator.clipboard?.writeText("vloop.me/@yousif.bites");
+                    toast.success(lang === "ar" ? "تم نسخ الرابط!" : "Link copied!");
+                  }}
+                  className="hidden md:flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm font-bold text-foreground transition hover:bg-muted"
+                  title="Copy Bio-Link"
+                >
+                  <LinkIcon className="h-4 w-4" />
+                  vloop.me/@yousif.bites
+                </button>
+                <div className="relative">
+                  <button
+                    onClick={() => setMenu((m) => !m)}
+                    className="flex items-center gap-2 rounded-lg p-1 hover:bg-muted"
+                  >
+                    <img src={c2} alt="" className="h-9 w-9 rounded-full object-cover" />
+                    <span className="hidden text-start leading-tight lg:block">
+                      <span className="block text-sm font-bold flex items-center gap-1">
+                        {lang === "ar" ? "يوسف المناعي" : "Yousif Al-Mannai"}
+                        <Check className="h-3 w-3 rounded-full bg-primary p-0.5 text-primary-foreground" />
+                      </span>
+                      <span className="num block text-xs text-muted-foreground" dir="ltr">
+                        @yousif.bites
+                      </span>
+                    </span>
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  </button>
+                  {menu && (
+                    <div className="absolute end-0 top-12 w-52 rounded-xl border bg-popover p-1.5 shadow-lift animate-in fade-in zoom-in-95">
+                      <button className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium hover:bg-muted">
+                        <UserCog className="h-4 w-4 text-muted-foreground" />
+                        {lang === "ar" ? "الملف الشخصي" : "Profile"}
+                      </button>
+                      <button className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium hover:bg-muted">
+                        <Settings className="h-4 w-4 text-muted-foreground" />
+                        {lang === "ar" ? "إعدادات الحساب" : "Settings"}
+                      </button>
+                      <div className="my-1 border-t border-border"></div>
+                      <button
+                        onClick={() => {
+                          setMenu(false);
+                          setLogoutDialog(true);
+                        }}
+                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        {lang === "ar" ? "تسجيل الخروج" : "Log out"}
+                      </button>
+                    </div>
+                  )}
+                </div>
               </>
             ) : (
               <>
@@ -473,7 +552,7 @@ function AuthStartModal({
               <span className="rounded-lg bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground">{isAr ? "ابدأ" : "Continue"}</span>
             </Link>
           ) : (
-            <Link to="/" onClick={onClose} className="flex items-center justify-between rounded-xl border p-4 transition hover:border-primary hover:bg-primary/5">
+            <Link to="/creator" onClick={onClose} className="flex items-center justify-between rounded-xl border p-4 transition hover:border-primary hover:bg-primary/5">
               <div className="flex items-center gap-4">
                 <span className="flex h-12 w-12 items-center justify-center rounded-full bg-sky/10 text-sky">
                   <QrCode className="h-6 w-6" />
@@ -524,7 +603,7 @@ function AuthStartModal({
           <button
             onClick={() => {
               onClose();
-              void router.navigate({ to: "/" });
+              void router.navigate({ to: "/creator" });
             }}
             className="group flex w-full items-center justify-between rounded-xl border border-border bg-card p-4 text-start transition hover:border-foreground/30 hover:bg-muted/50"
           >
