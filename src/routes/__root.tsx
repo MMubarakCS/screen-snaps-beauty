@@ -131,7 +131,7 @@ function RootComponent() {
           <AppHeader />
           <Outlet />
           <AppFooter />
-          <Toaster position="bottom-center" richColors dir={undefined} />
+          <Toaster position="bottom-center" richColors />
         </div>
       </LangProvider>
     </QueryClientProvider>
