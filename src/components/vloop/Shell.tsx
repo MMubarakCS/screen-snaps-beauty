@@ -162,35 +162,18 @@ export function AppHeader() {
                 {lang === "ar" ? "الأسئلة الشائعة" : "FAQ"}
               </a>
             </nav>
-          ) : (
+          ) : isCreator ? null : (
             <nav className="hidden items-center gap-1 text-sm font-medium lg:flex">
-              {location.pathname.startsWith("/creator") ? (
-                <>
-                  <Link to="/creator" activeOptions={{ exact: true }} className="rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
-                    {lang === "ar" ? "لوحة التحكم" : "Dashboard"}
-                  </Link>
-                  <Link to="/creator" className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
-                    {lang === "ar" ? "إدارة الطلبات" : "Campaign Requests"}
-                    <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">1</span>
-                  </Link>
-                  <Link to="/creator" className="rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
-                    {lang === "ar" ? "المحفظة والسحب" : "Wallet & Payouts"}
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <Link to="/merchant" activeOptions={{ exact: true }} className="rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
-                    {tr(t.nav.discover)}
-                  </Link>
-                  <Link to="/campaigns" className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
-                    {tr(t.nav.campaigns)}
-                    <span className="h-1.5 w-1.5 rounded-full bg-warning" title="Pending review"></span>
-                  </Link>
-                  <Link to="/invoices" className="rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
-                    {tr(t.nav.invoices)}
-                  </Link>
-                </>
-              )}
+              <Link to="/merchant" activeOptions={{ exact: true }} className="rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
+                {tr(t.nav.discover)}
+              </Link>
+              <Link to="/campaigns" className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
+                {tr(t.nav.campaigns)}
+                <span className="h-1.5 w-1.5 rounded-full bg-warning" title="Pending review"></span>
+              </Link>
+              <Link to="/invoices" className="rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
+                {tr(t.nav.invoices)}
+              </Link>
             </nav>
           )}
           <div className="ms-auto flex items-center gap-3">
