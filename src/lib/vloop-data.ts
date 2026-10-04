@@ -10,10 +10,13 @@ export const fmtBHD = (n: number, lang: Lang) =>
   `${n.toLocaleString("en-US", { minimumFractionDigits: 3, maximumFractionDigits: 3 })} ${lang === "ar" ? "د.ب" : "BHD"}`;
 
 export const categories: { id: string; label: L }[] = [
-  { id: "food", label: { ar: "الأطعمة والمطاعم", en: "Food & Restaurants" } },
-  { id: "lifestyle", label: { ar: "أسلوب الحياة", en: "Lifestyle" } },
-  { id: "beauty", label: { ar: "الجمال والعناية", en: "Beauty & Care" } },
-  { id: "all", label: { ar: "جميع الفئات", en: "All Categories" } },
+  { id: "food-casual-dining", label: { ar: "الأطعمة والمطاعم", en: "Food & Casual Dining" } },
+  { id: "cafes-bakeries", label: { ar: "المقاهي والمخابز", en: "Cafes & Bakeries" } },
+  { id: "retail-fashion", label: { ar: "التجزئة والأزياء", en: "Retail & Fashion" } },
+  { id: "beauty-salons", label: { ar: "الجمال والعناية", en: "Beauty & Salons" } },
+  { id: "healthcare-clinics", label: { ar: "العيادات والصحة", en: "Healthcare & Clinics" } },
+  { id: "tourism-entertainment", label: { ar: "السياحة والترفيه", en: "Tourism & Entertainment" } },
+  { id: "auto-local-services", label: { ar: "الخدمات والسيارات", en: "Auto & Local Services" } },
 ];
 
 export type Creator = {
@@ -44,7 +47,7 @@ export const creators: Creator[] = [
     reliability: 98,
     campaigns: 42,
     minRate: 140,
-    categories: ["food"],
+    categories: ["food-casual-dining"],
     engagement: "6.8%",
     audience: { ar: "78% من البحرين · 25–34 سنة", en: "78% Bahrain · ages 25–34" },
   },
@@ -59,7 +62,7 @@ export const creators: Creator[] = [
     reliability: 96,
     campaigns: 31,
     minRate: 120,
-    categories: ["food", "lifestyle"],
+    categories: ["food-casual-dining", "cafes-bakeries"],
     engagement: "5.9%",
     audience: { ar: "71% من البحرين · 18–30 سنة", en: "71% Bahrain · ages 18–30" },
   },
@@ -74,7 +77,7 @@ export const creators: Creator[] = [
     reliability: 99,
     campaigns: 57,
     minRate: 150,
-    categories: ["lifestyle", "beauty", "food"],
+    categories: ["beauty-salons", "tourism-entertainment", "food-casual-dining"],
     engagement: "7.4%",
     audience: { ar: "64% من البحرين · 22–35 سنة", en: "64% Bahrain · ages 22–35" },
   },
@@ -89,7 +92,7 @@ export const creators: Creator[] = [
     reliability: 94,
     campaigns: 23,
     minRate: 95,
-    categories: ["food"],
+    categories: ["food-casual-dining"],
     engagement: "8.1%",
     audience: { ar: "82% من البحرين · 20–40 سنة", en: "82% Bahrain · ages 20–40" },
   },

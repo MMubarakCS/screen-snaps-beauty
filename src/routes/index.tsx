@@ -52,9 +52,9 @@ function Index() {
   const { lang } = useLang();
   const tr = (x: L) => x[lang];
   const [budget, setBudget] = useState("150.000");
-  const [cat, setCat] = useState("food");
+  const [cat, setCat] = useState("food-casual-dining");
   const [date, setDate] = useState("");
-  const [applied, setApplied] = useState({ budget: 150, cat: "food" });
+  const [applied, setApplied] = useState({ budget: 150, cat: "food-casual-dining" });
   const [searching, setSearching] = useState(false);
   const [booking, setBooking] = useState<Creator | null>(null);
   const [kit, setKit] = useState<string | null>(null);
@@ -201,6 +201,7 @@ function Index() {
                 onChange={(e) => setCat(e.target.value)}
                 className="w-full rounded-lg border bg-card px-3.5 py-2.5 text-sm outline-none focus:border-primary"
               >
+                <option value="all">{tr({ ar: "جميع الفئات", en: "All Categories" })}</option>
                 {categories.map((c) => (
                   <option key={c.id} value={c.id}>
                     {tr(c.label)}

@@ -1,8 +1,8 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { X, BadgeCheck, Check, Mail, Bell, KeyRound } from "lucide-react";
+import { X, BadgeCheck, Check, Mail, Bell, KeyRound, Camera } from "lucide-react";
 import { toast } from "sonner";
-import { useLang } from "@/components/vloop/Shell";
-import type { L } from "@/lib/vloop-data";
+import { useLang, useMerchantProfile } from "@/components/vloop/Shell";
+import { categories, type L } from "@/lib/vloop-data";
 
 function useNoScroll() {
   useEffect(() => {
@@ -43,24 +43,82 @@ const btnPrimary = "rounded-lg bg-primary px-4 py-2 text-sm font-bold text-prima
 
 export function CompanyProfileModal({ onClose }: { onClose: () => void }) {
   const { lang } = useLang();
+  const { profile, updateProfile } = useMerchantProfile();
   const tr = (x: L) => x[lang];
+  const [logoPreview, setLogoPreview] = useState(profile.logoUrl);
   const [f, setF] = useState({
     name: tr({ ar: "شركة فليم برجر ذ.م.م", en: "Flame Burger Co. W.L.L" }),
     vat: "210084920100003",
-    cat: "food-burger",
+    cat: profile.categoryId,
     branch: tr({ ar: "مجمع السيف - المنامة، مملكة البحرين", en: "Seef Mall - Manama, Kingdom of Bahrain" }),
     ig: "@flame_burger",
     phone: "+973 39123456",
   });
+  useEffect(() => {
+    setF((current) => ({ ...current, cat: profile.categoryId }));
+    setLogoPreview(profile.logoUrl);
+  }, [profile.categoryId, profile.logoUrl]);
+
   const set = (k: keyof typeof f) => (e: { target: { value: string } }) => setF((s) => ({ ...s, [k]: e.target.value }));
-  const save = () => { toast.success(tr({ ar: "تم تحديث بيانات المنشأة بنجاح", en: "Company details updated successfully" })); onClose(); };
+  const uploadLogo = (file: File | undefined) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error(tr({ ar: "يرجى اختيار ملف صورة", en: "Please choose an image file" }));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        setLogoPreview(reader.result);
+      } else {
+        toast.error(tr({ ar: "تعذر تحميل الشعار", en: "Could not load the logo" }));
+      }
+    };
+    reader.onerror = () => {
+      console.error("Failed to read the selected company logo", reader.error);
+      toast.error(tr({ ar: "تعذر تحميل الشعار", en: "Could not load the logo" }));
+    };
+    reader.readAsDataURL(file);
+  };
+  const save = () => {
+    updateProfile({ categoryId: f.cat, logoUrl: logoPreview });
+    toast.success(tr({ ar: "تم تحديث بيانات المنشأة بنجاح", en: "Company details updated successfully" }));
+    onClose();
+  };
   return (
     <ModalFrame
       title={tr({ ar: "الملف التعريفي للمنشأة", en: "Company Profile" })}
-      icon={<span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-gradient text-sm font-bold text-primary-foreground">FB</span>}
+      icon={logoPreview ? (
+        <img src={logoPreview} alt="" className="h-10 w-10 rounded-full object-cover" />
+      ) : (
+        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-gradient text-sm font-bold text-primary-foreground">FB</span>
+      )}
       onClose={onClose}
       footer={<><button onClick={onClose} className={btnGhost}>{tr({ ar: "إلغاء", en: "Cancel" })}</button><button onClick={save} className={btnPrimary}>{tr({ ar: "حفظ التعديلات", en: "Save Changes" })}</button></>}
     >
+      <div className="flex justify-center">
+        <div className="flex flex-col items-center gap-2">
+          {logoPreview ? (
+            <img src={logoPreview} alt={tr({ ar: "شعار المنشأة", en: "Company logo" })} className="h-20 w-20 rounded-full border object-cover" />
+          ) : (
+            <span className="flex h-20 w-20 items-center justify-center rounded-full bg-brand-gradient text-xl font-bold text-primary-foreground">FB</span>
+          )}
+          <label className={`${btnGhost} inline-flex cursor-pointer items-center gap-2`}>
+            <Camera className="h-4 w-4" />
+            {tr({ ar: "تغيير الشعار / Upload Logo", en: "تغيير الشعار / Upload Logo" })}
+            <input
+              type="file"
+              accept="image/*"
+              className="sr-only"
+              onChange={(event) => {
+                uploadLogo(event.currentTarget.files?.[0]);
+                event.currentTarget.value = "";
+              }}
+            />
+          </label>
+        </div>
+      </div>
       <Field label={tr({ ar: "اسم المنشأة التجاري", en: "Business Name" })}><input value={f.name} onChange={set("name")} className={input} /></Field>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label={tr({ ar: "رقم السجل التجاري (CR)", en: "Commercial Registration (CR)" })}>
@@ -73,9 +131,9 @@ export function CompanyProfileModal({ onClose }: { onClose: () => void }) {
       </div>
       <Field label={tr({ ar: "النشاط والفئة", en: "Activity & Category" })}>
         <select value={f.cat} onChange={set("cat")} className={input}>
-          <option value="food-burger">{tr({ ar: "الأطعمة والمطاعم / برجر ووجبات سريعة", en: "Food & Restaurants / Burgers & Fast Food" })}</option>
-          <option value="food-cafe">{tr({ ar: "الأطعمة والمطاعم / مقاهي", en: "Food & Restaurants / Cafés" })}</option>
-          <option value="retail">{tr({ ar: "التجزئة", en: "Retail" })}</option>
+          {categories.map((category) => (
+            <option key={category.id} value={category.id}>{tr(category.label)}</option>
+          ))}
         </select>
       </Field>
       <Field label={tr({ ar: "الفرع الرئيسي", en: "Main Branch" })}><input value={f.branch} onChange={set("branch")} className={input} /></Field>
@@ -95,10 +153,17 @@ export function AccountSettingsModal({ onClose }: { onClose: () => void }) {
   const [n2, setN2] = useState(true);
   const [cur, setCur] = useState("");
   const [next, setNext] = useState("");
+  const [confirm, setConfirm] = useState("");
   const save = () => {
-    if (next && (!cur || next.length < 8)) {
-      toast.error(tr({ ar: "أدخل كلمة المرور الحالية، والجديدة 8 أحرف على الأقل", en: "Enter your current password; new password must be 8+ characters" }));
-      return;
+    if (cur || next || confirm) {
+      if (!cur || !next || !confirm || next.length < 8) {
+        toast.error(tr({ ar: "أدخل كلمة المرور الحالية والجديدة وتأكيدها، على أن تكون الجديدة 8 أحرف على الأقل", en: "Enter your current, new, and confirmation passwords; the new password must be 8+ characters" }));
+        return;
+      }
+      if (next !== confirm) {
+        toast.error(tr({ ar: "تأكيد كلمة المرور الجديدة غير متطابق", en: "New password confirmation does not match" }));
+        return;
+      }
     }
     toast.success(tr({ ar: "تم حفظ الإعدادات بنجاح", en: "Settings saved successfully" }));
     onClose();
@@ -122,17 +187,18 @@ export function AccountSettingsModal({ onClose }: { onClose: () => void }) {
         <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} dir="ltr" className={`${input} text-start`} />
       </section>
       <section>
-        <h3 className="mb-2 flex items-center gap-2 text-sm font-bold"><Bell className="h-4 w-4 text-primary" />{tr({ ar: "إشعارات الواتساب والبريد", en: "WhatsApp & Email Notifications" })}</h3>
+        <h3 className="mb-2 flex items-center gap-2 text-sm font-bold"><Bell className="h-4 w-4 text-primary" />{tr({ ar: "إشعارات النظام والبريد الإلكتروني / Email Notifications", en: "إشعارات النظام والبريد الإلكتروني / Email Notifications" })}</h3>
         <div className="space-y-2">
-          <Check2 on={n1} set={setN1} label={tr({ ar: "تنبيه فوري عند تقديم صانع المحتوى لإثبات النشر.", en: "Instant alert when a creator submits proof of posting." })} />
-          <Check2 on={n2} set={setN2} label={tr({ ar: "تنبيه تحذيري قبل انتهاء مهلة الـ 24 ساعة بـ 4 ساعات.", en: "Warning alert 4 hours before the 24-hour window ends." })} />
+          <Check2 on={n1} set={setN1} label={tr({ ar: "تنبيه فوري عبر البريد عند تقديم صانع المحتوى لإثبات النشر.", en: "Instant email alert when a creator submits proof of posting." })} />
+          <Check2 on={n2} set={setN2} label={tr({ ar: "تنبيه تحذيري عبر البريد قبل انتهاء مهلة الـ 24 ساعة بـ 4 ساعات.", en: "Email warning 4 hours before the 24-hour window ends." })} />
         </div>
       </section>
       <section>
         <h3 className="mb-2 flex items-center gap-2 text-sm font-bold"><KeyRound className="h-4 w-4 text-primary" />{tr({ ar: "الأمان - تغيير كلمة المرور", en: "Security - Change Password" })}</h3>
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="space-y-3">
           <Field label={tr({ ar: "كلمة المرور الحالية", en: "Current password" })}><input type="password" value={cur} onChange={(e) => setCur(e.target.value)} className={input} /></Field>
           <Field label={tr({ ar: "كلمة المرور الجديدة", en: "New password" })}><input type="password" value={next} onChange={(e) => setNext(e.target.value)} className={input} /></Field>
+          <Field label={tr({ ar: "تأكيد كلمة المرور الجديدة", en: "Confirm new password" })}><input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} className={input} /></Field>
         </div>
       </section>
     </ModalFrame>

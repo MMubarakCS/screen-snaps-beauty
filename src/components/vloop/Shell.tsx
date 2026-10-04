@@ -3,22 +3,91 @@ import { Link } from "@tanstack/react-router";
 import { QrCode, ChevronDown, Check, LogOut, Settings, Building2, Lock, Menu, X } from "lucide-react";
 import { toast } from "sonner";
 import { CompanyProfileModal, AccountSettingsModal } from "@/components/vloop/AccountModals";
-import { type Lang, type L, fmtBHD, t } from "@/lib/vloop-data";
+import { categories, type Lang, type L, fmtBHD, t } from "@/lib/vloop-data";
 
 const LangCtx = createContext<{ lang: Lang; setLang: (l: Lang) => void }>({ lang: "ar", setLang: () => {} });
 export const useLang = () => useContext(LangCtx);
 
+type MerchantProfile = { categoryId: string; logoUrl: string | null };
+const defaultMerchantProfile: MerchantProfile = { categoryId: "food-casual-dining", logoUrl: null };
+const MerchantProfileCtx = createContext<{
+  profile: MerchantProfile;
+  updateProfile: (updates: Partial<MerchantProfile>) => void;
+}>({
+  profile: defaultMerchantProfile,
+  updateProfile: () => {},
+});
+
+export const useMerchantProfile = () => useContext(MerchantProfileCtx);
+
+function isMerchantProfile(value: unknown): value is MerchantProfile {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "categoryId" in value &&
+    typeof value.categoryId === "string" &&
+    categories.some((category) => category.id === value.categoryId) &&
+    "logoUrl" in value &&
+    (typeof value.logoUrl === "string" || value.logoUrl === null)
+  );
+}
+
 export function LangProvider({ children }: { children: ReactNode }) {
   const [lang, setLang] = useState<Lang>("ar");
+  const [profile, setProfile] = useState(defaultMerchantProfile);
+  const [profileLoaded, setProfileLoaded] = useState(false);
+
   useEffect(() => {
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
   }, [lang]);
-  return <LangCtx.Provider value={{ lang, setLang }}>{children}</LangCtx.Provider>;
+
+  useEffect(() => {
+    if (profileLoaded) return;
+    try {
+      const storedProfile = localStorage.getItem("vloop.merchant-profile");
+      if (storedProfile) {
+        const parsed: unknown = JSON.parse(storedProfile);
+        if (isMerchantProfile(parsed)) {
+          setProfile(parsed);
+        } else {
+          toast.error(lang === "ar" ? "تعذر تحميل بيانات المنشأة المحفوظة" : "Saved company profile data is invalid");
+        }
+      }
+    } catch (error) {
+      console.error("Failed to load the saved company profile", error);
+      toast.error(lang === "ar" ? "تعذر تحميل بيانات المنشأة المحفوظة" : "Could not load the saved company profile");
+    } finally {
+      setProfileLoaded(true);
+    }
+  }, [lang, profileLoaded]);
+
+  useEffect(() => {
+    if (!profileLoaded) return;
+    try {
+      localStorage.setItem("vloop.merchant-profile", JSON.stringify(profile));
+    } catch (error) {
+      console.error("Failed to save the company profile", error);
+      toast.error(lang === "ar" ? "تعذر حفظ بيانات المنشأة" : "Could not save the company profile");
+    }
+  }, [lang, profile, profileLoaded]);
+
+  const updateProfile = (updates: Partial<MerchantProfile>) => {
+    setProfile((current) => ({ ...current, ...updates }));
+  };
+
+  return (
+    <LangCtx.Provider value={{ lang, setLang }}>
+      <MerchantProfileCtx.Provider value={{ profile, updateProfile }}>
+        {children}
+      </MerchantProfileCtx.Provider>
+    </LangCtx.Provider>
+  );
 }
 
 export function AppHeader() {
   const { lang, setLang } = useLang();
+  const { profile } = useMerchantProfile();
   const tr = (x: L) => x[lang];
   const [copied, setCopied] = useState(false);
   const [menu, setMenu] = useState(false);
@@ -81,9 +150,13 @@ export function AppHeader() {
                 onClick={() => setMenu((m) => !m)}
                 className="flex items-center gap-2 rounded-lg p-1 hover:bg-muted"
               >
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-gradient text-sm font-bold text-primary-foreground">
-                  FB
-                </span>
+                {profile.logoUrl ? (
+                  <img src={profile.logoUrl} alt="" className="h-9 w-9 rounded-full object-cover" />
+                ) : (
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-gradient text-sm font-bold text-primary-foreground">
+                    FB
+                  </span>
+                )}
                 <span className="hidden text-start leading-tight lg:block">
                   <span className="block text-sm font-bold">{tr(t.merchant.name)}</span>
                   <span className="num block text-xs text-muted-foreground">
