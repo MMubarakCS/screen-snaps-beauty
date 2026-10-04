@@ -12,7 +12,8 @@ import {
   Clock,
   ArrowUpRight,
   BadgeCheck,
-  AlertCircle
+  AlertCircle,
+  Send
 } from "lucide-react";
 import { useLang } from "@/components/vloop/Shell";
 import { fmtBHD } from "@/lib/vloop-data";
@@ -40,6 +41,20 @@ function CreatorPage() {
   
   // States for campaign
   const [campaignStatus, setCampaignStatus] = useState<"new" | "accepted" | "declined">("new");
+  
+  // Settings state
+  const [capacity, setCapacity] = useState("1");
+  const [daysOff, setDaysOff] = useState<string[]>(["Friday", "Saturday"]);
+  const allDays = [
+    { en: "Friday", ar: "الجمعة" },
+    { en: "Saturday", ar: "السبت" },
+    { en: "Sunday", ar: "الأحد" },
+    { en: "Monday", ar: "الإثنين" },
+    { en: "Tuesday", ar: "الثلاثاء" },
+    { en: "Wednesday", ar: "الأربعاء" },
+    { en: "Thursday", ar: "الخميس" }
+  ];
+  const toggleDay = (d: string) => setDaysOff(p => p.includes(d) ? p.filter(x => x !== d) : [...p, d]);
 
   const copyBioLink = () => {
     navigator.clipboard?.writeText("https://vloop.me/@yousif.bites");
@@ -65,7 +80,7 @@ function CreatorPage() {
         
         {/* 2. Top Summary & Bio-Link Hub */}
         <section className="rounded-2xl border bg-card p-6 shadow-soft md:p-8">
-          <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div className="flex-1 space-y-3">
               <h2 className="text-xl font-bold text-foreground">
                 {isAr ? "رابط الحجز الذكي الخاص بك" : "Your Smart Booking Link"}
@@ -88,12 +103,65 @@ function CreatorPage() {
                   : "Share it in your bio or with businesses; your fees are collected upfront and terms are automated."}
               </p>
             </div>
-            
-            <div className="w-full rounded-xl border bg-surface p-4 md:w-72">
+          </div>
+        </section>
+
+        {/* 2.5 Schedule & Availability Management Card */}
+        <section className="rounded-2xl border bg-card p-6 shadow-soft md:p-8">
+          <h2 className="mb-6 text-xl font-bold text-foreground">
+            {isAr ? "إدارة الجدول الزمني والمواعيد" : "Schedule & Availability Management"}
+          </h2>
+          <div className="grid gap-8 md:grid-cols-3">
+            <div>
               <label className="mb-2 block text-sm font-bold text-foreground">
-                {isAr ? "الحد الأدنى للميزانية (سري للتاجر)" : "Minimum Budget (Confidential)"}
+                {isAr ? "أقصى عدد تغطيات مسموح بها في اليوم الواحد" : "Daily Capacity Limit"}
               </label>
-              <div className="flex items-center rounded-lg border bg-background focus-within:border-primary focus-within:ring-2 focus-within:ring-ring/20">
+              <select
+                value={capacity}
+                onChange={(e) => setCapacity(e.target.value)}
+                className="w-full rounded-lg border bg-background p-2.5 text-sm outline-none focus:border-primary font-bold"
+              >
+                <option value="1">{isAr ? "1 تغطية يومياً" : "1 coverage per day"}</option>
+                <option value="2">{isAr ? "2 تغطيات يومياً" : "2 coverages per day"}</option>
+                <option value="3">{isAr ? "3 تغطيات يومياً" : "3 coverages per day"}</option>
+              </select>
+              <p className="mt-2 text-[11px] text-muted-foreground leading-relaxed">
+                {isAr
+                  ? "بمجرد قبولك لهذا العدد في تاريخ معين، سيتم إغلاق ذلك اليوم تلقائياً أمام المتاجر الأخرى لمنع تراكم الطلبات."
+                  : "Once this limit is reached for a specific date, that day is automatically blocked for future bookings."}
+              </p>
+            </div>
+            
+            <div>
+              <label className="mb-2 block text-sm font-bold text-foreground">
+                {isAr ? "إجازات أسبوعية ثابتة" : "Weekly Days Off"}
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {allDays.map((d) => (
+                  <button
+                    key={d.en}
+                    onClick={() => toggleDay(d.en)}
+                    className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-colors ${
+                      daysOff.includes(d.en) ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+                    }`}
+                  >
+                    {isAr ? d.ar : d.en}
+                    {daysOff.includes(d.en) && <Check className="h-3.5 w-3.5" />}
+                  </button>
+                ))}
+              </div>
+              <p className="mt-2 text-[11px] text-muted-foreground leading-relaxed">
+                {isAr
+                  ? "الأيام المحددة ستكون غير متاحة للحجوزات الجديدة."
+                  : "Selected days will be unavailable for new bookings."}
+              </p>
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-bold text-foreground">
+                {isAr ? "الحد الأدنى للميزانية (سري)" : "Minimum Budget Threshold (Confidential)"}
+              </label>
+              <div className="flex items-center rounded-lg border bg-background focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20">
                 <input
                   value={threshold}
                   onChange={(e) => setThreshold(e.target.value)}
@@ -299,44 +367,70 @@ function CreatorPage() {
               <div className="space-y-4">
                 {campaignStatus === "accepted" && (
                   <div className="rounded-2xl border bg-card p-6 shadow-soft">
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                      <div>
-                        <h3 className="text-lg font-bold">
-                          {isAr ? "شركة فليم برجر ذ.م.م" : "Flame Burger Co."}
-                        </h3>
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          Scheduled: <span className="font-semibold text-foreground">15 Oct 2026</span> • Payout: <span className="num font-bold text-foreground">150.000 BHD</span>
-                        </p>
-                        <span className="mt-2 inline-flex items-center rounded-full bg-warning-soft px-2.5 py-1 text-xs font-bold text-warning">
-                          {isAr ? "مجدولة" : "Scheduled"}
-                        </span>
+                    <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex gap-4">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-gradient text-white font-bold shrink-0">
+                          FB
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-bold">
+                            {isAr ? "شركة فليم برجر ذ.م.م (وجبات سريعة)" : "Flame Burger Co. (Fast Food)"}
+                          </h3>
+                          <div className="mt-2 flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-4 text-sm">
+                            <p className="text-muted-foreground">
+                              {isAr ? "الموعد المجدول:" : "Scheduled Date:"} <span className="font-semibold text-foreground">15 {isAr ? "أكتوبر" : "Oct"} 2026</span>
+                            </p>
+                            <span className="hidden sm:inline text-muted-foreground">•</span>
+                            <p className="text-muted-foreground">
+                              {isAr ? "صافي الأتعاب المضمونة:" : "Secured Payout:"} <span className="num font-bold text-foreground">150.000 {isAr ? "د.ب" : "BHD"}</span> <span className="text-xs text-muted-foreground">({isAr ? "محجوزة في الضمان" : "In Escrow"})</span>
+                            </p>
+                          </div>
+                          <span className="mt-3 inline-flex items-center rounded-full bg-warning-soft px-3 py-1 text-xs font-bold text-warning">
+                            <Clock className="mr-1.5 h-3.5 w-3.5" />
+                            {isAr ? "مجدولة" : "Scheduled"}
+                          </span>
+                        </div>
                       </div>
                       <button
                         onClick={() => setProofModal(true)}
-                        className="rounded-xl bg-foreground px-5 py-2.5 text-sm font-bold text-background transition hover:bg-foreground/90"
+                        className="rounded-xl bg-foreground px-6 py-3 text-sm font-bold text-background transition hover:bg-foreground/90 shrink-0"
                       >
-                        {isAr ? "🚀 رفع إثبات النشر" : "🚀 Submit Proof of Delivery"}
+                        {isAr ? "🚀 رفع إثبات النشر" : "🚀 Submit Proof"}
                       </button>
                     </div>
                   </div>
                 )}
 
                 <div className="rounded-2xl border bg-card p-6 shadow-soft">
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <h3 className="text-lg font-bold">Brew & Co. Cafe</h3>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        Scheduled: <span className="font-semibold text-foreground">Today, 10 Oct 2026</span> • Payout: <span className="num font-bold text-foreground">120.000 BHD</span>
-                      </p>
-                      <span className="mt-2 inline-flex items-center rounded-full bg-warning-soft px-2.5 py-1 text-xs font-bold text-warning">
-                        {isAr ? "مجدولة" : "Scheduled"}
-                      </span>
+                  <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex gap-4">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary font-bold shrink-0">
+                        BC
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold">
+                          {isAr ? "مقهى برو أند كو (قهوة مختصة)" : "Brew & Co. Cafe (Specialty Coffee)"}
+                        </h3>
+                        <div className="mt-2 flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-4 text-sm">
+                          <p className="text-muted-foreground">
+                            {isAr ? "الموعد المجدول:" : "Scheduled Date:"} <span className="font-semibold text-foreground">{isAr ? "اليوم، 10 أكتوبر 2026" : "Today, 10 Oct 2026"}</span>
+                          </p>
+                          <span className="hidden sm:inline text-muted-foreground">•</span>
+                          <p className="text-muted-foreground">
+                            {isAr ? "صافي الأتعاب المضمونة:" : "Secured Payout:"} <span className="num font-bold text-foreground">120.000 {isAr ? "د.ب" : "BHD"}</span> <span className="text-xs text-muted-foreground">({isAr ? "محجوزة في الضمان" : "In Escrow"})</span>
+                          </p>
+                        </div>
+                        <span className="mt-3 inline-flex items-center rounded-full bg-warning-soft px-3 py-1 text-xs font-bold text-warning">
+                          <Clock className="mr-1.5 h-3.5 w-3.5" />
+                          {isAr ? "مجدولة" : "Scheduled"}
+                        </span>
+                      </div>
                     </div>
                     <button
                       onClick={() => setProofModal(true)}
-                      className="rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground shadow-soft transition hover:bg-primary/90"
+                      className="rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-soft transition hover:bg-primary/90 shrink-0"
                     >
-                      {isAr ? "🚀 رفع إثبات النشر" : "🚀 Submit Proof of Delivery"}
+                      {isAr ? "🚀 رفع إثبات النشر" : "🚀 Submit Proof"}
                     </button>
                   </div>
                 </div>

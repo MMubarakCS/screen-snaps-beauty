@@ -3,6 +3,8 @@ import { Link, useLocation, useRouter } from "@tanstack/react-router";
 import { QrCode, ChevronDown, Check, LogOut, Settings, Building2, Lock, Menu, X, Store, Video, CircleHelp, UserCog, Link as LinkIcon } from "lucide-react";
 import { toast } from "sonner";
 import { CompanyProfileModal, AccountSettingsModal } from "@/components/vloop/AccountModals";
+import { CreatorProfileModal } from "@/components/vloop/CreatorProfileModal";
+import { CreatorSettingsModal } from "@/components/vloop/CreatorSettingsModal";
 import { HelpModal } from "@/components/vloop/HelpModal";
 import c2 from "@/assets/creator-2.jpg";
 import { type Lang, type L, fmtBHD, t, categories } from "@/lib/vloop-data";
@@ -100,7 +102,7 @@ export function AppHeader() {
   const [mobileMenu, setMobileMenu] = useState(false);
   const [logoutDialog, setLogoutDialog] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
-  const [modal, setModal] = useState<"company" | "settings" | AuthModal | "auth-login" | null>(null);
+  const [modal, setModal] = useState<"company" | "settings" | AuthModal | "auth-login" | "creator-profile" | "creator-settings" | null>(null);
   const handleNavClick = (e: MouseEvent<HTMLAnchorElement>, targetId: string) => {
     e.preventDefault();
     const target = document.getElementById(targetId);
@@ -164,20 +166,7 @@ export function AppHeader() {
             </nav>
           ) : (
             <nav className="hidden items-center gap-1 text-sm font-medium lg:flex">
-              {location.pathname.startsWith("/creator") ? (
-                <>
-                  <Link to="/creator" activeOptions={{ exact: true }} className="rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
-                    {lang === "ar" ? "لوحة التحكم" : "Dashboard"}
-                  </Link>
-                  <Link to="/creator" className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
-                    {lang === "ar" ? "إدارة الطلبات" : "Campaign Requests"}
-                    <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">1</span>
-                  </Link>
-                  <Link to="/creator" className="rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
-                    {lang === "ar" ? "المحفظة والسحب" : "Wallet & Payouts"}
-                  </Link>
-                </>
-              ) : (
+              {location.pathname.startsWith("/creator") ? null : (
                 <>
                   <Link to="/merchant" activeOptions={{ exact: true }} className="rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
                     {tr(t.nav.discover)}
@@ -251,14 +240,14 @@ export function AppHeader() {
                     <ChevronDown className="h-4 w-4 text-muted-foreground" />
                   </button>
                   {menu && (
-                    <div className="absolute end-0 top-12 w-52 rounded-xl border bg-popover p-1.5 shadow-lift animate-in fade-in zoom-in-95">
-                      <button className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium hover:bg-muted">
+                    <div className="absolute end-0 top-12 w-64 rounded-xl border bg-popover p-1.5 shadow-lift animate-in fade-in zoom-in-95">
+                      <button onClick={() => { setMenu(false); setModal("creator-profile"); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium hover:bg-muted">
                         <UserCog className="h-4 w-4 text-muted-foreground" />
-                        {lang === "ar" ? "الملف الشخصي" : "Profile"}
+                        {lang === "ar" ? "الملف الشخصي والميديا كيت" : "Media Kit Profile"}
                       </button>
-                      <button className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium hover:bg-muted">
+                      <button onClick={() => { setMenu(false); setModal("creator-settings"); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium hover:bg-muted">
                         <Settings className="h-4 w-4 text-muted-foreground" />
-                        {lang === "ar" ? "إعدادات الحساب" : "Settings"}
+                        {lang === "ar" ? "إعدادات الحساب والآيبان" : "Account & Payout Settings"}
                       </button>
                       <div className="my-1 border-t border-border"></div>
                       <button
@@ -494,6 +483,8 @@ export function AppHeader() {
       )}
       {modal === "company" && <CompanyProfileModal onClose={() => setModal(null)} />}
       {modal === "settings" && <AccountSettingsModal onClose={() => setModal(null)} />}
+      {modal === "creator-profile" && <CreatorProfileModal onClose={() => setModal(null)} lang={lang} />}
+      {modal === "creator-settings" && <CreatorSettingsModal onClose={() => setModal(null)} lang={lang} />}
       {(modal === "auth-start" || modal === "auth-merchant" || modal === "auth-creator") && (
         <AuthStartModal
           onClose={() => setModal(null)}
