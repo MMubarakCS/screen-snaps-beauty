@@ -1,6 +1,6 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { Link } from "@tanstack/react-router";
-import { QrCode, ChevronDown, Check, LogOut, Settings, Building2, Lock, Menu, X } from "lucide-react";
+import { createContext, useContext, useEffect, useState, type MouseEvent, type ReactNode } from "react";
+import { Link, useLocation, useRouter } from "@tanstack/react-router";
+import { QrCode, ChevronDown, Check, LogOut, Settings, Building2, Lock, Menu, X, Store, Video } from "lucide-react";
 import { toast } from "sonner";
 import { CompanyProfileModal, AccountSettingsModal } from "@/components/vloop/AccountModals";
 import { categories, type Lang, type L, fmtBHD, t } from "@/lib/vloop-data";
@@ -9,6 +9,7 @@ const LangCtx = createContext<{ lang: Lang; setLang: (l: Lang) => void }>({ lang
 export const useLang = () => useContext(LangCtx);
 
 type MerchantProfile = { categoryId: string; logoUrl: string | null };
+type AuthModal = "auth-start" | "auth-merchant" | "auth-creator";
 const defaultMerchantProfile: MerchantProfile = { categoryId: "food-casual-dining", logoUrl: null };
 const MerchantProfileCtx = createContext<{
   profile: MerchantProfile;
@@ -88,12 +89,40 @@ export function LangProvider({ children }: { children: ReactNode }) {
 export function AppHeader() {
   const { lang, setLang } = useLang();
   const { profile } = useMerchantProfile();
+  const location = useLocation();
+  const router = useRouter();
+  const isPublic = location.pathname === "/";
   const tr = (x: L) => x[lang];
   const [copied, setCopied] = useState(false);
   const [menu, setMenu] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
   const [logoutDialog, setLogoutDialog] = useState(false);
-  const [modal, setModal] = useState<"company" | "settings" | null>(null);
+  const [modal, setModal] = useState<"company" | "settings" | AuthModal | "auth-login" | null>(null);
+  const handleNavClick = (e: MouseEvent<HTMLAnchorElement>, targetId: string) => {
+    e.preventDefault();
+    const target = document.getElementById(targetId);
+    if (target) {
+      const headerOffset = 90;
+      const elementPosition = target.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth",
+      });
+    }
+  };
+  useEffect(() => {
+    const handleOpenModal = (e: Event) => {
+      const type: unknown = (e as CustomEvent<unknown>).detail;
+      if (type === "auth-start" || type === "auth-merchant" || type === "auth-creator") {
+        setModal(type);
+      }
+    };
+    window.addEventListener("open-auth-modal", handleOpenModal);
+    return () => window.removeEventListener("open-auth-modal", handleOpenModal);
+  }, []);
+
   const copyKiosk = () => {
     navigator.clipboard?.writeText("https://vloop.bh/kiosk/flame-burger-104829");
     setCopied(true);
@@ -110,30 +139,33 @@ export function AppHeader() {
               Vloop <span className="font-light text-muted-foreground">|</span> ڤلوب
             </span>
           </Link>
-          <nav className="hidden items-center gap-1 text-sm font-medium lg:flex">
-            <Link to="/" activeOptions={{ exact: true }} className="rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
-              {tr(t.nav.discover)}
-            </Link>
-            <Link to="/campaigns" className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
-              {tr(t.nav.campaigns)}
-              <span className="h-1.5 w-1.5 rounded-full bg-warning" title="Pending review"></span>
-            </Link>
-            <Link to="/invoices" className="rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
-              {tr(t.nav.invoices)}
-            </Link>
-          </nav>
+          {isPublic ? (
+            <nav className="hidden items-center gap-1 text-sm font-medium lg:flex">
+              <a href="#how-it-works" onClick={(e) => handleNavClick(e, "how-it-works")} className="rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">
+                {lang === "ar" ? "كيف تعمل المنصة" : "How it Works"}
+              </a>
+              <a href="#creators-showcase" onClick={(e) => handleNavClick(e, "creators-showcase")} className="rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">
+                {lang === "ar" ? "صنّاع المحتوى" : "Creators"}
+              </a>
+              <a href="#voucher-claim" onClick={(e) => handleNavClick(e, "voucher-claim")} className="rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">
+                {lang === "ar" ? "استرداد قسيمة خصم" : "Claim Voucher"}
+              </a>
+            </nav>
+          ) : (
+            <nav className="hidden items-center gap-1 text-sm font-medium lg:flex">
+              <Link to="/merchant" activeOptions={{ exact: true }} className="rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
+                {tr(t.nav.discover)}
+              </Link>
+              <Link to="/campaigns" className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
+                {tr(t.nav.campaigns)}
+                <span className="h-1.5 w-1.5 rounded-full bg-warning" title="Pending review"></span>
+              </Link>
+              <Link to="/invoices" className="rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
+                {tr(t.nav.invoices)}
+              </Link>
+            </nav>
+          )}
           <div className="ms-auto flex items-center gap-3">
-            <div className="hidden md:flex items-center gap-2 rounded-full border border-success/30 bg-success-soft px-3 py-1.5 text-sm font-semibold text-success">
-              <Lock className="h-4 w-4" />
-              {lang === "ar" ? "في الضمان:" : "Escrow:"} <span className="num font-bold">{fmtBHD(350, lang)}</span>
-            </div>
-            <button
-              onClick={copyKiosk}
-              className="hidden items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition hover:border-primary hover:text-primary md:inline-flex"
-            >
-              {copied ? <Check className="h-4 w-4 text-success" /> : <QrCode className="h-4 w-4" />}
-              {tr(copied ? t.nav.copied : t.nav.kiosk)}
-            </button>
             <div className="hidden lg:flex rounded-lg border p-0.5 text-xs font-bold">
               {(["ar", "en"] as const).map((l) => (
                 <button
@@ -145,6 +177,28 @@ export function AppHeader() {
                 </button>
               ))}
             </div>
+            {isPublic ? (
+              <>
+                <button onClick={() => setModal("auth-login")} className="hidden lg:flex rounded-lg px-4 py-2 text-sm font-bold transition hover:bg-muted">
+                  {lang === "ar" ? "تسجيل الدخول" : "Log In"}
+                </button>
+                <button onClick={() => setModal("auth-start")} className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-soft transition hover:bg-primary/90">
+                  {lang === "ar" ? "ابدأ الآن" : "Get Started"}
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="hidden md:flex items-center gap-2 rounded-full border border-success/30 bg-success-soft px-3 py-1.5 text-sm font-semibold text-success">
+                  <Lock className="h-4 w-4" />
+                  {lang === "ar" ? "في الضمان:" : "Escrow:"} <span className="num font-bold">{fmtBHD(350, lang)}</span>
+                </div>
+                <button
+                  onClick={copyKiosk}
+                  className="hidden items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition hover:border-primary hover:text-primary md:inline-flex"
+                >
+                  {copied ? <Check className="h-4 w-4 text-success" /> : <QrCode className="h-4 w-4" />}
+                  {tr(copied ? t.nav.copied : t.nav.kiosk)}
+                </button>
             <div className="relative">
               <button
                 onClick={() => setMenu((m) => !m)}
@@ -198,6 +252,8 @@ export function AppHeader() {
                 </div>
               )}
             </div>
+            </>
+            )}
             <button
               onClick={() => setMobileMenu(true)}
               className="lg:hidden p-1.5 -me-1 rounded-lg hover:bg-muted text-foreground"
@@ -225,43 +281,85 @@ export function AppHeader() {
               </button>
             </div>
 
-            <nav className="flex flex-col gap-1">
-              <Link to="/" onClick={() => setMobileMenu(false)} className="px-4 py-3 text-lg font-semibold rounded-xl hover:bg-muted" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
-                {tr(t.nav.discover)}
-              </Link>
-              <Link to="/campaigns" onClick={() => setMobileMenu(false)} className="flex items-center justify-between px-4 py-3 text-lg font-semibold rounded-xl hover:bg-muted" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
-                {tr(t.nav.campaigns)}
-                <span className="h-2 w-2 rounded-full bg-warning"></span>
-              </Link>
-              <Link to="/invoices" onClick={() => setMobileMenu(false)} className="px-4 py-3 text-lg font-semibold rounded-xl hover:bg-muted" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
-                {tr(t.nav.invoices)}
-              </Link>
-            </nav>
+            {isPublic ? (
+              <nav className="flex flex-col gap-1">
+                <a href="#how-it-works" onClick={(e) => { handleNavClick(e, "how-it-works"); setMobileMenu(false); }} className="px-4 py-3 text-lg font-semibold rounded-xl hover:bg-muted">
+                  {lang === "ar" ? "كيف تعمل المنصة" : "How it Works"}
+                </a>
+                <a href="#creators-showcase" onClick={(e) => { handleNavClick(e, "creators-showcase"); setMobileMenu(false); }} className="px-4 py-3 text-lg font-semibold rounded-xl hover:bg-muted">
+                  {lang === "ar" ? "صنّاع المحتوى" : "Creators"}
+                </a>
+                <a href="#voucher-claim" onClick={(e) => { handleNavClick(e, "voucher-claim"); setMobileMenu(false); }} className="px-4 py-3 text-lg font-semibold rounded-xl hover:bg-muted">
+                  {lang === "ar" ? "استرداد قسيمة خصم" : "Claim Voucher"}
+                </a>
+              </nav>
+            ) : (
+              <nav className="flex flex-col gap-1">
+                <Link to="/" onClick={() => setMobileMenu(false)} className="px-4 py-3 text-lg font-semibold rounded-xl hover:bg-muted" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
+                  {tr(t.nav.discover)}
+                </Link>
+                <Link to="/campaigns" onClick={() => setMobileMenu(false)} className="flex items-center justify-between px-4 py-3 text-lg font-semibold rounded-xl hover:bg-muted" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
+                  {tr(t.nav.campaigns)}
+                  <span className="h-2 w-2 rounded-full bg-warning"></span>
+                </Link>
+                <Link to="/invoices" onClick={() => setMobileMenu(false)} className="px-4 py-3 text-lg font-semibold rounded-xl hover:bg-muted" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
+                  {tr(t.nav.invoices)}
+                </Link>
+              </nav>
+            )}
 
-            <div className="mt-auto flex flex-col gap-4 pt-6 border-t">
-              <div className="flex items-center gap-2 rounded-xl border border-success/30 bg-success-soft px-4 py-3 text-base font-semibold text-success">
-                <Lock className="h-5 w-5" />
-                {lang === "ar" ? "في الضمان:" : "Escrow:"} <span className="num font-bold">{fmtBHD(350, lang)}</span>
+            {isPublic ? (
+              <div className="mt-auto flex flex-col gap-4 pt-6 border-t">
+                <button
+                  onClick={() => { setMobileMenu(false); setModal("auth-start"); }}
+                  className="flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-base font-bold text-primary-foreground shadow-soft transition hover:bg-primary/90"
+                >
+                  {lang === "ar" ? "ابدأ الآن" : "Get Started"}
+                </button>
+                <button
+                  onClick={() => { setMobileMenu(false); setModal("auth-login"); }}
+                  className="flex items-center justify-center gap-2 rounded-xl bg-muted px-4 py-3 text-base font-bold text-foreground shadow-soft transition hover:bg-muted/80"
+                >
+                  {lang === "ar" ? "تسجيل الدخول" : "Log In"}
+                </button>
+                <div className="flex rounded-xl border p-1 text-sm font-bold bg-muted/50">
+                  {(["ar", "en"] as const).map((l) => (
+                    <button
+                      key={l}
+                      onClick={() => { setLang(l); setMobileMenu(false); }}
+                      className={`flex-1 rounded-lg py-2.5 transition ${lang === l ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+                    >
+                      {l.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <button
-                onClick={() => { copyKiosk(); setMobileMenu(false); }}
-                className="flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-base font-bold text-primary-foreground shadow-soft transition hover:bg-primary/90"
-              >
-                {copied ? <Check className="h-5 w-5" /> : <QrCode className="h-5 w-5" />}
-                {tr(copied ? t.nav.copied : t.nav.kiosk)}
-              </button>
-              <div className="flex rounded-xl border p-1 text-sm font-bold bg-muted/50">
-                {(["ar", "en"] as const).map((l) => (
-                  <button
-                    key={l}
-                    onClick={() => { setLang(l); setMobileMenu(false); }}
-                    className={`flex-1 rounded-lg py-2.5 transition ${lang === l ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
-                  >
-                    {l.toUpperCase()}
-                  </button>
-                ))}
+            ) : (
+              <div className="mt-auto flex flex-col gap-4 pt-6 border-t">
+                <div className="flex items-center gap-2 rounded-xl border border-success/30 bg-success-soft px-4 py-3 text-base font-semibold text-success">
+                  <Lock className="h-5 w-5" />
+                  {lang === "ar" ? "في الضمان:" : "Escrow:"} <span className="num font-bold">{fmtBHD(350, lang)}</span>
+                </div>
+                <button
+                  onClick={() => { copyKiosk(); setMobileMenu(false); }}
+                  className="flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-base font-bold text-primary-foreground shadow-soft transition hover:bg-primary/90"
+                >
+                  {copied ? <Check className="h-5 w-5" /> : <QrCode className="h-5 w-5" />}
+                  {tr(copied ? t.nav.copied : t.nav.kiosk)}
+                </button>
+                <div className="flex rounded-xl border p-1 text-sm font-bold bg-muted/50">
+                  {(["ar", "en"] as const).map((l) => (
+                    <button
+                      key={l}
+                      onClick={() => { setLang(l); setMobileMenu(false); }}
+                      className={`flex-1 rounded-lg py-2.5 transition ${lang === l ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+                    >
+                      {l.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       )}
@@ -286,7 +384,7 @@ export function AppHeader() {
                 {lang === "ar" ? "إلغاء" : "Cancel"}
               </button>
               <button
-                onClick={() => { setLogoutDialog(false); toast(lang === "ar" ? "تم تسجيل الخروج. إلى اللقاء 👋" : "You've been logged out. Goodbye 👋"); }}
+                onClick={() => { setLogoutDialog(false); toast(lang === "ar" ? "تم تسجيل الخروج. إلى اللقاء 👋" : "You've been logged out. Goodbye 👋"); router.navigate({ to: '/' }); }}
                 className="rounded-lg bg-destructive px-4 py-2 text-sm font-bold text-destructive-foreground hover:bg-destructive/90"
               >
                 {lang === "ar" ? "تأكيد الخروج" : "Log out"}
@@ -297,7 +395,161 @@ export function AppHeader() {
       )}
       {modal === "company" && <CompanyProfileModal onClose={() => setModal(null)} />}
       {modal === "settings" && <AccountSettingsModal onClose={() => setModal(null)} />}
+      {(modal === "auth-start" || modal === "auth-merchant" || modal === "auth-creator") && (
+        <AuthStartModal
+          onClose={() => setModal(null)}
+          onChooseOther={() => setModal("auth-start")}
+          lang={lang}
+          role={modal === "auth-merchant" ? "merchant" : modal === "auth-creator" ? "creator" : null}
+        />
+      )}
+      {modal === "auth-login" && <AuthLoginModal onClose={() => setModal(null)} lang={lang} />}
     </>
+  );
+}
+
+function AuthStartModal({
+  onClose,
+  onChooseOther,
+  lang,
+  role,
+}: {
+  onClose: () => void;
+  onChooseOther: () => void;
+  lang: Lang;
+  role: "merchant" | "creator" | null;
+}) {
+  const isAr = lang === "ar";
+  const router = useRouter();
+  if (role) {
+    const isMerchant = role === "merchant";
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm animate-in fade-in" onClick={onClose}>
+        <div className="w-full max-w-md rounded-3xl border bg-card p-8 shadow-2xl animate-in zoom-in-95" onClick={(e) => e.stopPropagation()}>
+          <div className="mb-6 flex items-center justify-between">
+            <h2 className="text-2xl font-bold">
+              {isMerchant
+                ? isAr ? "ابدأ كمتجر" : "Get Started as a Merchant"
+                : isAr ? "انضم كصانع محتوى" : "Join as a Creator"}
+            </h2>
+            <button onClick={onClose} className="rounded-full p-2 text-muted-foreground hover:bg-muted">
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          <p className="mb-6 text-sm leading-relaxed text-muted-foreground">
+            {isMerchant
+              ? isAr ? "اكتشف صنّاع المحتوى وأطلق حملتك التسويقية بضمان مالي." : "Discover creators and launch your campaign with secure escrow."
+              : isAr ? "استقبل طلبات الحملات وابدأ بتحقيق الدخل من محتواك." : "Receive campaign bookings and start earning from your content."}
+          </p>
+          {isMerchant ? (
+            <Link to="/merchant" onClick={onClose} className="flex items-center justify-between rounded-xl border p-4 transition hover:border-primary hover:bg-primary/5">
+              <div className="flex items-center gap-4">
+                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <Building2 className="h-6 w-6" />
+                </span>
+                <span className="font-bold">{isAr ? "متابعة كمتجر" : "Continue as a Merchant"}</span>
+              </div>
+              <span className="rounded-lg bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground">{isAr ? "ابدأ" : "Continue"}</span>
+            </Link>
+          ) : (
+            <Link to="/" onClick={onClose} className="flex items-center justify-between rounded-xl border p-4 transition hover:border-primary hover:bg-primary/5">
+              <div className="flex items-center gap-4">
+                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-sky/10 text-sky">
+                  <QrCode className="h-6 w-6" />
+                </span>
+                <span className="font-bold">{isAr ? "متابعة كصانع محتوى" : "Continue as a Creator"}</span>
+              </div>
+              <span className="rounded-lg bg-foreground px-3 py-1.5 text-xs font-bold text-background">{isAr ? "ابدأ" : "Continue"}</span>
+            </Link>
+          )}
+          <button onClick={onChooseOther} className="mt-5 w-full text-sm font-semibold text-muted-foreground transition hover:text-foreground">
+            {isAr ? "اختيار نوع حساب آخر" : "Choose another account type"}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm animate-in fade-in" onClick={onClose}>
+      <div className="w-full max-w-md rounded-3xl border bg-card p-8 shadow-2xl animate-in zoom-in-95" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold">{isAr ? "اختر نوع حسابك" : "Choose Account Type"}</h2>
+          <button onClick={onClose} className="p-2 rounded-full hover:bg-muted text-muted-foreground">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <div className="mt-4 space-y-3">
+          <button
+            onClick={() => {
+              onClose();
+              void router.navigate({ to: "/merchant" });
+            }}
+            className="group flex w-full items-center justify-between rounded-xl border border-border bg-card p-4 text-start transition hover:border-primary hover:bg-accent/40"
+          >
+            <div className="flex min-w-0 items-center gap-3.5">
+              <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <Store className="size-5" />
+              </div>
+              <div className="min-w-0">
+                <h4 className="text-sm font-bold text-foreground">{isAr ? "أنا صاحب منشأة / متجر" : "I am a Merchant / Brand"}</h4>
+                <p className="mt-0.5 text-xs text-muted-foreground">{isAr ? "حجز المؤثرين وإطلاق الحملات بضمان مالي" : "Book creators and launch escrow-secured campaigns"}</p>
+              </div>
+            </div>
+            <span className="shrink-0 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground group-hover:bg-primary/90">
+              {isAr ? "دخول كمتجر" : "Merchant Login"}
+            </span>
+          </button>
+          <button
+            onClick={() => {
+              onClose();
+              void router.navigate({ to: "/" });
+            }}
+            className="group flex w-full items-center justify-between rounded-xl border border-border bg-card p-4 text-start transition hover:border-foreground/30 hover:bg-muted/50"
+          >
+            <div className="flex min-w-0 items-center gap-3.5">
+              <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-muted text-foreground">
+                <Video className="size-5" />
+              </div>
+              <div className="min-w-0">
+                <h4 className="text-sm font-bold text-foreground">{isAr ? "أنا صانع محتوى / مؤثر" : "I am a Creator / Influencer"}</h4>
+                <p className="mt-0.5 text-xs text-muted-foreground">{isAr ? "استقبال الطلبات وتحقيق دخل مضمون مسبقاً" : "Receive bookings and earn guaranteed income"}</p>
+              </div>
+            </div>
+            <span className="shrink-0 whitespace-nowrap rounded-lg bg-foreground px-3 py-1.5 text-xs font-semibold text-background">
+              {isAr ? "دخول كصانع محتوى" : "Creator Login"}
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AuthLoginModal({ onClose, lang }: { onClose: () => void; lang: Lang }) {
+  const isAr = lang === "ar";
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm animate-in fade-in" onClick={onClose}>
+      <div className="w-full max-w-sm rounded-3xl border bg-card p-8 shadow-2xl animate-in zoom-in-95 text-center" onClick={(e) => e.stopPropagation()}>
+        <div className="mb-6 mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand-gradient text-white">
+          <Lock className="h-8 w-8" />
+        </div>
+        <h2 className="text-xl font-bold mb-2">{isAr ? "تسجيل الدخول لـ ڤلوب" : "Log in to Vloop"}</h2>
+        <p className="text-sm text-muted-foreground mb-6">
+          {isAr ? "أدخل رقم هاتفك أو بريدك الإلكتروني للمتابعة" : "Enter your phone number or email to continue"}
+        </p>
+        <div className="space-y-3">
+          <input type="text" placeholder={isAr ? "رقم الهاتف أو البريد" : "Phone or Email"} className="w-full rounded-xl border bg-background px-4 py-3 text-sm outline-none focus:border-primary" />
+          <input type="password" placeholder={isAr ? "كلمة المرور" : "Password"} className="w-full rounded-xl border bg-background px-4 py-3 text-sm outline-none focus:border-primary" />
+          <Link to="/merchant" onClick={onClose} className="block w-full rounded-xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground shadow-soft transition hover:bg-primary/90">
+            {isAr ? "دخول" : "Sign In"}
+          </Link>
+        </div>
+        <button onClick={onClose} className="mt-4 text-xs font-semibold text-muted-foreground hover:text-foreground">
+          {isAr ? "إلغاء" : "Cancel"}
+        </button>
+      </div>
+    </div>
   );
 }
 

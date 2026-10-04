@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CampaignsRouteImport } from './routes/campaigns'
 import { Route as InvoicesRouteImport } from './routes/invoices'
+import { Route as MerchantRouteImport } from './routes/merchant'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,35 +29,44 @@ const InvoicesRoute = InvoicesRouteImport.update({
   path: '/invoices',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MerchantRoute = MerchantRouteImport.update({
+  id: '/merchant',
+  path: '/merchant',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/campaigns': typeof CampaignsRoute
   '/invoices': typeof InvoicesRoute
+  '/merchant': typeof MerchantRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/campaigns': typeof CampaignsRoute
   '/invoices': typeof InvoicesRoute
+  '/merchant': typeof MerchantRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/campaigns': typeof CampaignsRoute
   '/invoices': typeof InvoicesRoute
+  '/merchant': typeof MerchantRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/campaigns' | '/invoices'
+  fullPaths: '/' | '/campaigns' | '/invoices' | '/merchant'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/campaigns' | '/invoices'
-  id: '__root__' | '/' | '/campaigns' | '/invoices'
+  to: '/' | '/campaigns' | '/invoices' | '/merchant'
+  id: '__root__' | '/' | '/campaigns' | '/invoices' | '/merchant'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CampaignsRoute: typeof CampaignsRoute
   InvoicesRoute: typeof InvoicesRoute
+  MerchantRoute: typeof MerchantRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,6 +92,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InvoicesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/merchant': {
+      id: '/merchant'
+      path: '/merchant'
+      fullPath: '/merchant'
+      preLoaderRoute: typeof MerchantRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +106,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CampaignsRoute: CampaignsRoute,
   InvoicesRoute: InvoicesRoute,
+  MerchantRoute: MerchantRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

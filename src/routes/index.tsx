@@ -1,376 +1,356 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import {
-  BadgeCheck,
-  QrCode,
-  ChevronDown,
-  Megaphone,
-  Footprints,
-  Timer,
-  TrendingUp,
-  Search,
-  Users,
-  Eye,
-  ShieldCheck,
-  Check,
-  Wallet,
-  LogOut,
-  Settings,
-  UserCog,
-  Loader2,
-  Sparkles,
-  Building2,
-  Lock,
-} from "lucide-react";
+import { useState } from "react";
+import { QrCode, ShieldCheck, Check, Megaphone, Smartphone, Star, Store, Wallet, Timer, TrendingUp, Users, Copy, X, BadgeCheck, Eye } from "lucide-react";
 import { useLang } from "@/components/vloop/Shell";
-import { BookingModal } from "@/components/vloop/BookingModal";
-import { type Lang, type L, type Creator, creators, categories, fmtBHD, t } from "@/lib/vloop-data";
+import { Link } from "@tanstack/react-router";
+import { creators, t, type L } from "@/lib/vloop-data";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Vloop | ڤلوب — Merchant Discovery & Campaign Dashboard" },
-      {
-        name: "description",
-        content:
-          "Discover creators within your budget and book influencer campaigns secured by Vloop escrow in Bahrain.",
-      },
-      { property: "og:title", content: "Vloop | ڤلوب — Merchant Dashboard" },
-      {
-        property: "og:description",
-        content:
-          "Influencer marketing with financial escrow for local businesses in Bahrain & the GCC.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
-  component: Index,
+  component: PublicLanding,
 });
 
-function Index() {
+function PublicLanding() {
   const { lang } = useLang();
-  const tr = (x: L) => x[lang];
-  const [budget, setBudget] = useState("150.000");
-  const [cat, setCat] = useState("food-casual-dining");
-  const [date, setDate] = useState("");
-  const [applied, setApplied] = useState({ budget: 150, cat: "food-casual-dining" });
-  const [searching, setSearching] = useState(false);
-  const [booking, setBooking] = useState<Creator | null>(null);
-  const [kit, setKit] = useState<string | null>(null);
-  const results = useMemo(
-    () =>
-      creators.filter(
-        (c) =>
-          c.minRate <= applied.budget &&
-          (applied.cat === "all" || c.categories.includes(applied.cat)),
-      ),
-    [applied],
-  );
+  const [claimCode, setClaimCode] = useState("");
+  const [phone, setPhone] = useState("");
+  const [showQRModal, setShowQRModal] = useState(false);
+  const [copied, setCopied] = useState(false);
 
-  const runSearch = () => {
-    setSearching(true);
-    setTimeout(() => {
-      setApplied({ budget: parseFloat(budget) || 0, cat });
-      setSearching(false);
-    }, 600);
+  const isAr = lang === "ar";
+
+  const handleClaim = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (claimCode && phone) {
+      setShowQRModal(true);
+    }
   };
 
-  const metrics = [
-    {
-      icon: Megaphone,
-      label: t.m1.label,
-      value: "3",
-      sub: `${tr(t.m1.sub)} ${fmtBHD(450, lang)}`,
-      tone: "text-primary bg-accent",
-    },
-    {
-      icon: Footprints,
-      label: t.m2.label,
-      value: `1,280`,
-      unit: tr(t.m2.unit),
-      sub: tr(t.m2.sub),
-      tone: "text-sky bg-accent",
-    },
-    {
-      icon: Timer,
-      label: t.m3.label,
-      value: "1",
-      unit: tr(t.m3.unit),
-      badge: tr(t.m3.badge),
-      tone: "text-warning bg-warning-soft",
-    },
-    {
-      icon: TrendingUp,
-      label: t.m4.label,
-      value: "3.8x",
-      sub: tr(t.m4.sub),
-      tone: "text-success bg-success-soft",
-      money: true,
-    },
-  ];
+  const copyToken = () => {
+    navigator.clipboard.writeText("VLP-98412");
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <div className="min-h-screen bg-background">
-      <main className="mx-auto w-[92%] max-w-[1680px] space-y-8 px-4 py-8 lg:px-8 2xl:space-y-12 2xl:py-12">
-        <div>
-          <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl 2xl:text-5xl">
-            {tr(t.greet.title)}
+      {/* HERO SECTION */}
+      <section className="relative overflow-hidden pt-12 pb-24 lg:pt-24 lg:pb-32">
+        <div className="absolute inset-0 bg-brand-gradient opacity-[0.03] -z-10" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2 -z-10" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-sky/10 blur-[120px] rounded-full translate-y-1/2 -translate-x-1/2 -z-10" />
+        
+        <div className="mx-auto w-[92%] max-w-[1200px] text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border bg-card/50 backdrop-blur-sm px-4 py-1.5 text-sm font-semibold text-primary mb-6 shadow-sm">
+            <ShieldCheck className="h-4 w-4" />
+            {isAr ? "منصة الوساطة والضمان المالي المعتمدة في البحرين" : "Certified Escrow Platform in Bahrain"}
+          </div>
+          
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground leading-[1.15] text-center max-w-4xl mx-auto mb-6">
+            {isAr ? "تسويق المؤثرين الميداني..." : "Field Influencer Marketing..."}
+            <span className="block text-primary mt-1">
+              {isAr ? "في حلقة مضمونة" : "In a Guaranteed Loop"}
+            </span>
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground 2xl:mt-3 2xl:text-lg">
-            {tr(t.greet.sub)}
+          
+          <p className="mx-auto max-w-3xl text-lg sm:text-xl text-muted-foreground leading-relaxed mb-10">
+            {isAr
+              ? "المنصة السحابية الأولى لحملات المؤثرين بنظام الأمانات المالية (Escrow) وتتبع مبيعات الفروع الميدانية عبر قسائم QR الذكية."
+              : "The premier cloud platform for influencer campaigns with financial escrow and field branch sales tracking via smart QR vouchers."}
+          </p>
+          
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: "auth-merchant" }))}
+              className="w-full sm:w-auto rounded-xl bg-primary px-8 py-4 text-base font-bold text-primary-foreground shadow-lift transition hover:bg-primary/90 hover:-translate-y-1"
+            >
+              {isAr ? "ابدأ حملتك كمتجر" : "Start Your Campaign as a Merchant"}
+            </button>
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: "auth-creator" }))}
+              className="w-full sm:w-auto rounded-xl border border-primary px-8 py-4 text-base font-bold text-primary transition hover:bg-primary/5 hover:-translate-y-1"
+            >
+              {isAr ? "انضم كصانع محتوى" : "Join as a Creator"}
+            </button>
+          </div>
+
+          {/* VOUCHER CLAIM WIDGET */}
+          <div id="voucher-claim" className="mx-auto max-w-4xl relative scroll-mt-24">
+            <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-primary/30 to-sky/30 blur-xl opacity-50" />
+            <div className="relative rounded-3xl border bg-card/90 backdrop-blur-xl p-6 sm:p-8 shadow-2xl">
+              <div className="flex items-center justify-center gap-3 mb-6">
+                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-gradient text-white shadow-inner">
+                  <QrCode className="h-6 w-6" />
+                </span>
+                <h2 className="text-xl sm:text-2xl font-bold text-start leading-tight">
+                  {isAr ? "معك كود خصم من إعلان مؤثر؟ استلم باركود العرض فوراً 🎟️" : "Have a discount code? Claim your offer barcode instantly 🎟️"}
+                </h2>
+              </div>
+              
+              <form onSubmit={handleClaim} className="flex flex-col md:flex-row gap-3">
+                <input
+                  type="text"
+                  placeholder={isAr ? "كود الحملة أو رمز المشهور (مثال: FLAME20)" : "Campaign Code (e.g. FLAME20)"}
+                  value={claimCode}
+                  onChange={(e) => setClaimCode(e.target.value)}
+                  className="flex-1 rounded-xl border bg-background/50 px-4 py-3.5 text-base font-semibold outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                  required
+                />
+                <input
+                  type="tel"
+                  placeholder={isAr ? "رقم هاتفك النقال (39xxxxxx)" : "Mobile Number (39xxxxxx)"}
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="flex-1 rounded-xl border bg-background/50 px-4 py-3.5 text-base font-semibold outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all num"
+                  required
+                />
+                <button
+                  type="submit"
+                  className="rounded-xl bg-foreground px-6 py-3.5 text-base font-bold text-background shadow-soft transition hover:bg-foreground/90 whitespace-nowrap shrink-0"
+                >
+                  {isAr ? "استلام الـ QR Code فوراً ✨" : "Claim QR Code ✨"}
+                </button>
+              </form>
+              <p className="mt-4 flex items-center justify-center gap-1.5 text-sm font-medium text-muted-foreground">
+                <ShieldCheck className="h-4 w-4 text-success" />
+                {isAr ? "محمي بنظام التحقق السريع — بدون الحاجة لإنشاء حساب أو انتظار كود OTP." : "Secured by rapid verification — no account creation or OTP needed."}
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* TRUST PILLARS STRIP */}
+      <section className="border-y bg-surface py-8">
+        <div className="mx-auto flex w-[92%] max-w-[1680px] flex-wrap items-start justify-center gap-6 lg:gap-12">
+          {[
+            {
+              icon: ShieldCheck,
+              t: isAr ? "ضمان مالي كامل" : "Full Financial Escrow",
+              d: isAr ? "حجز الدفعة في الأمانات حتى إتمام التغطية الميدانية." : "Funds held in escrow until field coverage is completed."
+            },
+            {
+              icon: QrCode,
+              t: isAr ? "تتبع فوري بالـ QR" : "Instant QR Tracking",
+              d: isAr ? "قياس زوار الفروع دون الحاجة لكاشير إلكتروني معقد." : "Measure branch visits without complex POS integration."
+            },
+            {
+              icon: Store,
+              t: isAr ? "فواتير ضريبية معتمدة" : "Certified Tax Invoices",
+              d: isAr ? "متوافقة 100% مع معايير الجهاز الوطني للإيرادات (NBR)." : "100% compliant with National Bureau of Revenue (NBR)."
+            },
+            {
+              icon: Timer,
+              t: isAr ? "مهلة اعتماد 24 ساعة" : "24h Approval Window",
+              d: isAr ? "حوكمة تلقائية تضمن حقوق الطرفين." : "Automated governance secures rights for both parties."
+            },
+          ].map((m, i) => (
+            <div key={i} className="flex max-w-[240px] flex-col items-center text-center gap-2">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary mb-1">
+                <m.icon className="h-6 w-6" />
+              </div>
+              <h4 className="font-bold text-sm sm:text-base">{m.t}</h4>
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{m.d}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* TRUSTED LOCAL BRANDS */}
+      <section className="border-b bg-background py-10">
+        <div className="mx-auto w-[92%] max-w-[1200px]">
+          <h2 className="mb-6 text-center text-sm font-medium text-muted-foreground">
+            {isAr
+              ? "تثق بنا نخبة من أبرز المطاعم والمتاجر المحلية في مملكة البحرين"
+              : "Trusted by leading local restaurants and retailers across the Kingdom of Bahrain"}
+          </h2>
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+            {[
+              { ar: "🍔 فليم برجر", en: "🍔 Flame Burger Co." },
+              { ar: "☕ بيك اند كو", en: "☕ Brew & Co. Cafe" },
+              { ar: "🍕 كراست آرتيزان بيتزا", en: "🍕 Crust Artisan Pizza" },
+              { ar: "🌮 ميز تريفييرا", en: "🌮 Mesa Taqueria" },
+              { ar: "🥗 هيلثي بايتس", en: "🥗 Healthy Bites BH" },
+            ].map((brand) => (
+              <span
+                key={brand.en}
+                className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-600 opacity-70 transition hover:opacity-100"
+              >
+                {isAr ? brand.ar : brand.en}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 3-STEP LOOP */}
+      <section id="how-it-works" className="mx-auto w-[92%] max-w-[1200px] scroll-mt-24 py-20 lg:py-32">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl sm:text-4xl font-extrabold mb-4">{isAr ? "كيف تعمل المنصة (The 3-Step Guaranteed Loop)" : "How It Works (The 3-Step Guaranteed Loop)"}</h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            {isAr ? "دورة متكاملة تضمن حقوق الطرفين وتوفر تتبعاً دقيقاً لنتائج الحملات الإعلانية." : "An integrated loop that secures rights for both parties and tracks ad results accurately."}
           </p>
         </div>
 
-        {/* METRICS */}
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 2xl:gap-8">
-          {metrics.map((m, i) => (
-            <div
-              key={i}
-              className="rounded-2xl border bg-card p-5 shadow-soft transition hover:shadow-lift 2xl:p-8"
-            >
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold text-muted-foreground 2xl:text-base">
-                  {tr(m.label)}
-                </p>
-                <span
-                  className={`flex h-9 w-9 items-center justify-center rounded-lg 2xl:h-12 2xl:w-12 ${m.tone}`}
-                >
-                  <m.icon className="h-4.5 w-4.5 2xl:h-6 2xl:w-6" />
-                </span>
+        <div className="grid gap-6 md:grid-cols-3">
+          {[
+            {
+              i: Wallet,
+              t: isAr ? "حجز آمن بضمان مالي" : "Escrow Deposit",
+              d: isAr ? "يتم حجز مبلغ الحملة في محفظة آمنة (Escrow) لضمان جدية العمل وحفظ حقوق الطرفين." : "Campaign funds are held securely to ensure commitment and protect both parties.",
+              c: "text-sky bg-sky/10 border-sky/20",
+              ic: "text-sky",
+            },
+            {
+              i: Timer,
+              t: isAr ? "تنفيذ مع نافذة مراجعة 24 ساعة" : "24h Review Settlement",
+              d: isAr ? "بعد تنفيذ الحملة، يتم فتح نافذة مراجعة لمدة 24 ساعة قبل تحويل المبالغ لصانع المحتوى." : "After execution, a 24-hour review window is opened before releasing funds to the creator.",
+              c: "text-warning bg-warning-soft border-warning/20",
+              ic: "text-warning",
+            },
+            {
+              i: Store,
+              t: isAr ? "مبيعات وزوار موثقون" : "Single-Use Footfall Tracking",
+              d: isAr ? "تتبع فوري للمبيعات والزوار من خلال مسح قسائم الخصم الذكية (QR) في الفروع." : "Real-time tracking of sales and footfall through smart QR discount scans at branches.",
+              c: "text-success bg-success-soft border-success/20",
+              ic: "text-success",
+            },
+          ].map((s, i) => (
+            <div key={i} className="relative rounded-3xl border bg-card p-8 shadow-soft transition hover:shadow-lift hover:-translate-y-1">
+              <div className={`absolute -top-5 ${isAr ? '-right-5' : '-left-5'} w-12 h-12 flex items-center justify-center rounded-full text-xl font-extrabold num shadow-sm bg-background border`}>
+                {i + 1}
               </div>
-              <p
-                className={`num mt-3 text-3xl font-extrabold 2xl:mt-5 2xl:text-5xl ${m.money ? "text-success" : ""}`}
-              >
-                {m.value}{" "}
-                {m.unit && (
-                  <span className="text-base font-semibold text-muted-foreground 2xl:text-xl">
-                    {m.unit}
-                  </span>
-                )}
-              </p>
-              {m.sub && (
-                <p className="mt-2 text-xs leading-relaxed text-muted-foreground 2xl:text-sm">
-                  {m.sub}
-                </p>
-              )}
-              {m.badge && (
-                <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-warning-soft px-2.5 py-1 text-xs font-semibold text-warning 2xl:px-3 2xl:py-1.5 2xl:text-sm">
-                  <span className="relative flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-warning opacity-60" />
-                    <span className="relative h-2 w-2 rounded-full bg-warning" />
-                  </span>
-                  {m.badge}
-                </span>
-              )}
+              <div className={`mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl ${s.c}`}>
+                <s.i className={`h-8 w-8 ${s.ic}`} />
+              </div>
+              <h3 className="text-xl font-bold mb-3">{s.t}</h3>
+              <p className="text-muted-foreground leading-relaxed">{s.d}</p>
             </div>
           ))}
-        </section>
+        </div>
+      </section>
 
-        {/* MATCHMAKER */}
-        <section className="rounded-2xl border bg-surface p-6">
-          <div className="mb-5 flex items-start gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-gradient text-primary-foreground">
-              <Sparkles className="h-5 w-5" />
-            </span>
-            <div>
-              <h2 className="text-lg font-bold">{tr(t.search.title)}</h2>
-              <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                <ShieldCheck className="h-3.5 w-3.5 text-success" />
-                {tr(t.search.sub)}
-              </p>
-            </div>
+      {/* PUBLIC CREATOR SHOWCASE */}
+      <section id="creators-showcase" className="scroll-mt-24 border-t bg-surface py-20 lg:py-32">
+        <div className="mx-auto w-[92%] max-w-[1200px]">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-extrabold mb-4">
+              {isAr ? "نخبة صنّاع المحتوى الموثوقين على ڤلوب" : "Top Verified Creators on Vloop"}
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              {isAr ? "تصفح نماذج من صنّاع المحتوى المتاحين للحملات التسويقية الميدانية." : "Browse examples of creators available for field marketing campaigns."}
+            </p>
           </div>
-          <div className="grid gap-3 md:grid-cols-[1fr_1fr_1fr_auto]">
-            <Field label={tr(t.search.budget)}>
-              <div className="flex items-center rounded-lg border bg-card focus-within:border-primary focus-within:ring-2 focus-within:ring-ring/20">
-                <input
-                  value={budget}
-                  onChange={(e) => setBudget(e.target.value)}
-                  inputMode="decimal"
-                  className="num w-full bg-transparent px-3.5 py-2.5 text-sm font-semibold outline-none"
-                />
-                <span className="px-3 text-sm text-muted-foreground">
-                  {lang === "ar" ? "د.ب" : "BHD"}
-                </span>
-              </div>
-            </Field>
-            <Field label={tr(t.search.category)}>
-              <select
-                value={cat}
-                onChange={(e) => setCat(e.target.value)}
-                className="w-full rounded-lg border bg-card px-3.5 py-2.5 text-sm outline-none focus:border-primary"
-              >
-                <option value="all">{tr({ ar: "جميع الفئات", en: "All Categories" })}</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {tr(c.label)}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label={tr(t.search.date)}>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full rounded-lg border bg-card px-3.5 py-2.5 text-sm outline-none focus:border-primary"
-              />
-            </Field>
+
+          <div className="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {creators.slice(0, 4).map((c) => (
+              <article key={c.id} className="flex h-full min-h-[240px] flex-col rounded-3xl border bg-card p-6 shadow-soft transition hover:-translate-y-1 hover:shadow-lift">
+                <div className="flex items-center gap-4 mb-4">
+                  <img src={c.img} alt="" className="size-16 rounded-full object-cover ring-2 ring-accent" />
+                  <div>
+                    <h3 className="font-bold text-lg flex items-center gap-1.5">
+                      {isAr ? c.name.ar : c.name.en}
+                      <BadgeCheck className="size-4 text-primary fill-primary text-primary-foreground" />
+                    </h3>
+                    <span className="text-sm text-muted-foreground dir-ltr" style={{ direction: "ltr", unicodeBidi: "isolate" }}>{c.handle}</span>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {c.tags.slice(0, 2).map((tg) => (
+                    <span key={tg} className="rounded-lg bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">{tg}</span>
+                  ))}
+                </div>
+                <div className="mt-auto grid grid-cols-2 gap-4 text-center">
+                  <div className="rounded-xl bg-surface p-3">
+                    <span className="block text-xs text-muted-foreground mb-1">
+                      <Users className="h-3.5 w-3.5 inline mr-1" />
+                      {isAr ? "متابع" : "Followers"}
+                    </span>
+                    <strong className="num text-sm">{c.followers}</strong>
+                  </div>
+                  <div className="rounded-xl bg-surface p-3">
+                    <span className="block text-xs text-muted-foreground mb-1">
+                      <Eye className="h-3.5 w-3.5 inline mr-1" />
+                      {isAr ? "مشاهدات" : "Views"}
+                    </span>
+                    <strong className="num text-sm">{c.storyViews}</strong>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <div className="text-center">
             <button
-              onClick={runSearch}
-              className="inline-flex h-[42px] items-center justify-center gap-2 self-end rounded-lg bg-primary px-6 text-sm font-bold text-primary-foreground shadow-soft transition hover:bg-primary/90"
+              onClick={() => window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: "auth-merchant" }))}
+              className="inline-flex items-center gap-2 rounded-xl bg-foreground px-8 py-4 text-base font-bold text-background shadow-soft transition hover:bg-foreground/90 hover:-translate-y-1"
             >
-              {searching ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Search className="h-4 w-4" />
-              )}
-              {tr(t.search.cta)}
+              {isAr ? "سجّل كمتجر للبدء بالحجز" : "Register as a Brand to Start Booking"}
             </button>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* GRID */}
-        <section>
-          <div className="mb-4 flex items-baseline justify-between">
-            <h2 className="text-lg font-bold">{tr(t.grid.title)}</h2>
-            <span className="num text-sm text-muted-foreground">
-              {results.length} {tr(t.grid.count)}
-            </span>
-          </div>
-          {results.length === 0 ? (
-            <p className="rounded-2xl border border-dashed p-10 text-center text-sm text-muted-foreground">
-              {tr(t.grid.empty)}
-            </p>
-          ) : (
-            <div
-              className={`grid gap-5 sm:grid-cols-2 xl:grid-cols-4 transition-opacity ${searching ? "opacity-40" : ""}`}
-            >
-              {results.map((c) => (
-                <article
-                  key={c.id}
-                  className="flex h-full flex-col justify-between rounded-2xl border bg-card p-5 shadow-soft transition hover:-translate-y-0.5 hover:shadow-lift 2xl:p-8"
-                >
-                  <div>
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={c.img}
-                        alt={tr(c.name)}
-                        loading="lazy"
-                        width={816}
-                        height={816}
-                        className="size-12 rounded-full object-cover shrink-0 ring-2 ring-accent 2xl:size-16"
-                      />
-                      <div className="flex flex-col items-start text-start min-w-0 pb-1">
-                        <div className="flex items-center gap-1.5">
-                          <h3 className="font-bold text-base text-foreground leading-normal 2xl:text-xl">
-                            {tr(c.name)}
-                          </h3>
-                          <BadgeCheck className="size-4 text-primary shrink-0 fill-primary text-primary-foreground 2xl:size-5" />
-                        </div>
-                        <span
-                          className="text-xs text-muted-foreground font-medium mt-0.5"
-                          style={{ direction: "ltr", unicodeBidi: "isolate" }}
-                        >
-                          {c.handle}
-                        </span>
-                      </div>
-                    </div>
-                    <div
-                      dir="ltr"
-                      className="mt-3 flex flex-wrap gap-1.5"
-                      style={{ justifyContent: lang === "ar" ? "flex-end" : "flex-start" }}
-                    >
-                      {c.tags.map((tg) => (
-                        <span
-                          key={tg}
-                          className="rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground 2xl:px-3 2xl:py-1 2xl:text-sm"
-                        >
-                          {tg}
-                        </span>
-                      ))}
-                    </div>
-                    <div className="mt-4 space-y-2 text-sm 2xl:space-y-3 2xl:text-base">
-                      <Stat icon={Users} label={tr(t.card.followers)} value={c.followers} />
-                      <Stat icon={Eye} label={tr(t.card.views)} value={c.storyViews} />
-                      <Stat
-                        icon={ShieldCheck}
-                        label={tr(t.card.reliability)}
-                        value={`${c.reliability}%`}
-                        hint={`${c.campaigns} ${tr(t.card.completed)}`}
-                      />
-                    </div>
-                    <span className="mt-4 inline-flex w-fit items-center gap-1.5 rounded-full bg-success-soft px-3 py-1 text-xs font-bold text-success 2xl:mt-6 2xl:px-4 2xl:py-1.5 2xl:text-sm">
-                      <Check className="h-3.5 w-3.5 2xl:h-4 2xl:w-4" />
-                      {tr(t.card.match)} <span className="num">{applied.budget}</span>{" "}
-                      {tr(t.card.budgetWord)}
-                    </span>
-                  </div>
-                  <div className="mt-auto grid grid-cols-2 gap-2 pt-5 2xl:gap-4 2xl:pt-8">
-                    <a
-                      href={`/creators/${c.handle.replace("@", "")}`}
-                      className="flex items-center justify-center rounded-lg border px-2 py-2 text-center text-xs font-semibold transition hover:border-primary hover:text-primary 2xl:px-4 2xl:py-3 2xl:text-sm"
-                    >
-                      {tr(t.card.kit)}
-                    </a>
-                    <button
-                      onClick={() => setBooking(c)}
-                      className="rounded-lg bg-primary px-2 py-2 text-xs font-bold text-primary-foreground transition hover:bg-primary/90 2xl:px-4 2xl:py-3 2xl:text-sm"
-                    >
-                      {tr(t.card.book)}
-                    </button>
-                  </div>
-                </article>
-              ))}
+      {/* QR MODAL */}
+      {showQRModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-md animate-in fade-in" onClick={() => setShowQRModal(false)}>
+          <div className="w-full max-w-sm rounded-3xl border bg-card p-1 shadow-2xl animate-in zoom-in-95" onClick={e => e.stopPropagation()}>
+            <div className="relative rounded-2xl bg-surface p-8 text-center border">
+              <button onClick={() => setShowQRModal(false)} className="absolute top-4 right-4 p-2 rounded-full hover:bg-muted text-muted-foreground transition">
+                <X className="h-5 w-5" />
+              </button>
+              
+              <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-success-soft text-success">
+                <Check className="h-8 w-8" />
+              </div>
+              
+              <h3 className="text-2xl font-bold mb-2">{isAr ? "تم إصدار قسيمتك بنجاح!" : "Voucher Issued Successfully!"}</h3>
+              <p className="text-sm text-muted-foreground mb-8">
+                {isAr ? "أظهر هذا الرمز عند الكاشير للحصول على الخصم." : "Show this code at the cashier to claim your discount."}
+              </p>
+
+              <div className="mx-auto mb-6 w-48 h-48 bg-white rounded-xl p-4 shadow-sm">
+                {/* Mock QR Code */}
+                <div className="w-full h-full bg-[url('https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=VLP-98412')] bg-cover" />
+              </div>
+
+              <div className="mb-6 flex items-center justify-center gap-2 rounded-xl bg-muted py-3 px-4">
+                <span className="font-mono text-xl font-bold tracking-widest text-foreground num">VLP-98412</span>
+                <button onClick={copyToken} className="p-2 hover:bg-background rounded-lg transition text-muted-foreground hover:text-foreground">
+                  {copied ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
+                </button>
+              </div>
+
+              <div className="flex items-center justify-center gap-2 text-sm font-semibold text-warning">
+                <Timer className="h-4 w-4" />
+                {isAr ? "صالح لمدة 48 ساعة فقط" : "Valid for 48 hours only"}
+              </div>
             </div>
-          )}
-        </section>
-      </main>
-
-      {booking && (
-        <BookingModal
-          creator={booking}
-          lang={lang}
-          fee={applied.budget}
-          onClose={() => setBooking(null)}
-          selectedDate={date}
-        />
+          </div>
+        </div>
       )}
     </div>
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function SparklesIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
-    <label className="block">
-      <span className="mb-1.5 block text-xs font-semibold text-muted-foreground">{label}</span>
-      {children}
-    </label>
-  );
-}
-
-function Stat({
-  icon: Icon,
-  label,
-  value,
-  hint,
-}: {
-  icon: typeof Users;
-  label: string;
-  value: string;
-  hint?: string;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-2">
-      <span className="flex items-center gap-1.5 text-muted-foreground">
-        <Icon className="h-3.5 w-3.5" />
-        {label}
-      </span>
-      <span className="text-end">
-        <b className="num">{value}</b>
-        {hint && <span className="block text-[11px] text-muted-foreground">{hint}</span>}
-      </span>
-    </div>
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+      <path d="M5 3v4" />
+      <path d="M19 17v4" />
+      <path d="M3 5h4" />
+      <path d="M17 19h4" />
+    </svg>
   );
 }
