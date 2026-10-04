@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { QrCode, ShieldCheck, Check, Megaphone, Smartphone, Star, Store, Wallet, Timer, TrendingUp, Users, Copy, X, BadgeCheck, Eye } from "lucide-react";
+import { QrCode, ShieldCheck, Check, Megaphone, Smartphone, Star, Store, Wallet, Timer, TrendingUp, Users, Copy, X, BadgeCheck, Eye, Headphones } from "lucide-react";
 import { useLang } from "@/components/vloop/Shell";
 import { Link } from "@tanstack/react-router";
 import { creators, t, type L } from "@/lib/vloop-data";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 export const Route = createFileRoute("/")({
   component: PublicLanding,
@@ -17,6 +18,58 @@ function PublicLanding() {
   const [copied, setCopied] = useState(false);
 
   const isAr = lang === "ar";
+  const faqItems: { question: L; answer: L }[] = [
+    {
+      question: {
+        ar: "س: كيف تضمن منصة ڤلوب أموالي كصاحب منشأة؟",
+        en: "Q: How does Vloop protect my funds as a business owner?",
+      },
+      answer: {
+        ar: "ج: تظل أموالك محجوزة بأمان في صندوق الأمانات (Escrow)، ولا يتم تحريرها للمعلن إلا بعد نشر التغطية وموافقتك عليها أو مرور 24 ساعة دون تقديم اعتراض مستند لشروط العقد.",
+        en: "A: Your funds remain securely held in escrow and are released to the creator only after the coverage is published and approved by you, or after 24 hours pass without a dispute based on the contract terms.",
+      },
+    },
+    {
+      question: {
+        ar: "س: ماذا يحدث إذا تخلف صانع المحتوى عن الحضور أو النشر في الموعد؟",
+        en: "Q: What if a creator misses the visit or posting deadline?",
+      },
+      answer: {
+        ar: "ج: في حال مرور 24 ساعة من تاريخ الموعد المحدد دون رفع إثبات النشر، يُلغى الطلب تلقائياً وتُسترد أموالك كاملة 100% إلى محفظتك بالمنصة مع إمكانية استرجاعها لبطاقتك البنكية.",
+        en: "A: If 24 hours pass from the scheduled time without proof of posting, the booking is cancelled automatically and 100% of your funds are returned to your platform wallet, with the option to withdraw them to your bank card.",
+      },
+    },
+    {
+      question: {
+        ar: "س: كصانع محتوى، متى وكيف أستلم أرباحي؟",
+        en: "Q: As a creator, when and how do I receive my earnings?",
+      },
+      answer: {
+        ar: "ج: بمجرد اعتماد الحملة (سواء بالموافقة المباشرة أو بعد انتهاء مهلة الـ 24 ساعة التلقائية)، يتحول المبلغ فوراً إلى \"الرصيد المتاح للسحب\" لتتمكن من تحويله لحسابك البنكي المحلي عبر Fawri+ IBAN بدون أي خصومات أو عمولات على أجرك المتفق عليه.",
+        en: "A: Once a campaign is approved—directly or after the 24-hour review window—the amount moves immediately to your available balance for withdrawal to your local bank account via Fawri+ IBAN, with no deductions or fees from your agreed earnings.",
+      },
+    },
+    {
+      question: {
+        ar: "س: هل يحتاج زبائن المطعم لتحميل تطبيق أو التسجيل للاستفادة من كود الخصم؟",
+        en: "Q: Do restaurant customers need an app or account to use a discount code?",
+      },
+      answer: {
+        ar: "ج: لا، الزبون يكتفي بإدخال رقم هاتفه في صفحة العرض المباشرة عبر المتصفح ليحصل على قسيمة الـ QR لمرة واحدة خلال 3 ثوانٍ وبدون انتظار أي رمز OTP.",
+        en: "A: No. Customers only enter their phone number on the offer page in their browser to receive a single-use QR voucher within 3 seconds, without waiting for an OTP.",
+      },
+    },
+    {
+      question: {
+        ar: "س: كيف يتم التعامل مع الخلافات أو عدم الالتزام بالشروط؟",
+        en: "Q: How are disputes or breaches of campaign terms handled?",
+      },
+      answer: {
+        ar: "ج: يتيح النظام للتاجر زر \"تقديم اعتراض\" خلال مهلة الـ 24 ساعة يوقف تحرير الأموال فوراً، ويتدخل فريق التحكيم لمطابقة التغطية المنشورة مع قائمة الشروط الرقمية الملزمة المعتمدة مسبقاً (NLP Brief).",
+        en: "A: Merchants can raise a dispute during the 24-hour review window, immediately pausing fund release. Our arbitration team then checks the published coverage against the approved, binding digital brief (NLP Brief).",
+      },
+    },
+  ];
 
   const handleClaim = (e: React.FormEvent) => {
     e.preventDefault();
@@ -280,6 +333,65 @@ function PublicLanding() {
               className="inline-flex items-center gap-2 rounded-xl bg-foreground px-8 py-4 text-base font-bold text-background shadow-soft transition hover:bg-foreground/90 hover:-translate-y-1"
             >
               {isAr ? "سجّل كمتجر للبدء بالحجز" : "Register as a Brand to Start Booking"}
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ SECTION */}
+      <section id="faq" className="scroll-mt-24 border-t bg-background py-16 sm:py-20 lg:py-28">
+        <div className="mx-auto w-[92%] max-w-[1000px]">
+          <div className="mb-10 text-center sm:mb-14">
+            <span className="mb-4 inline-flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <Headphones className="size-6" />
+            </span>
+            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
+              {isAr ? "الأسئلة الشائعة والمساعدة" : "Frequently Asked Questions"}
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+              {isAr
+                ? "كل ما تحتاج معرفته عن نظام الضمان المالي، حجز المؤثرين، وتتبع الزوار."
+                : "Everything you need to know about escrow, creator bookings, and visitor tracking."}
+            </p>
+          </div>
+
+          <Accordion type="single" collapsible className="overflow-hidden rounded-2xl border bg-card px-5 shadow-soft sm:px-7">
+            {faqItems.map(({ question, answer }, index) => (
+              <AccordionItem key={question.en} value={`faq-${index}`}>
+                <AccordionTrigger className="gap-4 py-5 text-start text-sm font-bold leading-relaxed hover:no-underline sm:text-base">
+                  {question[lang]}
+                </AccordionTrigger>
+                <AccordionContent className="pb-5 text-sm leading-8 text-muted-foreground sm:text-base">
+                  {answer[lang]}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+
+          <div className="mt-7 flex flex-col gap-4 rounded-2xl border bg-card p-6 shadow-soft sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h3 className="text-base font-bold text-foreground">
+                {isAr ? "لديك استفسار آخر؟" : "Still have a question?"}
+              </h3>
+              <p className="mt-1 flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
+                {isAr
+                  ? "فريقنا جاهز لمساعدتك عبر البريد المباشر:"
+                  : "Our team is ready to help via direct email:"}
+                <a
+                  href="mailto:support@vloop.me"
+                  className="font-medium text-muted-foreground hover:text-primary"
+                  dir="ltr"
+                >
+                  support@vloop.me
+                </a>
+              </p>
+            </div>
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent("open-help-modal"))}
+              className="inline-flex shrink-0 items-center justify-center gap-2 self-start rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground transition hover:bg-primary/90 sm:self-auto"
+            >
+              <Headphones className="size-4" />
+              {isAr ? "تواصل مع فريق الدعم" : "Contact Support"}
             </button>
           </div>
         </div>

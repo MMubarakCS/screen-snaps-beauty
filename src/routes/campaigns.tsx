@@ -72,7 +72,7 @@ function Campaigns() {
   ];
 
   return (
-    <main className="mx-auto w-full max-w-full overflow-x-hidden flex-1 space-y-8 px-4 sm:px-6 py-8 lg:px-8 2xl:space-y-12 2xl:py-12">
+    <main className="mx-auto w-full max-w-7xl flex-1 space-y-8 overflow-x-hidden px-4 py-8 sm:px-6 2xl:space-y-12 2xl:py-12">
       <div>
         <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl 2xl:text-5xl">{tr({ ar: "إدارة ومتابعة الحملات", en: "My Campaigns & Reviews" })}</h1>
         <p className="mt-1 text-sm text-muted-foreground 2xl:mt-3 2xl:text-lg">{tr({ ar: "تتبع حالة الضمان المالي، مراجعة روابط المحتوى، ومراقبة زيارات المتجر الميدانية.", en: "Track escrow status, review proof links, and monitor live in-store footfall." })}</p>

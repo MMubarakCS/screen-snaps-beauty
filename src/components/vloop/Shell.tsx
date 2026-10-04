@@ -1,8 +1,9 @@
 import { createContext, useContext, useEffect, useState, type MouseEvent, type ReactNode } from "react";
 import { Link, useLocation, useRouter } from "@tanstack/react-router";
-import { QrCode, ChevronDown, Check, LogOut, Settings, Building2, Lock, Menu, X, Store, Video } from "lucide-react";
+import { QrCode, ChevronDown, Check, LogOut, Settings, Building2, Lock, Menu, X, Store, Video, CircleHelp } from "lucide-react";
 import { toast } from "sonner";
 import { CompanyProfileModal, AccountSettingsModal } from "@/components/vloop/AccountModals";
+import { HelpModal } from "@/components/vloop/HelpModal";
 import { categories, type Lang, type L, fmtBHD, t } from "@/lib/vloop-data";
 
 const LangCtx = createContext<{ lang: Lang; setLang: (l: Lang) => void }>({ lang: "ar", setLang: () => {} });
@@ -97,6 +98,7 @@ export function AppHeader() {
   const [menu, setMenu] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
   const [logoutDialog, setLogoutDialog] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [modal, setModal] = useState<"company" | "settings" | AuthModal | "auth-login" | null>(null);
   const handleNavClick = (e: MouseEvent<HTMLAnchorElement>, targetId: string) => {
     e.preventDefault();
@@ -119,8 +121,13 @@ export function AppHeader() {
         setModal(type);
       }
     };
+    const handleOpenHelp = () => setHelpOpen(true);
     window.addEventListener("open-auth-modal", handleOpenModal);
-    return () => window.removeEventListener("open-auth-modal", handleOpenModal);
+    window.addEventListener("open-help-modal", handleOpenHelp);
+    return () => {
+      window.removeEventListener("open-auth-modal", handleOpenModal);
+      window.removeEventListener("open-help-modal", handleOpenHelp);
+    };
   }, []);
 
   const copyKiosk = () => {
@@ -140,15 +147,18 @@ export function AppHeader() {
             </span>
           </Link>
           {isPublic ? (
-            <nav className="hidden items-center gap-1 text-sm font-medium lg:flex">
+            <nav dir={lang === "ar" ? "rtl" : "ltr"} className="hidden flex-row items-center gap-1 text-sm font-medium lg:flex">
+              <a href="#voucher-claim" onClick={(e) => handleNavClick(e, "voucher-claim")} className="rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">
+                {lang === "ar" ? "استرداد قسيمة خصم" : "Claim Voucher"}
+              </a>
               <a href="#how-it-works" onClick={(e) => handleNavClick(e, "how-it-works")} className="rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">
                 {lang === "ar" ? "كيف تعمل المنصة" : "How it Works"}
               </a>
               <a href="#creators-showcase" onClick={(e) => handleNavClick(e, "creators-showcase")} className="rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">
                 {lang === "ar" ? "صنّاع المحتوى" : "Creators"}
               </a>
-              <a href="#voucher-claim" onClick={(e) => handleNavClick(e, "voucher-claim")} className="rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">
-                {lang === "ar" ? "استرداد قسيمة خصم" : "Claim Voucher"}
+              <a href="#faq" onClick={(e) => handleNavClick(e, "faq")} className="rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground">
+                {lang === "ar" ? "الأسئلة الشائعة" : "FAQ"}
               </a>
             </nav>
           ) : (
@@ -238,6 +248,13 @@ export function AppHeader() {
                       </button>
                     );
                   })}
+                  <button
+                    onClick={() => { setMenu(false); setHelpOpen(true); }}
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium hover:bg-muted"
+                  >
+                    <CircleHelp className="h-4 w-4 text-muted-foreground" />
+                    {tr({ ar: "المساعدة والدعم", en: "Help & Support" })}
+                  </button>
                   <div className="my-1 border-t border-border"></div>
                   <button
                     onClick={() => {
@@ -283,14 +300,17 @@ export function AppHeader() {
 
             {isPublic ? (
               <nav className="flex flex-col gap-1">
+                <a href="#voucher-claim" onClick={(e) => { handleNavClick(e, "voucher-claim"); setMobileMenu(false); }} className="px-4 py-3 text-lg font-semibold rounded-xl hover:bg-muted">
+                  {lang === "ar" ? "استرداد قسيمة خصم" : "Claim Voucher"}
+                </a>
                 <a href="#how-it-works" onClick={(e) => { handleNavClick(e, "how-it-works"); setMobileMenu(false); }} className="px-4 py-3 text-lg font-semibold rounded-xl hover:bg-muted">
                   {lang === "ar" ? "كيف تعمل المنصة" : "How it Works"}
                 </a>
                 <a href="#creators-showcase" onClick={(e) => { handleNavClick(e, "creators-showcase"); setMobileMenu(false); }} className="px-4 py-3 text-lg font-semibold rounded-xl hover:bg-muted">
                   {lang === "ar" ? "صنّاع المحتوى" : "Creators"}
                 </a>
-                <a href="#voucher-claim" onClick={(e) => { handleNavClick(e, "voucher-claim"); setMobileMenu(false); }} className="px-4 py-3 text-lg font-semibold rounded-xl hover:bg-muted">
-                  {lang === "ar" ? "استرداد قسيمة خصم" : "Claim Voucher"}
+                <a href="#faq" onClick={(e) => { handleNavClick(e, "faq"); setMobileMenu(false); }} className="px-4 py-3 text-lg font-semibold rounded-xl hover:bg-muted">
+                  {lang === "ar" ? "الأسئلة الشائعة" : "FAQ"}
                 </a>
               </nav>
             ) : (
@@ -404,6 +424,7 @@ export function AppHeader() {
         />
       )}
       {modal === "auth-login" && <AuthLoginModal onClose={() => setModal(null)} lang={lang} />}
+      <HelpModal open={helpOpen} onOpenChange={setHelpOpen} lang={lang} />
     </>
   );
 }
@@ -555,7 +576,17 @@ function AuthLoginModal({ onClose, lang }: { onClose: () => void; lang: Lang }) 
 
 export function AppFooter() {
   const { lang } = useLang();
+  const location = useLocation();
   const tr = (x: L) => x[lang];
+  const handleFooterLink = (event: MouseEvent<HTMLAnchorElement>, link: L) => {
+    if (link.en !== "FAQ") return;
+    event.preventDefault();
+    if (location.pathname === "/") {
+      document.getElementById("faq")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+    window.dispatchEvent(new CustomEvent("open-help-modal"));
+  };
   return (
       <footer className="mt-12 border-t bg-surface">
         <div className="mx-auto w-[92%] max-w-[1680px] grid gap-10 px-4 py-12 md:grid-cols-[1.5fr_1fr_1fr_1fr] lg:px-8 2xl:py-16">
@@ -582,7 +613,13 @@ export function AppFooter() {
               <ul className="space-y-2 text-sm text-muted-foreground">
                 {links.map((l) => (
                   <li key={l.en}>
-                    <a className="cursor-pointer hover:text-primary">{tr(l)}</a>
+                    <a
+                      href={l.en === "FAQ" ? "#faq" : undefined}
+                      onClick={(event) => handleFooterLink(event, l)}
+                      className="cursor-pointer hover:text-primary"
+                    >
+                      {tr(l)}
+                    </a>
                   </li>
                 ))}
               </ul>

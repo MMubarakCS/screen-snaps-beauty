@@ -95,11 +95,18 @@ function ManualMode({
           .map((x) => (x.id === id ? (x.preset ? { ...x, on: false } : null) : x))
           .filter(Boolean) as Term[],
     );
-  const addClause = () =>
-    setTerms((s) => [
-      ...s,
-      { id: crypto.randomUUID(), text: { ar: "", en: "" }, on: true, preset: false },
-    ]);
+  const addClause = () => {
+    const id =
+      globalThis.crypto?.randomUUID?.() ??
+      `custom-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const clause: Term = {
+      id,
+      text: { ar: "", en: "" },
+      on: true,
+      preset: false,
+    };
+    setTerms((current) => (Array.isArray(current) ? [...current, clause] : [clause]));
+  };
 
   return (
     <>
@@ -219,6 +226,7 @@ function ManualMode({
             </div>
           )}
           <button
+            type="button"
             onClick={addClause}
             className="mt-3 inline-flex items-center gap-1 rounded-lg border border-dashed px-3 py-2 text-sm font-medium text-primary transition hover:border-primary hover:bg-accent"
           >
