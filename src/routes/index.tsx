@@ -156,26 +156,21 @@ function PublicLanding() {
       </section>
 
       {/* TRUSTED LOCAL BRANDS */}
-      <section className="border-b bg-background py-10">
+      <section className="my-10 border-y border-border/40 bg-muted/20 py-6">
         <div className="mx-auto w-[92%] max-w-[1200px]">
-          <h2 className="mb-6 text-center text-sm font-medium text-muted-foreground">
+          <h2 className="mb-5 text-center text-xs font-bold uppercase tracking-wider text-muted-foreground/80">
             {isAr
               ? "تثق بنا نخبة من أبرز المطاعم والمتاجر المحلية في مملكة البحرين"
               : "Trusted by leading local restaurants and retailers across the Kingdom of Bahrain"}
           </h2>
-          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
-            {[
-              { ar: "🍔 فليم برجر", en: "🍔 Flame Burger Co." },
-              { ar: "☕ بيك اند كو", en: "☕ Brew & Co. Cafe" },
-              { ar: "🍕 كراست آرتيزان بيتزا", en: "🍕 Crust Artisan Pizza" },
-              { ar: "🌮 ميز تريفييرا", en: "🌮 Mesa Taqueria" },
-              { ar: "🥗 هيلثي بايتس", en: "🥗 Healthy Bites BH" },
-            ].map((brand) => (
+          <div className="flex flex-wrap items-center justify-center gap-8 md:gap-14">
+            {["FLAME BURGER CO.", "BREW & CO. CAFE", "CRUST ARTISAN PIZZA", "MESA TAQUERIA", "HEALTHY BITES BH"].map((b) => (
               <span
-                key={brand.en}
-                className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-600 opacity-70 transition hover:opacity-100"
+                key={b}
+                dir="ltr"
+                className="cursor-default select-none text-base font-extrabold tracking-tight text-muted-foreground/60 transition-colors duration-200 hover:text-foreground md:text-lg"
               >
-                {isAr ? brand.ar : brand.en}
+                {b}
               </span>
             ))}
           </div>
