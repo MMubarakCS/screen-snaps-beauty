@@ -95,6 +95,7 @@ export function AppHeader() {
   const location = useLocation();
   const router = useRouter();
   const isPublic = location.pathname === "/";
+  const isCreator = location.pathname.startsWith("/creator");
   const tr = (x: L) => x[lang];
   const [copied, setCopied] = useState(false);
   const [menu, setMenu] = useState(false);
@@ -185,7 +186,7 @@ export function AppHeader() {
             </nav>
           )}
           <div className="ms-auto flex items-center gap-3">
-            <div className="hidden lg:flex rounded-lg border p-0.5 text-xs font-bold">
+            <div className={`${isCreator ? "flex" : "hidden lg:flex"} rounded-lg border p-0.5 text-xs font-bold`}>
               {(["ar", "en"] as const).map((l) => (
                 <button
                   key={l}
@@ -205,7 +206,7 @@ export function AppHeader() {
                   {lang === "ar" ? "ابدأ الآن" : "Get Started"}
                 </button>
               </>
-            ) : location.pathname.startsWith("/creator") ? (
+            ) : isCreator ? (
               <>
                 <button
                   className="hidden md:flex items-center gap-2 rounded-full border border-success/30 bg-success-soft px-3 py-1.5 text-sm font-bold text-success"
@@ -230,12 +231,12 @@ export function AppHeader() {
                     className="flex items-center gap-2 rounded-lg p-1 hover:bg-muted"
                   >
                     <img src={c2} alt="" className="h-9 w-9 rounded-full object-cover" />
-                    <span className="hidden text-start leading-tight lg:block">
-                      <span className="block text-sm font-bold flex items-center gap-1">
+                    <span className="hidden flex-col items-start text-start leading-tight xl:flex">
+                      <span className="flex items-center gap-1 text-sm font-semibold">
                         {lang === "ar" ? "يوسف المناعي" : "Yousif Al-Mannai"}
                         <Check className="h-3 w-3 rounded-full bg-primary p-0.5 text-primary-foreground" />
                       </span>
-                      <span className="num block text-xs text-muted-foreground" dir="ltr">
+                      <span className="num text-xs text-muted-foreground" style={{ direction: "ltr", unicodeBidi: "isolate" }}>
                         @yousif.bites
                       </span>
                     </span>
@@ -341,18 +342,20 @@ export function AppHeader() {
             </div>
             </>
             )}
-            <button
-              onClick={() => setMobileMenu(true)}
-              className="lg:hidden p-1.5 -me-1 rounded-lg hover:bg-muted text-foreground"
-            >
-              <Menu className="h-6 w-6" />
-            </button>
+            {!isCreator && (
+              <button
+                onClick={() => setMobileMenu(true)}
+                className="lg:hidden p-1.5 -me-1 rounded-lg hover:bg-muted text-foreground"
+              >
+                <Menu className="h-6 w-6" />
+              </button>
+            )}
           </div>
         </div>
       </header>
 
       {/* MOBILE DRAWER */}
-      {mobileMenu && (
+      {mobileMenu && !isCreator && (
         <div className="fixed inset-0 z-50 flex lg:hidden animate-in fade-in" onClick={() => setMobileMenu(false)}>
           <div className="fixed inset-0 bg-background/80 backdrop-blur-sm" />
           <div 

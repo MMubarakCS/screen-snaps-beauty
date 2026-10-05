@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { Plane } from "lucide-react";
+import { useEffect, useState } from "react";
 import {
   Copy,
   Wallet,
@@ -38,6 +37,8 @@ function CreatorPage() {
   const { lang } = useLang();
   const isAr = lang === "ar";
   const [copiedBio, setCopiedBio] = useState(false);
+  const [creatorAvatarPreview, setCreatorAvatarPreview] = useState<string | null>(null);
+  const [creatorCoverPreview, setCreatorCoverPreview] = useState<string | null>(null);
   const [tab, setTab] = useState<"new" | "active" | "completed">("new");
   const [threshold, setThreshold] = useState("150.000");
   
@@ -56,9 +57,48 @@ function CreatorPage() {
   const [blackoutDates, setBlackoutDates] = useState<{ from: string; to: string }[]>([
     { from: "2026-11-10", to: "2026-11-15" }
   ]);
+  const [isAddingBlackout, setIsAddingBlackout] = useState(false);
+  const [newBlackoutFrom, setNewBlackoutFrom] = useState("");
+  const [newBlackoutTo, setNewBlackoutTo] = useState("");
+
+  useEffect(() => {
+    const handleProfileImageSelected = (event: Event) => {
+      const { kind, file } = (event as CustomEvent<{ kind: "avatar" | "cover"; file: File }>).detail;
+      const previewUrl = URL.createObjectURL(file);
+      if (kind === "avatar") setCreatorAvatarPreview(previewUrl);
+      else setCreatorCoverPreview(previewUrl);
+    };
+
+    window.addEventListener("creator-profile-image-selected", handleProfileImageSelected);
+    return () => window.removeEventListener("creator-profile-image-selected", handleProfileImageSelected);
+  }, []);
+
+  useEffect(() => {
+    if (!creatorAvatarPreview) return;
+    return () => URL.revokeObjectURL(creatorAvatarPreview);
+  }, [creatorAvatarPreview]);
+
+  useEffect(() => {
+    if (!creatorCoverPreview) return;
+    return () => URL.revokeObjectURL(creatorCoverPreview);
+  }, [creatorCoverPreview]);
 
   // Campaign platforms (simulated from brief)
-  const campaignPlatforms = ["instagram", "tiktok"] as const;
+  const campaignPlatforms: ("instagram" | "tiktok" | "snapchat")[] = ["instagram", "tiktok"];
+  const proofPlatformFields = {
+    instagram: {
+      label: isAr ? "رابط ستوري إنستغرام" : "Instagram Story URL",
+      placeholder: "https://instagram.com/...",
+    },
+    tiktok: {
+      label: isAr ? "رابط فيديو تيك توك" : "TikTok Video URL",
+      placeholder: "https://tiktok.com/...",
+    },
+    snapchat: {
+      label: isAr ? "رابط ستوري سناب شات" : "Snapchat Story URL",
+      placeholder: "https://snapchat.com/...",
+    },
+  };
 
   // Schedule Management States
   const [daysOff, setDaysOff] = useState<string[]>(["الجمعة", "السبت"]);
@@ -102,55 +142,91 @@ function CreatorPage() {
   return (
     <div className="min-h-screen bg-background pb-12">
       <main className="mx-auto w-[92%] max-w-[1680px] space-y-8 px-4 py-8 lg:px-8 2xl:space-y-12 2xl:py-12">
+        {/* ================= CREATOR PROFILE HEADER ================= */}
+        <div className="mb-8 overflow-hidden rounded-2xl border border-border bg-card shadow-soft">
+          {/* Cover */}
+          <div
+            className="h-28 w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-500 bg-cover bg-center sm:h-36"
+            style={
+              creatorCoverPreview
+                ? { backgroundImage: `url("${creatorCoverPreview}")` }
+                : undefined
+            }
+          />
 
-        {/* 1. Profile Hero Banner with Cover Photo */}
-        <section className="h-44 sm:h-52 w-full rounded-2xl overflow-hidden relative border bg-muted">
-          {/* Sleek gradient cover placeholder */}
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-sky/20 to-violet-500/25" />
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNCI+PHBhdGggZD0iTTM2IDE4YzEuNjU3IDAgMy0xLjM0MyAzLTNzLTEuMzQzLTMtMy0zLTMgMS4zNDMtMyAzIDEuMzQzIDMgMyAzeiIvPjwvZz48L2c+PC9zdmc+')] opacity-60" />
-
-          {/* Edit media kit button */}
-          <button
-            onClick={openProfileModal}
-            className="absolute top-3 end-3 sm:top-4 sm:end-4 z-10 inline-flex items-center gap-1.5 rounded-lg bg-background/80 backdrop-blur-sm px-3 py-1.5 text-xs font-bold text-foreground shadow-sm border border-white/20 transition hover:bg-background/95"
-          >
-            <Pencil className="h-3.5 w-3.5" />
-            {isAr ? "تعديل الميديا كيت" : "Edit Media Kit"}
-          </button>
-
-          {/* Overlaid Profile Header */}
-          <div className="absolute bottom-0 inset-x-0 p-4 sm:p-5">
-            <div className="flex items-end gap-3">
-              <img
-                src={c2}
-                alt={isAr ? "يوسف المناعي" : "Yousif Al-Mannai"}
-                className="size-16 rounded-full border-2 border-background object-cover shadow-lg shrink-0"
-              />
-              <div className="flex flex-col items-start text-start pb-0.5">
-                <div className="flex items-center gap-1.5">
-                  <h2 className="text-lg font-bold text-foreground drop-shadow-sm">
-                    {isAr ? "يوسف المناعي" : "Yousif Al-Mannai"}
-                  </h2>
-                  <BadgeCheck className="size-4 text-primary shrink-0" />
+          {/* Profile Details */}
+          <div className="p-4 sm:p-6">
+            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+              <div className="flex items-center gap-3.5 text-start sm:gap-4">
+                <img
+                  src={creatorAvatarPreview ?? c2}
+                  alt={isAr ? "يوسف المناعي" : "Yousif Al-Mannai"}
+                  className="size-16 shrink-0 rounded-full border-2 border-border bg-muted object-cover sm:size-20"
+                />
+                <div className="flex min-w-0 flex-col items-start text-start">
+                  <div className="flex items-center gap-1.5">
+                    <h1 className="text-lg font-bold leading-tight text-foreground sm:text-2xl">
+                      {isAr ? "يوسف المناعي" : "Yousif Al-Mannai"}
+                    </h1>
+                    <BadgeCheck className="size-4 shrink-0 text-primary sm:size-5" />
+                  </div>
+                  <span
+                    className="mt-0.5 text-xs font-medium text-muted-foreground sm:text-sm"
+                    style={{ direction: "ltr", unicodeBidi: "isolate" }}
+                  >
+                    @yousif.bites
+                  </span>
                 </div>
-                <span className="text-xs text-muted-foreground font-medium" style={{ direction: "ltr", unicodeBidi: "isolate" }}>
-                  @yousif.bites
+              </div>
+
+              <button
+                type="button"
+                onClick={openProfileModal}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2 text-xs font-semibold text-foreground shadow-sm transition hover:bg-muted sm:w-fit sm:text-sm"
+              >
+                <Pencil className="size-3.5" />
+                {isAr ? "تعديل الميديا كيت" : "Edit Media Kit"}
+              </button>
+            </div>
+
+            {/* Social Accounts and Stats */}
+            <div className="mt-5 flex flex-col justify-between gap-3 border-t border-border pt-4 text-xs md:flex-row md:items-center">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1 rounded-lg bg-muted px-2.5 py-1 font-medium text-muted-foreground">
+                  Instagram:{" "}
+                  <strong className="text-foreground" dir="ltr">
+                    @yousif.bites
+                  </strong>
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-lg bg-muted px-2.5 py-1 font-medium text-muted-foreground">
+                  TikTok:{" "}
+                  <strong className="text-foreground" dir="ltr">
+                    @yousif.vlogs
+                  </strong>
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-lg bg-muted px-2.5 py-1 font-medium text-muted-foreground">
+                  Snapchat:{" "}
+                  <strong className="text-foreground" dir="ltr">
+                    @yousif_snap
+                  </strong>
+                </span>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded-full border border-slate-200 bg-slate-100 px-3 py-1 font-bold text-slate-700">
+                  {isAr ? "62K متابع" : "62K followers"}
+                </span>
+                <span className="rounded-full border border-slate-200 bg-slate-100 px-3 py-1 font-bold text-slate-700">
+                  {isAr ? "11.8K مشاهدات الستوري" : "11.8K story views"}
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 font-bold text-emerald-700">
+                  <CheckCircle2 className="size-3.5" />
+                  {isAr ? "إحصائيات موثقة" : "Verified stats"}
                 </span>
               </div>
             </div>
-            <div className="flex flex-wrap gap-1.5 mt-2.5 ms-[76px]">
-              <span className="inline-flex items-center gap-1 rounded-full bg-background/80 backdrop-blur-sm px-2.5 py-1 text-[11px] font-semibold text-foreground border border-white/20 shadow-sm">
-                📸 Instagram: @yousif.bites
-              </span>
-              <span className="inline-flex items-center gap-1 rounded-full bg-background/80 backdrop-blur-sm px-2.5 py-1 text-[11px] font-semibold text-foreground border border-white/20 shadow-sm">
-                🎵 TikTok: @yousif.vlogs
-              </span>
-              <span className="inline-flex items-center gap-1 rounded-full bg-background/80 backdrop-blur-sm px-2.5 py-1 text-[11px] font-semibold text-foreground border border-white/20 shadow-sm">
-                👻 Snapchat: @yousif_snap
-              </span>
-            </div>
           </div>
-        </section>
+        </div>
 
         {/* 2. Top Summary & Bio-Link Hub */}
         <section className="rounded-2xl border bg-card p-6 shadow-soft md:p-8">
@@ -279,29 +355,76 @@ function CreatorPage() {
                     return `${d.getDate()} ${months[d.getMonth()]}`;
                   };
                   return (
-                    <div key={idx} className="flex items-center gap-2">
+                    <div key={`${range.from}-${range.to}-${idx}`} className="flex items-center gap-2">
                       <span className="inline-flex items-center gap-2 rounded-lg border bg-background px-3 py-2 text-sm font-medium text-foreground">
-                        <Plane className="h-4 w-4 text-sky" />
                         {isAr ? "✈️ فترة إجازة:" : "✈️ Vacation:"} {fmtDate(fromDate)} – {fmtDate(toDate)}
                       </span>
                       <button
                         onClick={() => setBlackoutDates(prev => prev.filter((_, i) => i !== idx))}
                         className="rounded-full p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition"
+                        aria-label={isAr ? "حذف فترة الإجازة" : "Remove vacation period"}
                       >
                         <X className="h-3.5 w-3.5" />
                       </button>
                     </div>
                   );
                 })}
-                <button
-                  onClick={() => {
-                    toast.info(isAr ? "سيتم فتح منتقي التاريخ" : "Date picker will open");
-                  }}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-dashed px-3 py-2 text-xs font-bold text-muted-foreground hover:border-primary hover:text-primary transition"
-                >
-                  <Calendar className="h-3.5 w-3.5" />
-                  {isAr ? "+ إضافة فترة إجازة جديدة" : "+ Add Blackout Period"}
-                </button>
+                {!isAddingBlackout ? (
+                  <button
+                    type="button"
+                    onClick={() => setIsAddingBlackout(true)}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-dashed px-3 py-2 text-xs font-bold text-muted-foreground hover:border-primary hover:text-primary transition"
+                  >
+                    <Calendar className="h-3.5 w-3.5" />
+                    {isAr ? "+ إضافة فترة إجازة جديدة" : "+ Add Blackout Period"}
+                  </button>
+                ) : (
+                  <div className="flex flex-col gap-3 rounded-lg border bg-background p-3 sm:flex-row sm:items-end">
+                    <div className="flex-1">
+                      <label htmlFor="blackout-start" className="mb-1.5 block text-xs font-semibold text-foreground">
+                        {isAr ? "من تاريخ" : "Start Date"}
+                      </label>
+                      <input id="blackout-start" type="date" value={newBlackoutFrom} onChange={(event) => setNewBlackoutFrom(event.target.value)} className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:border-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <label htmlFor="blackout-end" className="mb-1.5 block text-xs font-semibold text-foreground">
+                        {isAr ? "إلى تاريخ" : "End Date"}
+                      </label>
+                      <input id="blackout-end" type="date" min={newBlackoutFrom || undefined} value={newBlackoutTo} onChange={(event) => setNewBlackoutTo(event.target.value)} className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:border-primary" />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!newBlackoutFrom || !newBlackoutTo) {
+                          toast.error(isAr ? "يرجى اختيار تاريخ البداية والنهاية" : "Select both a start and end date");
+                          return;
+                        }
+                        if (newBlackoutTo < newBlackoutFrom) {
+                          toast.error(isAr ? "يجب أن يكون تاريخ النهاية بعد تاريخ البداية" : "End date must be on or after the start date");
+                          return;
+                        }
+                        setBlackoutDates((ranges) => [...ranges, { from: newBlackoutFrom, to: newBlackoutTo }]);
+                        setNewBlackoutFrom("");
+                        setNewBlackoutTo("");
+                        setIsAddingBlackout(false);
+                      }}
+                      className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-foreground hover:bg-primary/90"
+                    >
+                      {isAr ? "حفظ الإجازة / Add" : "Add / حفظ الإجازة"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsAddingBlackout(false);
+                        setNewBlackoutFrom("");
+                        setNewBlackoutTo("");
+                      }}
+                      className="rounded-lg px-3 py-2 text-sm font-bold text-muted-foreground hover:bg-muted"
+                    >
+                      {isAr ? "إلغاء" : "Cancel"}
+                    </button>
+                  </div>
+                )}
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 {isAr
@@ -666,29 +789,21 @@ function CreatorPage() {
             </p>
 
             <div className="space-y-4">
-              {campaignPlatforms.includes("instagram") && (
-                <div>
-                  <label className="mb-1.5 block text-xs font-semibold text-foreground">
-                    {isAr ? "رابط ستوري إنستغرام" : "Instagram Story URL"}
-                  </label>
-                  <div className="flex items-center rounded-lg border bg-background px-3 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20">
-                    <LinkIcon className="h-4 w-4 text-muted-foreground shrink-0" />
-                    <input type="url" placeholder="https://instagram.com/..." className="w-full bg-transparent p-2.5 text-sm outline-none" dir="ltr" />
-                  </div>
-                </div>
-              )}
+              {campaignPlatforms.map((platform) => {
+                const field = proofPlatformFields[platform];
 
-              {campaignPlatforms.includes("tiktok") && (
-                <div>
-                  <label className="mb-1.5 block text-xs font-semibold text-foreground">
-                    {isAr ? "رابط فيديو تيك توك" : "TikTok Video URL"}
-                  </label>
-                  <div className="flex items-center rounded-lg border bg-background px-3 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20">
-                    <LinkIcon className="h-4 w-4 text-muted-foreground shrink-0" />
-                    <input type="url" placeholder="https://tiktok.com/..." className="w-full bg-transparent p-2.5 text-sm outline-none" dir="ltr" />
+                return (
+                  <div key={platform}>
+                    <label className="mb-1.5 block text-xs font-semibold text-foreground">
+                      {field.label}
+                    </label>
+                    <div className="flex items-center rounded-lg border bg-background px-3 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20">
+                      <LinkIcon className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <input type="url" placeholder={field.placeholder} className="w-full bg-transparent p-2.5 text-sm outline-none" dir="ltr" />
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })}
             </div>
 
             <div className="mt-8 flex justify-end gap-3">
