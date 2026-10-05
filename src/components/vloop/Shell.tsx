@@ -96,6 +96,13 @@ export function AppHeader() {
   const router = useRouter();
   const isPublic = location.pathname === "/";
   const isCreator = location.pathname.startsWith("/creator");
+  const homeDestination = isCreator
+    ? "/creator"
+    : ["/merchant", "/campaigns", "/invoices"].some((section) =>
+          location.pathname.startsWith(section),
+        )
+      ? "/merchant"
+      : "/";
   const tr = (x: L) => x[lang];
   const [copied, setCopied] = useState(false);
   const [menu, setMenu] = useState(false);
@@ -146,10 +153,10 @@ export function AppHeader() {
       {/* NAV */}
       <header className="sticky top-0 z-40 whitespace-nowrap border-b bg-background/90 backdrop-blur">
         <div className="mx-auto flex h-16 w-[92%] max-w-[1680px] items-center gap-6 px-4 lg:px-8">
-          <Link to="/" className="flex shrink-0 items-center gap-2">
+          <Link to={homeDestination} className="flex shrink-0 items-center gap-2">
             <img src="/logo.png" alt="Vloop" className="h-8 w-auto" />
-            <span className="text-lg font-extrabold">
-              Vloop <span className="font-light text-muted-foreground">|</span> ڤلوب
+            <span className="text-lg font-extrabold tracking-tight" dir="ltr">
+              Vloop <span className="font-normal text-border">|</span> ڤلوب
             </span>
           </Link>
           {isPublic ? (
