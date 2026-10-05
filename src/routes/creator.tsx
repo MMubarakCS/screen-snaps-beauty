@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { Plane } from "lucide-react";
 import {
   Copy,
   Wallet,
@@ -16,11 +17,13 @@ import {
   AlertCircle,
   Calendar,
   CalendarRange,
-  Send
+  Send,
+  Pencil
 } from "lucide-react";
 import { useLang } from "@/components/vloop/Shell";
 import { fmtBHD } from "@/lib/vloop-data";
 import { toast } from "sonner";
+import c2 from "@/assets/creator-2.jpg";
 
 export const Route = createFileRoute("/creator")({
   head: () => ({
@@ -44,6 +47,18 @@ function CreatorPage() {
   
   // States for campaign
   const [campaignStatus, setCampaignStatus] = useState<"new" | "accepted" | "declined">("new");
+
+  // Decline modal states
+  const [declineReason, setDeclineReason] = useState(0);
+  const [otherReasonText, setOtherReasonText] = useState("");
+
+  // Blackout / Vacation dates
+  const [blackoutDates, setBlackoutDates] = useState<{ from: string; to: string }[]>([
+    { from: "2026-11-10", to: "2026-11-15" }
+  ]);
+
+  // Campaign platforms (simulated from brief)
+  const campaignPlatforms = ["instagram", "tiktok"] as const;
 
   // Schedule Management States
   const [daysOff, setDaysOff] = useState<string[]>(["الجمعة", "السبت"]);
@@ -80,10 +95,63 @@ function CreatorPage() {
     toast.success(isAr ? "تم إرسال الإثبات بنجاح وبدأت مهلة الاعتماد" : "Proof submitted, approval period started");
   };
 
+  const openProfileModal = () => {
+    window.dispatchEvent(new CustomEvent("open-creator-profile-modal"));
+  };
+
   return (
     <div className="min-h-screen bg-background pb-12">
       <main className="mx-auto w-[92%] max-w-[1680px] space-y-8 px-4 py-8 lg:px-8 2xl:space-y-12 2xl:py-12">
-        
+
+        {/* 1. Profile Hero Banner with Cover Photo */}
+        <section className="h-44 sm:h-52 w-full rounded-2xl overflow-hidden relative border bg-muted">
+          {/* Sleek gradient cover placeholder */}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-sky/20 to-violet-500/25" />
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNCI+PHBhdGggZD0iTTM2IDE4YzEuNjU3IDAgMy0xLjM0MyAzLTNzLTEuMzQzLTMtMy0zLTMgMS4zNDMtMyAzIDEuMzQzIDMgMyAzeiIvPjwvZz48L2c+PC9zdmc+')] opacity-60" />
+
+          {/* Edit media kit button */}
+          <button
+            onClick={openProfileModal}
+            className="absolute top-3 end-3 sm:top-4 sm:end-4 z-10 inline-flex items-center gap-1.5 rounded-lg bg-background/80 backdrop-blur-sm px-3 py-1.5 text-xs font-bold text-foreground shadow-sm border border-white/20 transition hover:bg-background/95"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+            {isAr ? "تعديل الميديا كيت" : "Edit Media Kit"}
+          </button>
+
+          {/* Overlaid Profile Header */}
+          <div className="absolute bottom-0 inset-x-0 p-4 sm:p-5">
+            <div className="flex items-end gap-3">
+              <img
+                src={c2}
+                alt={isAr ? "يوسف المناعي" : "Yousif Al-Mannai"}
+                className="size-16 rounded-full border-2 border-background object-cover shadow-lg shrink-0"
+              />
+              <div className="flex flex-col items-start text-start pb-0.5">
+                <div className="flex items-center gap-1.5">
+                  <h2 className="text-lg font-bold text-foreground drop-shadow-sm">
+                    {isAr ? "يوسف المناعي" : "Yousif Al-Mannai"}
+                  </h2>
+                  <BadgeCheck className="size-4 text-primary shrink-0" />
+                </div>
+                <span className="text-xs text-muted-foreground font-medium" style={{ direction: "ltr", unicodeBidi: "isolate" }}>
+                  @yousif.bites
+                </span>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-1.5 mt-2.5 ms-[76px]">
+              <span className="inline-flex items-center gap-1 rounded-full bg-background/80 backdrop-blur-sm px-2.5 py-1 text-[11px] font-semibold text-foreground border border-white/20 shadow-sm">
+                📸 Instagram: @yousif.bites
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-background/80 backdrop-blur-sm px-2.5 py-1 text-[11px] font-semibold text-foreground border border-white/20 shadow-sm">
+                🎵 TikTok: @yousif.vlogs
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-background/80 backdrop-blur-sm px-2.5 py-1 text-[11px] font-semibold text-foreground border border-white/20 shadow-sm">
+                👻 Snapchat: @yousif_snap
+              </span>
+            </div>
+          </div>
+        </section>
+
         {/* 2. Top Summary & Bio-Link Hub */}
         <section className="rounded-2xl border bg-card p-6 shadow-soft md:p-8">
           <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
@@ -192,6 +260,53 @@ function CreatorPage() {
                 {isAr 
                   ? "لن تتمكن المتاجر من اختيار هذه الأيام عند حجز حملة معك." 
                   : "Merchants won't be able to select these days when booking a campaign with you."}
+              </p>
+            </div>
+
+            {/* Blackout / Vacation Dates */}
+            <div className="space-y-3 md:col-span-2 pt-4 border-t">
+              <label className="block text-sm font-bold text-foreground">
+                {isAr ? "حظر تواريخ محددة (إجازة أو سفر)" : "Specific Blackout Dates"}
+              </label>
+              <div className="space-y-2">
+                {blackoutDates.map((range, idx) => {
+                  const fromDate = new Date(range.from);
+                  const toDate = new Date(range.to);
+                  const fmtDate = (d: Date) => {
+                    const months = isAr
+                      ? ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"]
+                      : ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+                    return `${d.getDate()} ${months[d.getMonth()]}`;
+                  };
+                  return (
+                    <div key={idx} className="flex items-center gap-2">
+                      <span className="inline-flex items-center gap-2 rounded-lg border bg-background px-3 py-2 text-sm font-medium text-foreground">
+                        <Plane className="h-4 w-4 text-sky" />
+                        {isAr ? "✈️ فترة إجازة:" : "✈️ Vacation:"} {fmtDate(fromDate)} – {fmtDate(toDate)}
+                      </span>
+                      <button
+                        onClick={() => setBlackoutDates(prev => prev.filter((_, i) => i !== idx))}
+                        className="rounded-full p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  );
+                })}
+                <button
+                  onClick={() => {
+                    toast.info(isAr ? "سيتم فتح منتقي التاريخ" : "Date picker will open");
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-dashed px-3 py-2 text-xs font-bold text-muted-foreground hover:border-primary hover:text-primary transition"
+                >
+                  <Calendar className="h-3.5 w-3.5" />
+                  {isAr ? "+ إضافة فترة إجازة جديدة" : "+ Add Blackout Period"}
+                </button>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {isAr
+                  ? "لن يتمكن أي متجر من حجز هذه التواريخ."
+                  : "No merchant will be able to book these dates."}
               </p>
             </div>
           </div>
@@ -319,7 +434,7 @@ function CreatorPage() {
                         <div className="mt-4 flex items-center gap-4 text-sm font-medium text-foreground">
                           <span className="flex items-center gap-1.5 rounded-lg bg-muted px-3 py-1.5">
                             <Clock className="h-4 w-4 text-muted-foreground" />
-                            <span dir="ltr">15 Oct 2026</span>
+                            <span>{isAr ? "15 أكتوبر 2026" : "Oct 15, 2026"}</span>
                           </span>
                         </div>
                       </div>
@@ -384,59 +499,63 @@ function CreatorPage() {
             {tab === "active" && (
               <div className="space-y-4">
                 {campaignStatus === "accepted" && (
-                  <div className="rounded-2xl border bg-card p-6 shadow-soft">
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl border bg-card shadow-soft">
+                    <div className="flex items-start gap-3.5">
+                      <div className="size-11 rounded-xl bg-primary/10 flex items-center justify-center font-bold text-primary shrink-0">
+                        FB
+                      </div>
                       <div>
-                        <h3 className="text-lg font-bold">
-                          {isAr ? "شركة فليم برجر ذ.م.م (وجبات سريعة)" : "Flame Burger Co. (Fast Food)"}
-                        </h3>
-                        <div className="mt-2 space-y-1">
-                          <p className="text-sm text-muted-foreground">
-                            {isAr ? "الموعد المجدول:" : "Scheduled Date:"} <span className="font-semibold text-foreground" dir="ltr">15 Oct 2026</span>
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            {isAr ? "صافي الأتعاب المضمونة:" : "Secured Payout:"} <span className="num font-bold text-foreground">150.000 {isAr ? "د.ب" : "BHD"}</span> <span className="text-xs">({isAr ? "محجوزة في الضمان" : "in escrow"})</span>
-                          </p>
+                        <h4 className="font-bold text-base text-foreground">
+                          {isAr ? "شركة فليم برجر ذ.م.م" : "Flame Burger Co."}
+                        </h4>
+                        <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground mt-1">
+                          <span>{isAr ? "📅 الموعد: 15 أكتوبر 2026" : "📅 Date: Oct 15, 2026"}</span>
+                          <span>•</span>
+                          <span className="font-semibold text-emerald-600">
+                            {isAr ? "💰 150.000 د.ب (محجوز بالضمان)" : "💰 150.000 BHD (in escrow)"}
+                          </span>
+                          <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-[11px] font-medium">
+                            {isAr ? "مجدولة" : "Scheduled"}
+                          </span>
                         </div>
-                        <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-warning-soft px-3 py-1.5 text-xs font-bold text-warning">
-                          <Calendar className="h-3.5 w-3.5" />
-                          {isAr ? "مجدولة / Scheduled" : "Scheduled"}
-                        </span>
                       </div>
-                      <button
-                        onClick={() => setProofModal(true)}
-                        className="rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-soft transition hover:bg-primary/90"
-                      >
-                        {isAr ? "🚀 رفع إثبات النشر" : "🚀 Submit Proof"}
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                <div className="rounded-2xl border bg-card p-6 shadow-soft">
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <h3 className="text-lg font-bold">{isAr ? "مقهى برو آند كو (قهوة مختصة)" : "Brew & Co. Cafe (Specialty Coffee)"}</h3>
-                      <div className="mt-2 space-y-1">
-                        <p className="text-sm text-muted-foreground">
-                          {isAr ? "الموعد المجدول:" : "Scheduled Date:"} <span className="font-semibold text-foreground" dir="ltr">10 Oct 2026</span>
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {isAr ? "صافي الأتعاب المضمونة:" : "Secured Payout:"} <span className="num font-bold text-foreground">120.000 {isAr ? "د.ب" : "BHD"}</span> <span className="text-xs">({isAr ? "محجوزة في الضمان" : "in escrow"})</span>
-                        </p>
-                      </div>
-                      <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-warning-soft px-3 py-1.5 text-xs font-bold text-warning">
-                        <Calendar className="h-3.5 w-3.5" />
-                        {isAr ? "مجدولة / Scheduled" : "Scheduled"}
-                      </span>
                     </div>
                     <button
                       onClick={() => setProofModal(true)}
-                      className="rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-soft transition hover:bg-primary/90"
+                      className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm shadow-soft hover:bg-primary/90 shrink-0"
                     >
-                      {isAr ? "🚀 رفع إثبات النشر" : "🚀 Submit Proof"}
+                      🚀 {isAr ? "رفع إثبات النشر" : "Submit Proof"}
                     </button>
                   </div>
+                )}
+
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl border bg-card shadow-soft">
+                  <div className="flex items-start gap-3.5">
+                    <div className="size-11 rounded-xl bg-sky/10 flex items-center justify-center font-bold text-sky shrink-0">
+                      BC
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-base text-foreground">
+                        {isAr ? "مقهى برو آند كو" : "Brew & Co. Cafe"}
+                      </h4>
+                      <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground mt-1">
+                        <span>{isAr ? "📅 الموعد: 10 أكتوبر 2026" : "📅 Date: Oct 10, 2026"}</span>
+                        <span>•</span>
+                        <span className="font-semibold text-emerald-600">
+                          {isAr ? "💰 120.000 د.ب (محجوز بالضمان)" : "💰 120.000 BHD (in escrow)"}
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-[11px] font-medium">
+                          {isAr ? "مجدولة" : "Scheduled"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setProofModal(true)}
+                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm shadow-soft hover:bg-primary/90 shrink-0"
+                  >
+                    🚀 {isAr ? "رفع إثبات النشر" : "Submit Proof"}
+                  </button>
                 </div>
               </div>
             )}
@@ -476,29 +595,49 @@ function CreatorPage() {
                 isAr ? "الميزانية لا تناسب حجم ومستوى المتجر (طلب تسعيرة خاصة)." : "Budget does not match brand requirements.",
                 isAr ? "تضارب في المواعيد / الجدول ممتلئ في هذا اليوم." : "Schedule conflict / fully booked.",
                 isAr ? "محتوى العرض لا يتناسب مع طبيعة وأسلوب حسابي." : "Content doesn't align with my style.",
-                isAr ? "سبب آخر (حقل نصي إضافي)." : "Other (specify)."
+                isAr ? "سبب آخر" : "Other"
               ].map((reason, i) => (
-                <label key={i} className="flex cursor-pointer items-start gap-3 rounded-lg border p-3 hover:bg-muted/50">
-                  <input type="radio" name="decline" className="mt-0.5" defaultChecked={i === 0} />
+                <label key={i} className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition ${declineReason === i ? "border-primary bg-primary/5" : "hover:bg-muted/50"}`}>
+                  <input
+                    type="radio"
+                    name="decline"
+                    className="mt-0.5"
+                    checked={declineReason === i}
+                    onChange={() => { setDeclineReason(i); if (i !== 3) setOtherReasonText(""); }}
+                  />
                   <span className="text-sm font-medium text-foreground">{reason}</span>
                 </label>
               ))}
             </div>
 
+            {declineReason === 3 && (
+              <div className="mt-3">
+                <textarea
+                  value={otherReasonText}
+                  onChange={(e) => setOtherReasonText(e.target.value)}
+                  placeholder={isAr ? "يرجى كتابة سبب الاعتذار بالتفصيل (إلزامي)..." : "Please describe your reason in detail (required)..."}
+                  className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 min-h-[80px] resize-none"
+                />
+              </div>
+            )}
+
             <div className="mt-6 flex justify-end gap-3">
               <button
-                onClick={() => setDeclineModal(false)}
+                onClick={() => { setDeclineModal(false); setDeclineReason(0); setOtherReasonText(""); }}
                 className="rounded-lg px-4 py-2 text-sm font-bold text-muted-foreground hover:bg-muted"
               >
                 {isAr ? "إلغاء" : "Cancel"}
               </button>
               <button
+                disabled={declineReason === 3 && otherReasonText.trim().length < 3}
                 onClick={() => {
                   setDeclineModal(false);
                   setCampaignStatus("declined");
+                  setDeclineReason(0);
+                  setOtherReasonText("");
                   toast.success(isAr ? "تم الاعتذار بنجاح" : "Declined successfully");
                 }}
-                className="rounded-lg bg-destructive px-4 py-2 text-sm font-bold text-destructive-foreground hover:bg-destructive/90"
+                className="rounded-lg bg-destructive px-4 py-2 text-sm font-bold text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
                 {isAr ? "تأكيد الاعتذار واسترداد الضمان" : "Confirm Decline & Refund Escrow"}
               </button>
@@ -527,25 +666,29 @@ function CreatorPage() {
             </p>
 
             <div className="space-y-4">
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold text-foreground">
-                  {isAr ? "رابط ستوري إنستغرام" : "Instagram Story URL"}
-                </label>
-                <div className="flex items-center rounded-lg border bg-background px-3 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20">
-                  <LinkIcon className="h-4 w-4 text-muted-foreground shrink-0" />
-                  <input type="url" placeholder="https://instagram.com/..." className="w-full bg-transparent p-2.5 text-sm outline-none" dir="ltr" />
+              {campaignPlatforms.includes("instagram") && (
+                <div>
+                  <label className="mb-1.5 block text-xs font-semibold text-foreground">
+                    {isAr ? "رابط ستوري إنستغرام" : "Instagram Story URL"}
+                  </label>
+                  <div className="flex items-center rounded-lg border bg-background px-3 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20">
+                    <LinkIcon className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <input type="url" placeholder="https://instagram.com/..." className="w-full bg-transparent p-2.5 text-sm outline-none" dir="ltr" />
+                  </div>
                 </div>
-              </div>
+              )}
 
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold text-foreground">
-                  {isAr ? "رابط فيديو تيك توك (اختياري)" : "TikTok Video URL (Optional)"}
-                </label>
-                <div className="flex items-center rounded-lg border bg-background px-3 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20">
-                  <LinkIcon className="h-4 w-4 text-muted-foreground shrink-0" />
-                  <input type="url" placeholder="https://tiktok.com/..." className="w-full bg-transparent p-2.5 text-sm outline-none" dir="ltr" />
+              {campaignPlatforms.includes("tiktok") && (
+                <div>
+                  <label className="mb-1.5 block text-xs font-semibold text-foreground">
+                    {isAr ? "رابط فيديو تيك توك" : "TikTok Video URL"}
+                  </label>
+                  <div className="flex items-center rounded-lg border bg-background px-3 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20">
+                    <LinkIcon className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <input type="url" placeholder="https://tiktok.com/..." className="w-full bg-transparent p-2.5 text-sm outline-none" dir="ltr" />
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             <div className="mt-8 flex justify-end gap-3">

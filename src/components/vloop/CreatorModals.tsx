@@ -1,4 +1,4 @@
-import { X, ImagePlus, CheckCircle2, UserCog, Upload, Settings } from "lucide-react";
+import { X, ImagePlus, CheckCircle2, UserCog, Upload, Settings, Ghost } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useLang } from "./Shell";
@@ -74,6 +74,14 @@ export function CreatorProfileModal({ onClose }: { onClose: () => void }) {
               </label>
               <input defaultValue="@yousif.vlogs" className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:border-primary" dir="ltr" />
             </div>
+          </div>
+
+          <div>
+            <label className="mb-1.5 block text-sm font-bold text-foreground flex items-center gap-2">
+              <Ghost className="h-4 w-4 text-yellow-500" />
+              {isAr ? "حساب سناب شات الرسمي / Snapchat Handle" : "Snapchat Handle"}
+            </label>
+            <input defaultValue="@yousif_snap" placeholder="@username" className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:border-primary" dir="ltr" />
           </div>
 
           <div>

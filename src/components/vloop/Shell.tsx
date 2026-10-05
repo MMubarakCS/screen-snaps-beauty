@@ -124,11 +124,14 @@ export function AppHeader() {
       }
     };
     const handleOpenHelp = () => setHelpOpen(true);
+    const handleOpenCreatorProfile = () => setModal("creator-profile");
     window.addEventListener("open-auth-modal", handleOpenModal);
     window.addEventListener("open-help-modal", handleOpenHelp);
+    window.addEventListener("open-creator-profile-modal", handleOpenCreatorProfile);
     return () => {
       window.removeEventListener("open-auth-modal", handleOpenModal);
       window.removeEventListener("open-help-modal", handleOpenHelp);
+      window.removeEventListener("open-creator-profile-modal", handleOpenCreatorProfile);
     };
   }, []);
 
