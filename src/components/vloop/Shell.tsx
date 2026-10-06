@@ -220,12 +220,12 @@ export function AppHeader() {
                 <DropdownMenuContent align="end" className="min-w-60">
                   <DropdownMenuItem onSelect={() => setAdminSettingsOpen(true)} className="cursor-pointer">
                     <Settings className="h-4 w-4" />
-                    {lang === "ar" ? "إعدادات الحساب والأمان / Admin Settings" : "إعدادات الحساب والأمان / Admin Settings"}
+                    {lang === "ar" ? "إعدادات الحساب والأمان" : "Admin Settings"}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onSelect={() => setLogoutDialog(true)} className="cursor-pointer text-destructive focus:text-destructive">
                     <LogOut className="h-4 w-4" />
-                    {lang === "ar" ? "تسجيل الخروج / Log out" : "تسجيل الخروج / Log out"}
+                    {lang === "ar" ? "تسجيل الخروج" : "Log out"}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -831,7 +831,7 @@ function AdminSettingsModal({
         <div className="flex items-center justify-between gap-3">
           <h2 id="admin-settings-title" className="flex items-center gap-2 text-lg font-bold">
             <Settings className="h-5 w-5 text-primary" />
-            {isAr ? "إعدادات الحساب والأمان / Admin Settings" : "إعدادات الحساب والأمان / Admin Settings"}
+            {isAr ? "إعدادات الحساب والأمان" : "Admin Settings"}
           </h2>
           <button type="button" onClick={onClose} aria-label={isAr ? "إغلاق" : "Close"} className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted">
             <X className="h-5 w-5" />

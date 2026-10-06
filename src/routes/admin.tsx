@@ -3,10 +3,11 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
   Lock, TrendingUp, AlertTriangle, BadgeCheck, ExternalLink, Check, HelpCircle, Scale,
-  Search, X, ShieldAlert, Ban, Gavel, Users, Image as ImageIcon,
+  Search, ShieldAlert, Ban, Gavel, Users,
 } from "lucide-react";
 import { useLang } from "@/components/vloop/Shell";
-import { creators, fmtBHD, type Creator, type L } from "@/lib/vloop-data";
+import { creators, fmtBHD, type L } from "@/lib/vloop-data";
+import { InsightsProofModal, type InsightsVerification, type SocialPlatform } from "@/components/vloop/InsightsProofModal";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -22,20 +23,9 @@ export const Route = createFileRoute("/admin")({
 });
 
 type Tab = "disputes" | "verify" | "users";
-type UserRow = { id: string; name: L; handle: string; type: "merchant" | "creator"; score: number; status: "active" | "suspended"; strikes: number };
-type Verification = {
-  id: string;
-  creator: Creator;
-  currentFollowers: string;
-  currentViews: string;
-  requestedFollowers: string;
-  requestedViews: string;
-  screenshotDataUrl: string | null;
-  screenshotName: string | null;
-  status: "pending" | "approved" | "rejected";
-};
+type UserRow = { id: string; name: L; handle: string; type: "merchant" | "creator"; score?: number; completedCampaigns?: number; status: "active" | "suspended"; strikes: number };
 
-const initialVerifications: Verification[] = [
+const initialVerifications: InsightsVerification[] = [
   {
     id: "1",
     creator: creators[0]!,
@@ -45,6 +35,8 @@ const initialVerifications: Verification[] = [
     requestedViews: "19.5K",
     screenshotDataUrl: null,
     screenshotName: null,
+    platform: "instagram",
+    profileUrl: "https://instagram.com/fatima_foodie",
     status: "pending",
   },
   {
@@ -56,15 +48,17 @@ const initialVerifications: Verification[] = [
     requestedViews: "22K",
     screenshotDataUrl: null,
     screenshotName: null,
+    platform: "tiktok",
+    profileUrl: "https://www.tiktok.com/@noor.daily",
     status: "pending",
   },
 ];
 
 const initialUsers: UserRow[] = [
-  { id: "u1", name: { ar: "شركة فليم برجر ذ.م.م", en: "Flame Burger Co. W.L.L" }, handle: "@flame_burger", type: "merchant", score: 97, status: "active", strikes: 0 },
+  { id: "u1", name: { ar: "شركة فليم برجر ذ.م.م", en: "Flame Burger Co. W.L.L" }, handle: "@flame_burger", type: "merchant", completedCampaigns: 14, status: "active", strikes: 0 },
   { id: "u2", name: { ar: "يوسف المناعي", en: "Yousif Al-Mannai" }, handle: "@yousif.bites", type: "creator", score: 96, status: "active", strikes: 0 },
   { id: "u3", name: { ar: "فاطمة الحداد", en: "Fatima Al-Haddad" }, handle: "@fatima_foodie", type: "creator", score: 98, status: "active", strikes: 0 },
-  { id: "u4", name: { ar: "بيك اند كو", en: "Brew & Co. Cafe" }, handle: "@brewandco.bh", type: "merchant", score: 92, status: "active", strikes: 1 },
+  { id: "u4", name: { ar: "بيك اند كو", en: "Brew & Co. Cafe" }, handle: "@brewandco.bh", type: "merchant", completedCampaigns: 8, status: "active", strikes: 1 },
   { id: "u5", name: { ar: "خالد البوعينين", en: "Khalid Al-Buainain" }, handle: "@khalid_eats_bh", type: "creator", score: 94, status: "active", strikes: 0 },
 ];
 
@@ -74,13 +68,29 @@ function AdminPage() {
   const [tab, setTab] = useState<Tab>("disputes");
   const [dispute, setDispute] = useState<null | "creator" | "merchant" | "split">(null);
   const [verifications, setVerifications] = useState(initialVerifications);
-  const [proofRequest, setProofRequest] = useState<Verification | null>(null);
+  const [proofRequest, setProofRequest] = useState<InsightsVerification | null>(null);
   const [users, setUsers] = useState(initialUsers);
+  const [userSearch, setUserSearch] = useState("");
+  const [userTypeFilter, setUserTypeFilter] = useState<"all" | "merchant" | "creator">("all");
+  const [userPage, setUserPage] = useState(1);
   const [confirmSuspend, setConfirmSuspend] = useState<UserRow | null>(null);
 
   const disputesOpen = dispute === null ? 1 : 0;
   const verificationsOpen = verifications.filter((verification) => verification.status === "pending").length;
   const yousif = creators[1]!;
+  const filteredUsers = users.filter((user) => {
+    const matchesType = userTypeFilter === "all" || user.type === userTypeFilter;
+    const query = userSearch.trim().toLocaleLowerCase();
+    const matchesSearch =
+      !query ||
+      user.name.ar.toLocaleLowerCase().includes(query) ||
+      user.name.en.toLocaleLowerCase().includes(query) ||
+      user.handle.toLocaleLowerCase().includes(query);
+    return matchesType && matchesSearch;
+  });
+  const usersPerPage = 2;
+  const usersPageCount = Math.max(1, Math.ceil(filteredUsers.length / usersPerPage));
+  const paginatedUsers = filteredUsers.slice((userPage - 1) * usersPerPage, userPage * usersPerPage);
 
   useEffect(() => {
     try {
@@ -119,6 +129,10 @@ function AdminPage() {
         !("requestedViews" in parsed) ||
         typeof parsed.requestedViews !== "number" ||
         !Number.isFinite(parsed.requestedViews) ||
+        !("platform" in parsed) ||
+        (parsed.platform !== "instagram" && parsed.platform !== "tiktok" && parsed.platform !== "snapchat") ||
+        !("profileUrl" in parsed) ||
+        typeof parsed.profileUrl !== "string" ||
         !("screenshotDataUrl" in parsed) ||
         typeof parsed.screenshotDataUrl !== "string" ||
         !parsed.screenshotDataUrl.startsWith("data:image/") ||
@@ -129,6 +143,15 @@ function AdminPage() {
       }
       const creator = creators.find((item) => item.id === parsed.creatorId);
       if (!creator) throw new Error("Saved creator verification request refers to an unknown creator.");
+      const profileUrl = new URL(parsed.profileUrl);
+      const platformHosts: Record<SocialPlatform, string[]> = {
+        instagram: ["instagram.com", "www.instagram.com"],
+        tiktok: ["tiktok.com", "www.tiktok.com"],
+        snapchat: ["snapchat.com", "www.snapchat.com"],
+      };
+      if (profileUrl.protocol !== "https:" || !platformHosts[parsed.platform].includes(profileUrl.hostname.toLowerCase())) {
+        throw new Error("Saved creator profile URL does not match its selected platform.");
+      }
       const savedDecisions = window.localStorage.getItem("vloop.stats-verification-decisions");
       const parsedDecisions: unknown = savedDecisions ? JSON.parse(savedDecisions) : {};
       if (typeof parsedDecisions !== "object" || parsedDecisions === null || Array.isArray(parsedDecisions)) {
@@ -147,6 +170,8 @@ function AdminPage() {
         requestedViews: toCompactCount(parsed.requestedViews),
         screenshotDataUrl: parsed.screenshotDataUrl,
         screenshotName: parsed.screenshotName,
+        platform: parsed.platform,
+        profileUrl: profileUrl.toString(),
         status:
           parsedDecisions[creator.id] === "approved" || parsedDecisions[creator.id] === "rejected"
             ? parsedDecisions[creator.id]
@@ -163,7 +188,7 @@ function AdminPage() {
     }
   }, []);
 
-  const updateVerification = (verification: Verification, status: "approved" | "rejected") => {
+  const updateVerification = (verification: InsightsVerification, status: "approved" | "rejected") => {
     try {
       if (status === "approved") {
         const savedStats = window.localStorage.getItem("vloop.verified-creator-stats");
@@ -382,76 +407,99 @@ function AdminPage() {
       )}
 
       {tab === "users" && (
-        <div className="overflow-x-auto rounded-2xl border bg-card shadow-soft">
-          <table className="w-full min-w-[720px] text-sm">
-            <thead className="bg-surface text-xs text-muted-foreground">
-              <tr>{[{ ar: "المستخدم", en: "User" }, { ar: "نوع الحساب", en: "Account type" }, { ar: "مؤشر الموثوقية", en: "Reliability" }, { ar: "الحالة", en: "Status" }, { ar: "الإجراءات", en: "Actions" }].map((h, i) => <th key={i} className="px-4 py-3 text-start font-semibold">{tr(h)}</th>)}</tr>
-            </thead>
-            <tbody>
-              {users.map((u) => (
-                <tr key={u.id} className="border-t">
-                  <td className="px-4 py-3"><p className="font-bold">{tr(u.name)}</p><p className="text-xs text-muted-foreground" dir="ltr">{u.handle}</p></td>
-                  <td className="px-4 py-3"><span className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-xs font-semibold"><Users className="h-3 w-3" />{u.type === "merchant" ? tr({ ar: "متجر", en: "Merchant" }) : tr({ ar: "صانع محتوى", en: "Creator" })}</span></td>
-                  <td className="px-4 py-3"><span className="num font-bold">{u.score}%</span>{u.strikes > 0 && <span className="ms-2 text-xs font-semibold text-warning">{u.strikes} {tr({ ar: "إنذار", en: "strike(s)" })}</span>}</td>
-                  <td className="px-4 py-3">{u.status === "active" ? <span className="rounded-full bg-success-soft px-2.5 py-1 text-xs font-bold text-success">{tr({ ar: "نشط", en: "Active" })}</span> : <span className="rounded-full bg-destructive/10 px-2.5 py-1 text-xs font-bold text-destructive">{tr({ ar: "معلّق", en: "Suspended" })}</span>}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex gap-2">
-                      <button disabled={u.status !== "active"} onClick={() => { setUsers((l) => l.map((x) => x.id === u.id ? { ...x, strikes: x.strikes + 1, score: Math.max(0, x.score - 5) } : x)); toast.warning(tr({ ar: "تم توجيه إنذار", en: "Strike issued" })); }} className="inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs font-semibold hover:bg-muted disabled:opacity-40"><AlertTriangle className="h-3.5 w-3.5" />{tr({ ar: "توجيه إنذار", en: "Issue Strike" })}</button>
-                      {u.status === "active" ? (
-                        <button onClick={() => setConfirmSuspend(u)} className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-destructive hover:bg-destructive/10"><Ban className="h-3.5 w-3.5" />{tr({ ar: "تعليق الحساب مؤقتاً", en: "Suspend Account" })}</button>
+        <div className="space-y-4">
+          <div className="flex flex-col gap-3 rounded-2xl border bg-card p-4 shadow-soft sm:flex-row">
+            <label className="relative flex-1">
+              <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <input
+                type="search"
+                value={userSearch}
+                onChange={(event) => { setUserSearch(event.target.value); setUserPage(1); }}
+                placeholder={tr({ ar: "ابحث باسم المستخدم، المعرف @، أو اسم المتجر...", en: "Search user name, @handle, or business name..." })}
+                className="w-full rounded-lg border bg-background py-2.5 pe-3 ps-9 text-sm outline-none focus:border-primary"
+              />
+            </label>
+            <select
+              value={userTypeFilter}
+              onChange={(event) => { setUserTypeFilter(event.target.value as typeof userTypeFilter); setUserPage(1); }}
+              aria-label={tr({ ar: "تصفية حسب نوع الحساب", en: "Filter by account type" })}
+              className="rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary"
+            >
+              <option value="all">{tr({ ar: "الكل", en: "All accounts" })}</option>
+              <option value="merchant">{tr({ ar: "المتاجر فقط", en: "Merchants only" })}</option>
+              <option value="creator">{tr({ ar: "صنّاع المحتوى فقط", en: "Creators only" })}</option>
+            </select>
+          </div>
+          <div className="overflow-x-auto rounded-2xl border bg-card shadow-soft">
+            <table className="w-full min-w-[720px] text-sm">
+              <thead className="bg-surface text-xs text-muted-foreground">
+                <tr>{[{ ar: "المستخدم", en: "User" }, { ar: "نوع الحساب", en: "Account type" }, { ar: "الموثوقية / النشاط", en: "Reliability / Activity" }, { ar: "الحالة", en: "Status" }, { ar: "الإجراءات", en: "Actions" }].map((h, i) => <th key={i} className="px-4 py-3 text-start font-semibold">{tr(h)}</th>)}</tr>
+              </thead>
+              <tbody>
+                {paginatedUsers.length ? paginatedUsers.map((u) => (
+                  <tr key={u.id} className="border-t">
+                    <td className="px-4 py-3"><p className="font-bold">{tr(u.name)}</p><p className="text-xs text-muted-foreground" dir="ltr">{u.handle}</p></td>
+                    <td className="px-4 py-3"><span className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-xs font-semibold"><Users className="h-3 w-3" />{u.type === "merchant" ? tr({ ar: "متجر", en: "Merchant" }) : tr({ ar: "صانع محتوى", en: "Creator" })}</span></td>
+                    <td className="px-4 py-3">
+                      {u.type === "creator" ? (
+                        <>
+                          <span className="num font-bold">{u.score}%</span>
+                          {u.strikes > 0 && <span className="ms-2 text-xs font-semibold text-warning">{u.strikes} {tr({ ar: "إنذار", en: "strike(s)" })}</span>}
+                        </>
                       ) : (
-                        <button onClick={() => setUsers((l) => l.map((x) => x.id === u.id ? { ...x, status: "active" } : x))} className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-primary hover:bg-primary/10">{tr({ ar: "إعادة التفعيل", en: "Reactivate" })}</button>
+                        <div className="flex flex-col items-start gap-1">
+                          <span className="font-semibold">{u.completedCampaigns} {tr({ ar: "حملة مكتملة", en: "completed campaigns" })}</span>
+                          {u.status === "active" && <span className="rounded-full bg-success-soft px-2 py-0.5 text-[11px] font-bold text-success">{tr({ ar: "موثوق (سجل تجاري نشط)", en: "Trusted (active commercial registration)" })}</span>}
+                        </div>
                       )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    </td>
+                    <td className="px-4 py-3">{u.status === "active" ? <span className="rounded-full bg-success-soft px-2.5 py-1 text-xs font-bold text-success">{tr({ ar: "نشط", en: "Active" })}</span> : <span className="rounded-full bg-destructive/10 px-2.5 py-1 text-xs font-bold text-destructive">{tr({ ar: "معلّق", en: "Suspended" })}</span>}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex gap-2">
+                        <button disabled={u.status !== "active"} onClick={() => { setUsers((l) => l.map((x) => x.id === u.id ? { ...x, strikes: x.strikes + 1, ...(x.type === "creator" ? { score: Math.max(0, (x.score ?? 0) - 5) } : {}) } : x)); toast.warning(tr({ ar: "تم توجيه إنذار", en: "Strike issued" })); }} className="inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs font-semibold hover:bg-muted disabled:opacity-40"><AlertTriangle className="h-3.5 w-3.5" />{tr({ ar: "توجيه إنذار", en: "Issue Strike" })}</button>
+                        {u.status === "active" ? (
+                          <button onClick={() => setConfirmSuspend(u)} className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-destructive hover:bg-destructive/10"><Ban className="h-3.5 w-3.5" />{tr({ ar: "تعليق الحساب مؤقتاً", en: "Suspend Account" })}</button>
+                        ) : (
+                          <button onClick={() => setUsers((l) => l.map((x) => x.id === u.id ? { ...x, status: "active" } : x))} className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-primary hover:bg-primary/10">{tr({ ar: "إعادة التفعيل", en: "Reactivate" })}</button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                )) : (
+                  <tr><td colSpan={5} className="px-4 py-10 text-center text-sm text-muted-foreground">{tr({ ar: "لا توجد حسابات مطابقة", en: "No matching accounts" })}</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+          <nav aria-label={tr({ ar: "ترقيم صفحات الحسابات", en: "User account pagination" })} className="flex items-center justify-center gap-4">
+            <button
+              disabled={userPage <= 1}
+              onClick={() => setUserPage((page) => Math.max(1, page - 1))}
+              className="rounded-lg border px-3 py-2 text-sm font-semibold hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {tr({ ar: "السابق", en: "Previous" })}
+            </button>
+            <span className="text-sm font-semibold text-muted-foreground">
+              {tr({ ar: `صفحة ${userPage} من ${usersPageCount}`, en: `Page ${userPage} of ${usersPageCount}` })}
+            </span>
+            <button
+              disabled={userPage >= usersPageCount}
+              onClick={() => setUserPage((page) => Math.min(usersPageCount, page + 1))}
+              className="rounded-lg border px-3 py-2 text-sm font-semibold hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {tr({ ar: "التالي", en: "Next" })}
+            </button>
+          </nav>
         </div>
       )}
 
-      {proofRequest && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-foreground/40 p-4 backdrop-blur-sm" onClick={() => setProofRequest(null)}>
-          <div role="dialog" aria-modal="true" aria-labelledby="insights-proof-title" className="my-auto w-full max-w-2xl rounded-2xl border bg-card p-5 shadow-lift sm:p-6" onClick={(e) => e.stopPropagation()}>
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <div>
-                <h3 id="insights-proof-title" className="font-bold">{tr({ ar: "إثبات الإحصائيات (Insights)", en: "Stats proof (Insights)" })}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">{tr(proofRequest.creator.name)} · <span dir="ltr">{proofRequest.creator.handle}</span></p>
-              </div>
-              <button onClick={() => setProofRequest(null)} aria-label={tr({ ar: "إغلاق", en: "Close" })} className="rounded-lg p-1.5 hover:bg-muted"><X className="h-5 w-5" /></button>
-            </div>
-            {proofRequest.screenshotDataUrl ? (
-              <img
-                src={proofRequest.screenshotDataUrl}
-                alt={tr({ ar: "لقطة شاشة Insights المرفقة من صانع المحتوى", en: "Creator-uploaded Insights screenshot" })}
-                className="h-96 w-full max-w-sm mx-auto object-contain rounded-xl border bg-muted shadow-sm"
-              />
-            ) : (
-              <div className="flex h-96 w-full max-w-sm mx-auto flex-col items-center justify-center gap-2 rounded-xl border bg-muted px-6 text-center shadow-sm">
-                <ImageIcon className="h-8 w-8 text-muted-foreground" />
-                <p className="font-semibold">{tr({ ar: "لم تُرفق لقطة شاشة فعلية لهذا الطلب", en: "No actual screenshot is attached to this request" })}</p>
-                <p className="text-sm text-muted-foreground">{tr({ ar: "ستظهر الصورة هنا بعد إرسالها من ملف صانع المحتوى.", en: "The uploaded image will appear here after the creator submits it." })}</p>
-              </div>
-            )}
-            {proofRequest.screenshotName && <p className="mt-2 text-center text-xs text-muted-foreground">{proofRequest.screenshotName}</p>}
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              <div className="rounded-xl border bg-surface p-3">
-                <p className="text-xs text-muted-foreground">{tr({ ar: "الأرقام الحالية", en: "Current stats" })}</p>
-                <p className="num mt-1 font-bold">{proofRequest.currentFollowers} {tr({ ar: "متابع", en: "followers" })} • {proofRequest.currentViews} {tr({ ar: "مشاهدات", en: "views" })}</p>
-              </div>
-              <div className="rounded-xl border border-primary/30 bg-primary/5 p-3">
-                <p className="text-xs text-primary">{tr({ ar: "الأرقام الجديدة المطلوبة", en: "Requested stats" })}</p>
-                <p className="num mt-1 font-bold"><strong>{proofRequest.requestedFollowers} {tr({ ar: "متابع", en: "followers" })} • {proofRequest.requestedViews} {tr({ ar: "مشاهدات", en: "views" })}</strong></p>
-              </div>
-            </div>
-            <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-              <button onClick={() => updateVerification(proofRequest, "rejected")} className="rounded-lg border border-destructive px-4 py-2.5 text-sm font-bold text-destructive hover:bg-destructive/10">{tr({ ar: "رفض الطلب ✗", en: "Reject request ✗" })}</button>
-              <button onClick={() => updateVerification(proofRequest, "approved")} className="rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-soft hover:bg-primary/90">{tr({ ar: "اعتماد وتوثيق الإحصائيات ✓", en: "Approve & verify stats ✓" })}</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <InsightsProofModal
+        verification={proofRequest}
+        lang={lang}
+        onClose={() => setProofRequest(null)}
+        onApprove={() => { if (proofRequest) updateVerification(proofRequest, "approved"); }}
+        onReject={() => { if (proofRequest) updateVerification(proofRequest, "rejected"); }}
+      />
 
       {confirmSuspend && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4 backdrop-blur-sm" onClick={() => setConfirmSuspend(null)}>

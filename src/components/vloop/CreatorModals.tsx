@@ -11,9 +11,12 @@ export function CreatorProfileModal({ onClose }: { onClose: () => void }) {
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [statsRequestOpen, setStatsRequestOpen] = useState(false);
+  const [statsPlatform, setStatsPlatform] = useState<"instagram" | "tiktok" | "snapchat">("instagram");
+  const [profileUrl, setProfileUrl] = useState("");
   const [newFollowers, setNewFollowers] = useState("");
   const [newStoryViews, setNewStoryViews] = useState("");
   const [insightsScreenshot, setInsightsScreenshot] = useState<File | null>(null);
+  const [verifiedCreatorStats, setVerifiedCreatorStats] = useState({ followers: "62K", storyViews: "11.8K" });
   const [statsRequestState, setStatsRequestState] = useState<{
     lastRequestedAt: number | null;
     storageAvailable: boolean;
@@ -29,6 +32,32 @@ export function CreatorProfileModal({ onClose }: { onClose: () => void }) {
     if (!avatarPreview) return;
     return () => URL.revokeObjectURL(avatarPreview);
   }, [avatarPreview]);
+
+  useEffect(() => {
+    try {
+      const savedStats = window.localStorage.getItem("vloop.verified-creator-stats");
+      if (!savedStats) return;
+      const parsed: unknown = JSON.parse(savedStats);
+      if (
+        typeof parsed !== "object" ||
+        parsed === null ||
+        Array.isArray(parsed) ||
+        !("2" in parsed) ||
+        typeof parsed["2"] !== "object" ||
+        parsed["2"] === null ||
+        !("followers" in parsed["2"]) ||
+        typeof parsed["2"].followers !== "string" ||
+        !("storyViews" in parsed["2"]) ||
+        typeof parsed["2"].storyViews !== "string"
+      ) {
+        throw new Error("Saved verified creator stats are invalid.");
+      }
+      setVerifiedCreatorStats({ followers: parsed["2"].followers, storyViews: parsed["2"].storyViews });
+    } catch (error) {
+      console.error("Unable to load verified creator stats in the profile modal.", error);
+      toast.error(isAr ? "تعذر تحميل الإحصائيات الموثقة" : "Unable to load verified creator stats");
+    }
+  }, [isAr]);
 
   useEffect(() => {
     try {
@@ -64,18 +93,39 @@ export function CreatorProfileModal({ onClose }: { onClose: () => void }) {
   };
 
   const submitStatsUpdateRequest = async () => {
-    const followersCount = Number(newFollowers);
-    const storyViewsCount = Number(newStoryViews);
+    const parseCount = (value: string) => {
+      const normalized = value.trim().replace(/,/g, "").toUpperCase();
+      const match = normalized.match(/^(\d+(?:\.\d+)?)\s*([KMB])?$/);
+      if (!match) return Number.NaN;
+      const multiplier = match[2] === "K" ? 1_000 : match[2] === "M" ? 1_000_000 : match[2] === "B" ? 1_000_000_000 : 1;
+      return Math.round(Number(match[1]) * multiplier);
+    };
+    const followersCount = parseCount(newFollowers);
+    const storyViewsCount = parseCount(newStoryViews);
+    let validatedProfileUrl: URL;
+    try {
+      validatedProfileUrl = new URL(profileUrl.trim());
+    } catch {
+      toast.error(isAr ? "أدخل رابط حساب مباشر وصحيح" : "Enter a valid direct profile URL");
+      return;
+    }
+    const allowedHosts = {
+      instagram: ["instagram.com", "www.instagram.com"],
+      tiktok: ["tiktok.com", "www.tiktok.com"],
+      snapchat: ["snapchat.com", "www.snapchat.com"],
+    };
     if (
-      !newFollowers.trim() ||
-      !newStoryViews.trim() ||
-      !Number.isFinite(followersCount) ||
-      !Number.isFinite(storyViewsCount) ||
+      !Number.isSafeInteger(followersCount) ||
+      !Number.isSafeInteger(storyViewsCount) ||
       followersCount < 0 ||
       storyViewsCount < 0 ||
+      validatedProfileUrl.protocol !== "https:" ||
+      !allowedHosts[statsPlatform].includes(validatedProfileUrl.hostname.toLowerCase()) ||
       !insightsScreenshot
     ) {
-      toast.error(isAr ? "يرجى إدخال الأرقام وإرفاق لقطة شاشة حديثة" : "Enter the new metrics and attach a recent screenshot");
+      toast.error(isAr
+        ? "تحقق من الرابط والأرقام، وأرفق لقطة شاشة حديثة من المنصة المحددة"
+        : "Check the profile URL and metrics, and attach a recent screenshot from the selected platform");
       return;
     }
     if (!statsRequestState.storageAvailable) {
@@ -105,6 +155,8 @@ export function CreatorProfileModal({ onClose }: { onClose: () => void }) {
         "vloop.pending-stats-verification",
         JSON.stringify({
           creatorId: "2",
+          platform: statsPlatform,
+          profileUrl: validatedProfileUrl.toString(),
           requestedFollowers: followersCount,
           requestedViews: storyViewsCount,
           screenshotDataUrl,
@@ -118,10 +170,13 @@ export function CreatorProfileModal({ onClose }: { onClose: () => void }) {
       );
       setStatsRequestState({ lastRequestedAt: requestedAt, storageAvailable: true, ready: true });
       setStatsRequestOpen(false);
+      setProfileUrl("");
       setNewFollowers("");
       setNewStoryViews("");
       setInsightsScreenshot(null);
-      toast.success(isAr ? "تم إرسال طلب تحديث الإحصائيات للتدقيق الإداري" : "Stats update request sent for admin review");
+      toast.success(isAr
+        ? "تم إرسال طلبك للإدارة، وتخضع الإحصائيات للمراجعة خلال 24 ساعة"
+        : "Your request was sent to administration. Stats will be reviewed within 24 hours.");
     } catch (error) {
       console.error("Unable to save the stats update request and screenshot.", error);
       toast.error(isAr ? "تعذر حفظ طلب التحديث. يرجى المحاولة لاحقاً" : "Unable to save the update request. Please try again later");
@@ -246,13 +301,13 @@ export function CreatorProfileModal({ onClose }: { onClose: () => void }) {
                 <p className="text-xs font-medium text-muted-foreground">
                   {isAr ? "عدد المتابعين الإجمالي" : "Followers Count"}
                 </p>
-                <p className="mt-1 text-xl font-extrabold text-foreground" dir="ltr">62K</p>
+                <p className="mt-1 text-xl font-extrabold text-foreground" dir="ltr">{verifiedCreatorStats.followers}</p>
               </div>
               <div className="rounded-lg border bg-background p-3">
                 <p className="text-xs font-medium text-muted-foreground">
                   {isAr ? "متوسط مشاهدات الستوري" : "Avg. Story Views"}
                 </p>
-                <p className="mt-1 text-xl font-extrabold text-foreground" dir="ltr">11.8K</p>
+                <p className="mt-1 text-xl font-extrabold text-foreground" dir="ltr">{verifiedCreatorStats.storyViews}</p>
               </div>
             </div>
             <p className="inline-flex items-center gap-2 rounded-full bg-success/10 px-3 py-1.5 text-xs font-bold text-success">
@@ -310,11 +365,15 @@ export function CreatorProfileModal({ onClose }: { onClose: () => void }) {
             setStatsRequestOpen(false);
           }}
         >
-          <div
+          <form
             role="dialog"
             aria-modal="true"
             aria-labelledby="stats-update-title"
-            className="w-full max-w-md space-y-4 rounded-2xl border bg-card p-5 shadow-2xl"
+            className="w-full max-w-lg space-y-4 rounded-2xl border bg-card p-5 shadow-2xl"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void submitStatsUpdateRequest();
+            }}
             onClick={(event) => event.stopPropagation()}
           >
             <div className="flex items-center justify-between gap-3">
@@ -325,36 +384,77 @@ export function CreatorProfileModal({ onClose }: { onClose: () => void }) {
                 <X className="h-5 w-5" />
               </button>
             </div>
+            <fieldset>
+              <legend className="mb-2 text-sm font-semibold">{isAr ? "المنصة" : "Platform"}</legend>
+              <div className="grid grid-cols-3 gap-2">
+                {([
+                  ["instagram", isAr ? "إنستغرام Instagram" : "Instagram"],
+                  ["tiktok", isAr ? "تيك توك TikTok" : "TikTok"],
+                  ["snapchat", isAr ? "سناب شات Snapchat" : "Snapchat"],
+                ] as const).map(([platform, label]) => (
+                  <button
+                    key={platform}
+                    type="button"
+                    onClick={() => setStatsPlatform(platform)}
+                    aria-pressed={statsPlatform === platform}
+                    className={`rounded-lg border px-2 py-2 text-xs font-semibold transition sm:text-sm ${statsPlatform === platform ? "border-primary bg-primary/10 text-primary" : "hover:bg-muted"}`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+            <div>
+              <label htmlFor="stats-profile-url" className="mb-1.5 block text-sm font-semibold">
+                {isAr ? "رابط الحساب المباشر / Direct Profile URL" : "Direct Profile URL"}
+              </label>
+              <input
+                id="stats-profile-url"
+                type="url"
+                required
+                value={profileUrl}
+                onChange={(event) => setProfileUrl(event.target.value)}
+                placeholder={`https://${statsPlatform}.com/username...`}
+                className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+                dir="ltr"
+              />
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <label htmlFor="new-followers" className="mb-1.5 block text-sm font-semibold">
                 {isAr ? "عدد المتابعين الجديد" : "New Followers Count"}
               </label>
-              <input id="new-followers" type="number" min="0" step="1" inputMode="numeric" value={newFollowers} onChange={(event) => setNewFollowers(event.target.value)} className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:border-primary" dir="ltr" />
+              <input id="new-followers" type="text" required inputMode="decimal" placeholder="110K" value={newFollowers} onChange={(event) => setNewFollowers(event.target.value)} className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:border-primary" dir="ltr" />
             </div>
             <div>
               <label htmlFor="new-story-views" className="mb-1.5 block text-sm font-semibold">
                 {isAr ? "متوسط مشاهدات الستوري الجديد" : "New Avg. Story Views"}
               </label>
-              <input id="new-story-views" type="number" min="0" step="1" inputMode="numeric" value={newStoryViews} onChange={(event) => setNewStoryViews(event.target.value)} className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:border-primary" dir="ltr" />
+              <input id="new-story-views" type="text" required inputMode="decimal" placeholder="19.5K" value={newStoryViews} onChange={(event) => setNewStoryViews(event.target.value)} className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:border-primary" dir="ltr" />
+            </div>
             </div>
             <div>
               <label htmlFor="insights-screenshot" className="mb-1.5 block text-sm font-semibold">
                 {isAr ? "لقطة شاشة حديثة من Insights" : "Recent Insights Screenshot"}
               </label>
-              <input id="insights-screenshot" type="file" accept="image/*" onChange={(event) => setInsightsScreenshot(event.target.files?.[0] ?? null)} className="w-full text-sm text-muted-foreground file:me-3 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-2 file:text-xs file:font-semibold" />
+              <label htmlFor="insights-screenshot" className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed bg-surface p-5 text-center transition hover:border-primary/50 hover:bg-muted/50">
+                <Upload className="h-6 w-6 text-muted-foreground" />
+                <span className="text-sm font-semibold">{insightsScreenshot?.name ?? (isAr ? "اختر لقطة الشاشة من جهازك" : "Choose screenshot from your device")}</span>
+                <input id="insights-screenshot" type="file" accept="image/*" required onChange={(event) => setInsightsScreenshot(event.target.files?.[0] ?? null)} className="sr-only" />
+              </label>
             </div>
             <p className="text-xs text-muted-foreground">
-              {isAr ? "سيتم إرسال الأرقام واللقطة للمراجعة، ولن تتغير الإحصائيات المعتمدة إلا بعد موافقة الإدارة." : "The metrics and screenshot will be submitted for review. Verified metrics remain unchanged until approved by administration."}
+              {isAr ? "لن تتغير الإحصائيات المعتمدة إلا بعد موافقة الإدارة." : "Verified metrics remain unchanged until approved by administration."}
             </p>
             <div className="flex justify-end gap-2">
               <button type="button" onClick={() => setStatsRequestOpen(false)} className="rounded-lg px-4 py-2 text-sm font-bold text-muted-foreground hover:bg-muted">
                 {isAr ? "إلغاء" : "Cancel"}
               </button>
-              <button type="button" onClick={submitStatsUpdateRequest} className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-foreground hover:bg-primary/90">
-                {isAr ? "إرسال الطلب" : "Submit Request"}
+              <button type="submit" className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-foreground hover:bg-primary/90">
+                {isAr ? "إرسال الطلب للتدقيق الإداري" : "Submit for Admin Review"}
               </button>
             </div>
-          </div>
+          </form>
         </div>
       )}
     </div>
