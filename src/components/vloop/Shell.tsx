@@ -217,14 +217,17 @@ export function AppHeader() {
                     <ChevronDown className="h-4 w-4 text-muted-foreground" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="min-w-60">
-                  <DropdownMenuItem onSelect={() => setAdminSettingsOpen(true)} className="cursor-pointer">
-                    <Settings className="h-4 w-4" />
+                <DropdownMenuContent dir={lang === "ar" ? "rtl" : "ltr"} align="end" className="min-w-60">
+                  <DropdownMenuItem onSelect={() => setAdminSettingsOpen(true)} className="w-full flex items-center gap-2.5 px-3 py-2 text-start cursor-pointer">
+                    <Settings className="size-4 shrink-0" />
                     {lang === "ar" ? "إعدادات الحساب والأمان" : "Admin Settings"}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onSelect={() => setLogoutDialog(true)} className="cursor-pointer text-destructive focus:text-destructive">
-                    <LogOut className="h-4 w-4" />
+                  <DropdownMenuItem onSelect={() => setLogoutDialog(true)} className="w-full flex items-center gap-2.5 px-3 py-2 text-start cursor-pointer text-destructive focus:text-destructive">
+                    <LogOut
+                      className="size-4 text-red-600 shrink-0"
+                      style={{ transform: lang === "ar" ? "scaleX(-1)" : "none" }}
+                    />
                     {lang === "ar" ? "تسجيل الخروج" : "Log out"}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -372,13 +375,13 @@ export function AppHeader() {
                     <ChevronDown className="h-4 w-4 text-muted-foreground" />
                   </button>
                   {menu && (
-                    <div className="absolute end-0 top-12 w-52 rounded-xl border bg-popover p-1.5 shadow-lift animate-in fade-in zoom-in-95">
-                      <button onClick={() => { setMenu(false); setModal("creator-profile"); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium hover:bg-muted">
+                    <div dir={lang === "ar" ? "rtl" : "ltr"} className="absolute end-0 top-12 w-52 rounded-xl border bg-popover p-1.5 shadow-lift animate-in fade-in zoom-in-95">
+                      <button onClick={() => { setMenu(false); setModal("creator-profile"); }} className="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-start text-sm font-medium hover:bg-muted">
                         <UserCog className="h-4 w-4 text-muted-foreground" />
                         {lang === "ar" ? "الملف الشخصي والميديا كيت" : "Media Kit Profile"}
                       </button>
-                      <button onClick={() => { setMenu(false); setModal("creator-settings"); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium hover:bg-muted">
-                        <Settings className="h-4 w-4 text-muted-foreground" />
+                      <button onClick={() => { setMenu(false); setModal("creator-settings"); }} className="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-start text-sm font-medium hover:bg-muted">
+                        <Settings className="size-4 shrink-0 text-muted-foreground" />
                         {lang === "ar" ? "إعدادات الحساب والآيبان" : "Account & Payout Settings"}
                       </button>
                       <div className="my-1 border-t border-border"></div>
@@ -387,9 +390,12 @@ export function AppHeader() {
                           setMenu(false);
                           setLogoutDialog(true);
                         }}
-                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 hover:text-destructive"
+                        className="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-start text-sm font-medium text-destructive hover:bg-destructive/10 hover:text-destructive"
                       >
-                        <LogOut className="h-4 w-4" />
+                        <LogOut
+                          className="size-4 text-red-600 shrink-0"
+                          style={{ transform: lang === "ar" ? "scaleX(-1)" : "none" }}
+                        />
                         {lang === "ar" ? "تسجيل الخروج" : "Log out"}
                       </button>
                     </div>
@@ -430,7 +436,7 @@ export function AppHeader() {
                 <ChevronDown className="h-4 w-4 text-muted-foreground" />
               </button>
               {menu && (
-                <div className="absolute end-0 top-12 w-52 rounded-xl border bg-popover p-1.5 shadow-lift animate-in fade-in zoom-in-95">
+                <div dir={lang === "ar" ? "rtl" : "ltr"} className="absolute end-0 top-12 w-52 rounded-xl border bg-popover p-1.5 shadow-lift animate-in fade-in zoom-in-95">
                   {[
                     [Building2, { ar: "الملف التعريفي للمنشأة", en: "Company Profile" }, "company"],
                     [Settings, { ar: "إعدادات الحساب", en: "Account Settings" }, "settings"],
@@ -441,7 +447,7 @@ export function AppHeader() {
                       <button
                         key={i}
                         onClick={() => { setMenu(false); setModal(k as "company" | "settings"); }}
-                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium hover:bg-muted"
+                        className="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-start text-sm font-medium hover:bg-muted"
                       >
                         <Icon className="h-4 w-4 text-muted-foreground" />
                         {tr(label)}
@@ -450,7 +456,7 @@ export function AppHeader() {
                   })}
                   <button
                     onClick={() => { setMenu(false); setHelpOpen(true); }}
-                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium hover:bg-muted"
+                    className="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-start text-sm font-medium hover:bg-muted"
                   >
                     <CircleHelp className="h-4 w-4 text-muted-foreground" />
                     {tr({ ar: "المساعدة والدعم", en: "Help & Support" })}
@@ -461,9 +467,12 @@ export function AppHeader() {
                       setMenu(false);
                       setLogoutDialog(true);
                     }}
-                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 hover:text-destructive"
+                    className="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-start text-sm font-medium text-destructive hover:bg-destructive/10 hover:text-destructive"
                   >
-                    <LogOut className="h-4 w-4" />
+                    <LogOut
+                      className="size-4 text-red-600 shrink-0"
+                      style={{ transform: lang === "ar" ? "scaleX(-1)" : "none" }}
+                    />
                     {tr({ ar: "تسجيل الخروج", en: "Log out" })}
                   </button>
                 </div>

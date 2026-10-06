@@ -60,6 +60,9 @@ const initialUsers: UserRow[] = [
   { id: "u3", name: { ar: "فاطمة الحداد", en: "Fatima Al-Haddad" }, handle: "@fatima_foodie", type: "creator", score: 98, status: "active", strikes: 0 },
   { id: "u4", name: { ar: "بيك اند كو", en: "Brew & Co. Cafe" }, handle: "@brewandco.bh", type: "merchant", completedCampaigns: 8, status: "active", strikes: 1 },
   { id: "u5", name: { ar: "خالد البوعينين", en: "Khalid Al-Buainain" }, handle: "@khalid_eats_bh", type: "creator", score: 94, status: "active", strikes: 0 },
+  { id: "u6", name: { ar: "نور العلوي", en: "Noor Al-Alawi" }, handle: "@noor.daily", type: "creator", score: 99, status: "active", strikes: 0 },
+  { id: "u7", name: { ar: "كراست بيتزا", en: "Crust Pizza" }, handle: "@crustpizza.bh", type: "merchant", completedCampaigns: 11, status: "active", strikes: 0 },
+  { id: "u8", name: { ar: "ميسا تاكيريا", en: "Mesa Taqueria" }, handle: "@mesataqueria.bh", type: "merchant", completedCampaigns: 6, status: "active", strikes: 0 },
 ];
 
 function AdminPage() {
@@ -88,7 +91,7 @@ function AdminPage() {
       user.handle.toLocaleLowerCase().includes(query);
     return matchesType && matchesSearch;
   });
-  const usersPerPage = 2;
+  const usersPerPage = 10;
   const usersPageCount = Math.max(1, Math.ceil(filteredUsers.length / usersPerPage));
   const paginatedUsers = filteredUsers.slice((userPage - 1) * usersPerPage, userPage * usersPerPage);
 
