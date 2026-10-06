@@ -39,6 +39,7 @@ function CreatorPage() {
   const [copiedBio, setCopiedBio] = useState(false);
   const [creatorAvatarPreview, setCreatorAvatarPreview] = useState<string | null>(null);
   const [creatorCoverPreview, setCreatorCoverPreview] = useState<string | null>(null);
+  const [verifiedStats, setVerifiedStats] = useState<{ followers: string; storyViews: string } | null>(null);
   const [tab, setTab] = useState<"new" | "active" | "completed">("new");
   const [threshold, setThreshold] = useState("150.000");
   
@@ -60,6 +61,32 @@ function CreatorPage() {
   const [isAddingBlackout, setIsAddingBlackout] = useState(false);
   const [newBlackoutFrom, setNewBlackoutFrom] = useState("");
   const [newBlackoutTo, setNewBlackoutTo] = useState("");
+
+  useEffect(() => {
+    try {
+      const savedStats = window.localStorage.getItem("vloop.verified-creator-stats");
+      if (!savedStats) return;
+      const parsed: unknown = JSON.parse(savedStats);
+      if (
+        typeof parsed !== "object" ||
+        parsed === null ||
+        Array.isArray(parsed) ||
+        !("2" in parsed) ||
+        typeof parsed["2"] !== "object" ||
+        parsed["2"] === null ||
+        !("followers" in parsed["2"]) ||
+        typeof parsed["2"].followers !== "string" ||
+        !("storyViews" in parsed["2"]) ||
+        typeof parsed["2"].storyViews !== "string"
+      ) {
+        throw new Error("Saved verified creator stats are invalid.");
+      }
+      setVerifiedStats({ followers: parsed["2"].followers, storyViews: parsed["2"].storyViews });
+    } catch (error) {
+      console.error("Unable to load verified creator stats.", error);
+      toast.error(isAr ? "تعذر تحميل الإحصائيات الموثقة" : "Unable to load verified creator stats");
+    }
+  }, [isAr]);
 
   useEffect(() => {
     const handleProfileImageSelected = (event: Event) => {
@@ -214,10 +241,10 @@ function CreatorPage() {
 
               <div className="flex flex-wrap items-center gap-2">
                 <span className="rounded-full border border-slate-200 bg-slate-100 px-3 py-1 font-bold text-slate-700">
-                  {isAr ? "62K متابع" : "62K followers"}
+                  {isAr ? `${verifiedStats?.followers ?? "62K"} متابع` : `${verifiedStats?.followers ?? "62K"} followers`}
                 </span>
                 <span className="rounded-full border border-slate-200 bg-slate-100 px-3 py-1 font-bold text-slate-700">
-                  {isAr ? "11.8K مشاهدات الستوري" : "11.8K story views"}
+                  {isAr ? `${verifiedStats?.storyViews ?? "11.8K"} مشاهدات الستوري` : `${verifiedStats?.storyViews ?? "11.8K"} story views`}
                 </span>
                 <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 font-bold text-emerald-700">
                   <CheckCircle2 className="size-3.5" />

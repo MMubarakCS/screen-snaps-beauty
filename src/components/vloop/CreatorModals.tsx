@@ -63,7 +63,7 @@ export function CreatorProfileModal({ onClose }: { onClose: () => void }) {
     );
   };
 
-  const submitStatsUpdateRequest = () => {
+  const submitStatsUpdateRequest = async () => {
     const followersCount = Number(newFollowers);
     const storyViewsCount = Number(newStoryViews);
     if (
@@ -83,9 +83,39 @@ export function CreatorProfileModal({ onClose }: { onClose: () => void }) {
       return;
     }
 
-    const requestedAt = Date.now();
     try {
+      const screenshotDataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          if (typeof reader.result === "string") resolve(reader.result);
+          else reject(new Error("The selected screenshot could not be read."));
+        };
+        reader.onerror = () => reject(reader.error ?? new Error("The selected screenshot could not be read."));
+        reader.onabort = () => reject(new Error("Reading the selected screenshot was cancelled."));
+        reader.readAsDataURL(insightsScreenshot);
+      });
+      const requestedAt = Date.now();
+      const savedDecisions = window.localStorage.getItem("vloop.stats-verification-decisions");
+      const parsedDecisions: unknown = savedDecisions ? JSON.parse(savedDecisions) : {};
+      if (typeof parsedDecisions !== "object" || parsedDecisions === null || Array.isArray(parsedDecisions)) {
+        throw new Error("Saved stats verification decisions are invalid.");
+      }
       window.localStorage.setItem("creator-stats-update-requested-at", String(requestedAt));
+      window.localStorage.setItem(
+        "vloop.pending-stats-verification",
+        JSON.stringify({
+          creatorId: "2",
+          requestedFollowers: followersCount,
+          requestedViews: storyViewsCount,
+          screenshotDataUrl,
+          screenshotName: insightsScreenshot.name,
+          submittedAt: requestedAt,
+        }),
+      );
+      window.localStorage.setItem(
+        "vloop.stats-verification-decisions",
+        JSON.stringify({ ...parsedDecisions, "2": "pending" }),
+      );
       setStatsRequestState({ lastRequestedAt: requestedAt, storageAvailable: true, ready: true });
       setStatsRequestOpen(false);
       setNewFollowers("");
@@ -93,7 +123,7 @@ export function CreatorProfileModal({ onClose }: { onClose: () => void }) {
       setInsightsScreenshot(null);
       toast.success(isAr ? "تم إرسال طلب تحديث الإحصائيات للتدقيق الإداري" : "Stats update request sent for admin review");
     } catch (error) {
-      console.error("Unable to save the stats update request limit.", error);
+      console.error("Unable to save the stats update request and screenshot.", error);
       toast.error(isAr ? "تعذر حفظ طلب التحديث. يرجى المحاولة لاحقاً" : "Unable to save the update request. Please try again later");
     }
   };

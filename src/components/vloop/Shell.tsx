@@ -1,7 +1,14 @@
 import { createContext, useContext, useEffect, useState, type MouseEvent, type ReactNode } from "react";
 import { Link, useLocation, useRouter } from "@tanstack/react-router";
-import { QrCode, ChevronDown, Check, LogOut, Settings, Building2, Lock, Menu, X, Store, Video, CircleHelp, UserCog, ShieldCheck, Link as LinkIcon } from "lucide-react";
+import { QrCode, ChevronDown, Check, LogOut, Settings, Building2, Lock, Menu, X, Store, Video, CircleHelp, UserCog, ShieldCheck, Link as LinkIcon, KeyRound, Mail } from "lucide-react";
 import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { CompanyProfileModal, AccountSettingsModal } from "@/components/vloop/AccountModals";
 import { CreatorProfileModal, CreatorSettingsModal } from "@/components/vloop/CreatorModals";
 import { HelpModal } from "@/components/vloop/HelpModal";
@@ -94,7 +101,7 @@ export function AppHeader() {
   const { profile } = useMerchantProfile();
   const location = useLocation();
   const router = useRouter();
-  const isPublic = location.pathname === "/";
+  const isPublic = location.pathname === "/" || location.pathname === "/home";
   const isCreator = location.pathname.startsWith("/creator");
   const homeDestination = isCreator
     ? "/creator"
@@ -108,6 +115,8 @@ export function AppHeader() {
   const [menu, setMenu] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
   const [logoutDialog, setLogoutDialog] = useState(false);
+  const [adminSettingsOpen, setAdminSettingsOpen] = useState(false);
+  const [adminEmail, setAdminEmail] = useState("admin@vloop.bh");
   const [helpOpen, setHelpOpen] = useState(false);
   const [modal, setModal] = useState<"company" | "settings" | AuthModal | "auth-login" | "creator-profile" | "creator-settings" | null>(null);
   const handleNavClick = (e: MouseEvent<HTMLAnchorElement>, targetId: string) => {
@@ -148,43 +157,117 @@ export function AppHeader() {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+  useEffect(() => {
+    if (!location.pathname.startsWith("/admin")) return;
+    try {
+      const savedEmail = window.localStorage.getItem("vloop.admin-email");
+      if (savedEmail) setAdminEmail(savedEmail);
+    } catch (error) {
+      console.error("Unable to load the admin email.", error);
+      toast.error(lang === "ar" ? "تعذر تحميل البريد الإلكتروني للمسؤول" : "Unable to load the admin email");
+    }
+  }, [lang, location.pathname]);
+  const saveAdminEmail = (email: string) => {
+    try {
+      window.localStorage.setItem("vloop.admin-email", email);
+      setAdminEmail(email);
+      return true;
+    } catch (error) {
+      console.error("Unable to save the admin email.", error);
+      toast.error(lang === "ar" ? "تعذر حفظ البريد الإلكتروني للمسؤول" : "Unable to save the admin email");
+      return false;
+    }
+  };
   if (location.pathname.startsWith("/admin")) {
     return (
-      <header className="sticky top-0 z-40 whitespace-nowrap border-b bg-background/90 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:px-6">
-          <Link to="/admin" className="flex shrink-0 items-center gap-2">
-            <img src="/logo.png" alt="Vloop" className="h-8 w-auto" />
-            <span className="hidden text-lg font-extrabold sm:inline">
-              Vloop <span className="font-light text-muted-foreground">|</span> ڤلوب
-            </span>
-          </Link>
-          <span className="inline-flex items-center gap-1.5 rounded-md bg-foreground px-2.5 py-1 text-xs font-bold text-background">
-            <ShieldCheck className="h-3.5 w-3.5" />
-            {lang === "ar" ? "لوحة الإدارة العليا" : "Super Admin"}
-          </span>
-          <span className="hidden items-center gap-2 rounded-full border border-success/30 bg-success-soft px-3 py-1.5 text-xs font-semibold text-success xl:inline-flex">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-success" />
-            {lang === "ar" ? "نظام الأمانات والتحكيم المالي نشط" : "Escrow & arbitration system active"}
-            <span dir="ltr" className="font-bold">— CBB & NBR Compliant</span>
-          </span>
-          <div className="ms-auto flex items-center gap-3">
-            <div className="flex rounded-lg border p-0.5 text-xs font-bold">
-              {(["ar", "en"] as const).map((l) => (
-                <button key={l} onClick={() => setLang(l)} className={`rounded-md px-2.5 py-1.5 transition ${lang === l ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}>
-                  {l.toUpperCase()}
-                </button>
-              ))}
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-foreground text-sm font-bold text-background">SA</span>
-              <span className="hidden text-start leading-tight md:block">
-                <span className="block text-sm font-bold">{lang === "ar" ? "مدير النظام" : "System Admin"}</span>
-                <span className="block text-xs text-muted-foreground" dir="ltr">admin@vloop.bh</span>
+      <>
+        <header className="sticky top-0 z-40 whitespace-nowrap border-b bg-background/90 backdrop-blur">
+          <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:px-6">
+            <Link to="/admin" className="flex shrink-0 items-center gap-2">
+              <img src="/logo.png" alt="Vloop" className="h-8 w-auto" />
+              <span className="hidden text-lg font-extrabold sm:inline">
+                Vloop <span className="font-light text-muted-foreground">|</span> ڤلوب
               </span>
+            </Link>
+            <span className="inline-flex items-center gap-1.5 rounded-md bg-foreground px-2.5 py-1 text-xs font-bold text-background">
+              <ShieldCheck className="h-3.5 w-3.5" />
+              {lang === "ar" ? "لوحة الإدارة العليا" : "Super Admin"}
+            </span>
+            <span className="hidden items-center gap-2 rounded-full border border-success/30 bg-success-soft px-3 py-1.5 text-xs font-semibold text-success xl:inline-flex">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-success" />
+              {lang === "ar" ? "نظام الأمانات والتحكيم المالي نشط" : "Escrow & arbitration system active"}
+              <span dir="ltr" className="font-bold">— CBB & NBR Compliant</span>
+            </span>
+            <div className="ms-auto flex items-center gap-3">
+              <div className="flex rounded-lg border p-0.5 text-xs font-bold">
+                {(["ar", "en"] as const).map((l) => (
+                  <button key={l} onClick={() => setLang(l)} className={`rounded-md px-2.5 py-1.5 transition ${lang === l ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}>
+                    {l.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button type="button" className="flex items-center gap-2 rounded-lg p-1.5 text-start transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-foreground text-sm font-bold text-background">SA</span>
+                    <span className="hidden leading-tight md:block">
+                      <span className="block text-sm font-bold">{lang === "ar" ? "مدير النظام" : "System Admin"}</span>
+                      <span className="block text-xs text-muted-foreground" dir="ltr">{adminEmail}</span>
+                    </span>
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="min-w-60">
+                  <DropdownMenuItem onSelect={() => setAdminSettingsOpen(true)} className="cursor-pointer">
+                    <Settings className="h-4 w-4" />
+                    {lang === "ar" ? "إعدادات الحساب والأمان / Admin Settings" : "إعدادات الحساب والأمان / Admin Settings"}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={() => setLogoutDialog(true)} className="cursor-pointer text-destructive focus:text-destructive">
+                    <LogOut className="h-4 w-4" />
+                    {lang === "ar" ? "تسجيل الخروج / Log out" : "تسجيل الخروج / Log out"}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
+        {adminSettingsOpen && (
+          <AdminSettingsModal
+            lang={lang}
+            email={adminEmail}
+            onClose={() => setAdminSettingsOpen(false)}
+            onSaveEmail={saveAdminEmail}
+          />
+        )}
+        {logoutDialog && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center whitespace-normal bg-foreground/40 p-4 backdrop-blur-sm animate-in fade-in" onClick={() => setLogoutDialog(false)}>
+            <div role="dialog" aria-modal="true" className="w-full max-w-sm rounded-2xl border bg-card p-6 shadow-lift animate-in zoom-in-95" onClick={(e) => e.stopPropagation()}>
+              <h2 className="text-lg font-bold">{lang === "ar" ? "تسجيل الخروج من الحساب" : "Log out of your account"}</h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {lang === "ar"
+                  ? "هل أنت متأكد من رغبتك في تسجيل الخروج؟ ستحتاج إلى تسجيل الدخول مرة أخرى للوصول إلى لوحة التحكم."
+                  : "Are you sure you want to log out? You will need to sign in again to access the dashboard."}
+              </p>
+              <div className="mt-6 flex items-center justify-end gap-3">
+                <button onClick={() => setLogoutDialog(false)} className="rounded-lg border px-4 py-2 text-sm font-semibold transition hover:bg-muted">
+                  {lang === "ar" ? "إلغاء" : "Cancel"}
+                </button>
+                <button
+                  onClick={() => {
+                    setLogoutDialog(false);
+                    toast(lang === "ar" ? "تم تسجيل الخروج. إلى اللقاء 👋" : "You've been logged out. Goodbye 👋");
+                    void router.navigate({ to: "/home" });
+                  }}
+                  className="rounded-lg bg-destructive px-4 py-2 text-sm font-bold text-destructive-foreground hover:bg-destructive/90"
+                >
+                  {lang === "ar" ? "تأكيد الخروج" : "Log out"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </>
     );
   }
   return (
@@ -691,6 +774,118 @@ function AuthLoginModal({ onClose, lang }: { onClose: () => void; lang: Lang }) 
           {isAr ? "إلغاء" : "Cancel"}
         </button>
       </div>
+    </div>
+  );
+}
+
+function AdminSettingsModal({
+  lang,
+  email,
+  onClose,
+  onSaveEmail,
+}: {
+  lang: Lang;
+  email: string;
+  onClose: () => void;
+  onSaveEmail: (email: string) => boolean;
+}) {
+  const [nextEmail, setNextEmail] = useState(email);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const isAr = lang === "ar";
+
+  const save = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const changingPassword = Boolean(currentPassword || newPassword || confirmPassword);
+    if (changingPassword && (!currentPassword || !newPassword || !confirmPassword || newPassword.length < 8)) {
+      toast.error(isAr
+        ? "أدخل كلمة المرور الحالية والجديدة وتأكيدها، على أن تكون الجديدة 8 أحرف على الأقل"
+        : "Enter your current, new, and confirmation passwords; the new password must be 8+ characters");
+      return;
+    }
+    if (changingPassword && newPassword !== confirmPassword) {
+      toast.error(isAr ? "تأكيد كلمة المرور الجديدة غير متطابق" : "New password confirmation does not match");
+      return;
+    }
+    const normalizedEmail = nextEmail.trim();
+    if (!normalizedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      toast.error(isAr ? "أدخل بريداً إلكترونياً صحيحاً" : "Enter a valid email address");
+      return;
+    }
+    if (!onSaveEmail(normalizedEmail)) return;
+    toast.success(isAr ? "تم تحديث إعدادات المسؤول بنجاح" : "Admin settings updated successfully");
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4 backdrop-blur-sm" onClick={onClose}>
+      <form
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="admin-settings-title"
+        className="w-full max-w-md space-y-4 rounded-2xl border bg-card p-5 shadow-lift sm:p-6"
+        onSubmit={save}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="flex items-center justify-between gap-3">
+          <h2 id="admin-settings-title" className="flex items-center gap-2 text-lg font-bold">
+            <Settings className="h-5 w-5 text-primary" />
+            {isAr ? "إعدادات الحساب والأمان / Admin Settings" : "إعدادات الحساب والأمان / Admin Settings"}
+          </h2>
+          <button type="button" onClick={onClose} aria-label={isAr ? "إغلاق" : "Close"} className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <label className="block text-sm font-semibold">
+          <span className="mb-1.5 flex items-center gap-2"><Mail className="h-4 w-4 text-muted-foreground" />{isAr ? "البريد الإلكتروني للمسؤول" : "Admin email"}</span>
+          <input
+            type="email"
+            autoComplete="email"
+            required
+            value={nextEmail}
+            onChange={(event) => setNextEmail(event.target.value)}
+            dir="ltr"
+            className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary"
+          />
+        </label>
+        <div className="space-y-3 border-t pt-4">
+          <h3 className="flex items-center gap-2 text-sm font-bold"><KeyRound className="h-4 w-4 text-muted-foreground" />{isAr ? "تغيير كلمة المرور" : "Change password"}</h3>
+          <input
+            type="password"
+            autoComplete="current-password"
+            placeholder={isAr ? "كلمة المرور الحالية" : "Current password"}
+            value={currentPassword}
+            onChange={(event) => setCurrentPassword(event.target.value)}
+            className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary"
+          />
+          <div className="grid gap-3 sm:grid-cols-2">
+            <input
+              type="password"
+              autoComplete="new-password"
+              placeholder={isAr ? "كلمة المرور الجديدة" : "New password"}
+              value={newPassword}
+              onChange={(event) => setNewPassword(event.target.value)}
+              className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary"
+            />
+            <input
+              type="password"
+              autoComplete="new-password"
+              placeholder={isAr ? "تأكيد كلمة المرور" : "Confirm password"}
+              value={confirmPassword}
+              onChange={(event) => setConfirmPassword(event.target.value)}
+              className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {isAr ? "اترك حقول كلمة المرور فارغة إذا كنت تريد تغيير البريد الإلكتروني فقط." : "Leave password fields blank if you only want to change the email."}
+          </p>
+        </div>
+        <div className="flex justify-end gap-2 pt-1">
+          <button type="button" onClick={onClose} className="rounded-lg border px-4 py-2 text-sm font-semibold hover:bg-muted">{isAr ? "إلغاء" : "Cancel"}</button>
+          <button type="submit" className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-foreground hover:bg-primary/90">{isAr ? "حفظ الإعدادات" : "Save settings"}</button>
+        </div>
+      </form>
     </div>
   );
 }

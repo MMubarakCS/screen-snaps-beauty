@@ -1,12 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
   Lock, TrendingUp, AlertTriangle, BadgeCheck, ExternalLink, Check, HelpCircle, Scale,
   Search, X, ShieldAlert, Ban, Gavel, Users, Image as ImageIcon,
 } from "lucide-react";
 import { useLang } from "@/components/vloop/Shell";
-import { creators, fmtBHD, type L } from "@/lib/vloop-data";
+import { creators, fmtBHD, type Creator, type L } from "@/lib/vloop-data";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -23,6 +23,42 @@ export const Route = createFileRoute("/admin")({
 
 type Tab = "disputes" | "verify" | "users";
 type UserRow = { id: string; name: L; handle: string; type: "merchant" | "creator"; score: number; status: "active" | "suspended"; strikes: number };
+type Verification = {
+  id: string;
+  creator: Creator;
+  currentFollowers: string;
+  currentViews: string;
+  requestedFollowers: string;
+  requestedViews: string;
+  screenshotDataUrl: string | null;
+  screenshotName: string | null;
+  status: "pending" | "approved" | "rejected";
+};
+
+const initialVerifications: Verification[] = [
+  {
+    id: "1",
+    creator: creators[0]!,
+    currentFollowers: "85K",
+    currentViews: "14.2K",
+    requestedFollowers: "110K",
+    requestedViews: "19.5K",
+    screenshotDataUrl: null,
+    screenshotName: null,
+    status: "pending",
+  },
+  {
+    id: "3",
+    creator: creators[2]!,
+    currentFollowers: "110K",
+    currentViews: "19.5K",
+    requestedFollowers: "124K",
+    requestedViews: "22K",
+    screenshotDataUrl: null,
+    screenshotName: null,
+    status: "pending",
+  },
+];
 
 const initialUsers: UserRow[] = [
   { id: "u1", name: { ar: "شركة فليم برجر ذ.م.م", en: "Flame Burger Co. W.L.L" }, handle: "@flame_burger", type: "merchant", score: 97, status: "active", strikes: 0 },
@@ -37,15 +73,140 @@ function AdminPage() {
   const tr = (x: L) => x[lang];
   const [tab, setTab] = useState<Tab>("disputes");
   const [dispute, setDispute] = useState<null | "creator" | "merchant" | "split">(null);
-  const [verifyState, setVerifyState] = useState<"pending" | "approved" | "rejected">("pending");
-  const [proofOpen, setProofOpen] = useState(false);
+  const [verifications, setVerifications] = useState(initialVerifications);
+  const [proofRequest, setProofRequest] = useState<Verification | null>(null);
   const [users, setUsers] = useState(initialUsers);
   const [confirmSuspend, setConfirmSuspend] = useState<UserRow | null>(null);
 
   const disputesOpen = dispute === null ? 1 : 0;
-  const verificationsOpen = verifyState === "pending" ? 2 : 1;
+  const verificationsOpen = verifications.filter((verification) => verification.status === "pending").length;
   const yousif = creators[1]!;
-  const fatima = creators[0]!;
+
+  useEffect(() => {
+    try {
+      const savedDecisions = window.localStorage.getItem("vloop.stats-verification-decisions");
+      if (savedDecisions) {
+        const parsed: unknown = JSON.parse(savedDecisions);
+        if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+          throw new Error("Saved stats verification decisions are invalid.");
+        }
+        setVerifications((current) =>
+          current.map((verification) => {
+            const decision = parsed[verification.id];
+            return decision === "approved" || decision === "rejected"
+              ? { ...verification, status: decision }
+              : verification;
+          }),
+        );
+      }
+    } catch (error) {
+      console.error("Unable to load stats verification decisions.", error);
+      toast.error("Unable to load saved stats verification decisions.");
+    }
+
+    try {
+      const savedRequest = window.localStorage.getItem("vloop.pending-stats-verification");
+      if (!savedRequest) return;
+      const parsed: unknown = JSON.parse(savedRequest);
+      if (
+        typeof parsed !== "object" ||
+        parsed === null ||
+        !("creatorId" in parsed) ||
+        typeof parsed.creatorId !== "string" ||
+        !("requestedFollowers" in parsed) ||
+        typeof parsed.requestedFollowers !== "number" ||
+        !Number.isFinite(parsed.requestedFollowers) ||
+        !("requestedViews" in parsed) ||
+        typeof parsed.requestedViews !== "number" ||
+        !Number.isFinite(parsed.requestedViews) ||
+        !("screenshotDataUrl" in parsed) ||
+        typeof parsed.screenshotDataUrl !== "string" ||
+        !parsed.screenshotDataUrl.startsWith("data:image/") ||
+        !("screenshotName" in parsed) ||
+        typeof parsed.screenshotName !== "string"
+      ) {
+        throw new Error("Saved creator verification request is invalid.");
+      }
+      const creator = creators.find((item) => item.id === parsed.creatorId);
+      if (!creator) throw new Error("Saved creator verification request refers to an unknown creator.");
+      const savedDecisions = window.localStorage.getItem("vloop.stats-verification-decisions");
+      const parsedDecisions: unknown = savedDecisions ? JSON.parse(savedDecisions) : {};
+      if (typeof parsedDecisions !== "object" || parsedDecisions === null || Array.isArray(parsedDecisions)) {
+        throw new Error("Saved stats verification decisions are invalid.");
+      }
+      const toCompactCount = (count: number) =>
+        count >= 1000
+          ? `${Number((count / 1000).toFixed(count % 1000 === 0 ? 0 : 1))}K`
+          : String(count);
+      const savedVerification: Verification = {
+        id: creator.id,
+        creator,
+        currentFollowers: creator.followers,
+        currentViews: creator.storyViews,
+        requestedFollowers: toCompactCount(parsed.requestedFollowers),
+        requestedViews: toCompactCount(parsed.requestedViews),
+        screenshotDataUrl: parsed.screenshotDataUrl,
+        screenshotName: parsed.screenshotName,
+        status:
+          parsedDecisions[creator.id] === "approved" || parsedDecisions[creator.id] === "rejected"
+            ? parsedDecisions[creator.id]
+            : "pending",
+      };
+      setVerifications((current) =>
+        current.some((verification) => verification.id === creator.id)
+          ? current.map((verification) => verification.id === creator.id ? savedVerification : verification)
+          : [...current, savedVerification],
+      );
+    } catch (error) {
+      console.error("Unable to load the creator stats verification request.", error);
+      toast.error("Unable to load the saved stats verification request.");
+    }
+  }, []);
+
+  const updateVerification = (verification: Verification, status: "approved" | "rejected") => {
+    try {
+      if (status === "approved") {
+        const savedStats = window.localStorage.getItem("vloop.verified-creator-stats");
+        const parsedStats: unknown = savedStats ? JSON.parse(savedStats) : {};
+        if (typeof parsedStats !== "object" || parsedStats === null || Array.isArray(parsedStats)) {
+          throw new Error("Saved verified creator stats are invalid.");
+        }
+        window.localStorage.setItem(
+          "vloop.verified-creator-stats",
+          JSON.stringify({
+            ...parsedStats,
+            [verification.id]: {
+              followers: verification.requestedFollowers,
+              storyViews: verification.requestedViews,
+            },
+          }),
+        );
+      }
+      const savedDecisions = window.localStorage.getItem("vloop.stats-verification-decisions");
+      const parsedDecisions: unknown = savedDecisions ? JSON.parse(savedDecisions) : {};
+      if (typeof parsedDecisions !== "object" || parsedDecisions === null || Array.isArray(parsedDecisions)) {
+        throw new Error("Saved stats verification decisions are invalid.");
+      }
+      window.localStorage.setItem(
+        "vloop.stats-verification-decisions",
+        JSON.stringify({ ...parsedDecisions, [verification.id]: status }),
+      );
+    } catch (error) {
+      console.error("Unable to save the stats verification decision.", error);
+      toast.error(tr({ ar: "تعذر حفظ قرار التوثيق. يرجى المحاولة مرة أخرى", en: "Unable to save the verification decision. Please try again" }));
+      return;
+    }
+
+    setVerifications((current) =>
+      current.map((item) => item.id === verification.id ? { ...item, status } : item),
+    );
+    setProofRequest(null);
+    if (status === "approved") {
+      toast.success(tr({ ar: "تم اعتماد وتوثيق الإحصائيات وتحديث ملف صانع المحتوى", en: "Stats verified and creator profile updated" }));
+    } else {
+      toast(tr({ ar: "تم رفض الطلب", en: "Request rejected" }));
+    }
+  };
 
   const resolve = (k: "creator" | "merchant" | "split") => {
     setDispute(k);
@@ -177,34 +338,46 @@ function AdminPage() {
 
       {tab === "verify" && (
         <div className="space-y-4">
-          {verifyState === "pending" ? (
-            <article className="rounded-2xl border bg-card p-6 shadow-soft">
-              <div className="flex flex-col gap-6 lg:flex-row lg:items-center">
+          {verifications.map((verification) => (
+            <article key={verification.id} className="rounded-2xl border bg-card p-6 shadow-soft">
+              <div className="flex flex-col gap-5 lg:flex-row lg:items-center">
                 <div className="flex items-center gap-3 lg:w-64">
-                  <img src={fatima.img} alt="" className="h-14 w-14 rounded-full object-cover" />
-                  <div><p className="font-bold">{tr(fatima.name)}</p><p className="text-sm text-muted-foreground" dir="ltr">{fatima.handle}</p></div>
+                  <img src={verification.creator.img} alt="" className="h-14 w-14 rounded-full object-cover" />
+                  <div>
+                    <p className="font-bold">{tr(verification.creator.name)}</p>
+                    <p className="text-sm text-muted-foreground" dir="ltr">{verification.creator.handle}</p>
+                  </div>
                 </div>
-                <div className="grid flex-1 grid-cols-2 gap-3 text-sm">
-                  <div className="rounded-xl border bg-surface p-3"><p className="text-xs text-muted-foreground">{tr({ ar: "الإحصائيات الحالية", en: "Current stats" })}</p><p className="num mt-1 font-bold">85K {tr({ ar: "متابع", en: "followers" })} · 14.2K {tr({ ar: "مشاهدات", en: "views" })}</p></div>
-                  <div className="rounded-xl border border-primary/30 bg-primary/5 p-3"><p className="text-xs text-primary">{tr({ ar: "التحديث المطلوب", en: "Requested update" })}</p><p className="num mt-1 font-bold">110K {tr({ ar: "متابع", en: "followers" })} · 19.5K {tr({ ar: "مشاهدات", en: "views" })}</p></div>
+                <div className="grid flex-1 grid-cols-1 gap-3 text-sm sm:grid-cols-2">
+                  <div className="rounded-xl border bg-surface p-3">
+                    <p className="text-xs text-muted-foreground">{tr({ ar: "الأرقام الحالية", en: "Current stats" })}</p>
+                    <p className="num mt-1 font-bold">{verification.currentFollowers} {tr({ ar: "متابع", en: "followers" })} • {verification.currentViews} {tr({ ar: "مشاهدات", en: "views" })}</p>
+                  </div>
+                  <div className="rounded-xl border border-primary/30 bg-primary/5 p-3">
+                    <p className="text-xs text-primary">{tr({ ar: "الأرقام الجديدة المطلوبة", en: "Requested stats" })}</p>
+                    <p className="num mt-1 font-bold">{verification.requestedFollowers} {tr({ ar: "متابع", en: "followers" })} • {verification.requestedViews} {tr({ ar: "مشاهدات", en: "views" })}</p>
+                  </div>
                 </div>
-                <button onClick={() => setProofOpen(true)} className="inline-flex items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold hover:bg-muted"><Search className="h-4 w-4" />{tr({ ar: "معاينة إثبات الإحصائيات", en: "Preview stats proof" })}</button>
-              </div>
-              <div className="mt-5 flex flex-col gap-3 border-t pt-4 sm:flex-row sm:justify-end">
-                <button onClick={() => { setVerifyState("rejected"); toast(tr({ ar: "تم رفض الطلب", en: "Request rejected" })); }} className="rounded-lg border border-destructive px-4 py-2 text-sm font-bold text-destructive hover:bg-destructive/10">{tr({ ar: "رفض الطلب ✗", en: "Reject ✗" })}</button>
-                <button onClick={() => { setVerifyState("approved"); toast.success(tr({ ar: "تم اعتماد وتوثيق الإحصائيات", en: "Stats verified and approved" })); }} className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-soft hover:bg-primary/90">{tr({ ar: "اعتماد وتوثيق الإحصائيات ✓", en: "Approve & verify stats ✓" })}</button>
+                <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+                  {verification.status === "pending" ? (
+                    <>
+                      <button onClick={() => setProofRequest(verification)} className="inline-flex items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold hover:bg-muted">
+                        <Search className="h-4 w-4" />{tr({ ar: "معاينة إثبات الإحصائيات", en: "Preview stats proof" })}
+                      </button>
+                      <button onClick={() => updateVerification(verification, "rejected")} className="rounded-lg border border-destructive px-3 py-2 text-sm font-bold text-destructive hover:bg-destructive/10">{tr({ ar: "رفض الطلب ✗", en: "Reject ✗" })}</button>
+                      <button onClick={() => updateVerification(verification, "approved")} className="rounded-lg bg-primary px-3 py-2 text-sm font-bold text-primary-foreground shadow-soft hover:bg-primary/90">{tr({ ar: "اعتماد وتوثيق الإحصائيات ✓", en: "Approve & verify stats ✓" })}</button>
+                    </>
+                  ) : (
+                    <span className={`rounded-full px-3 py-1 text-xs font-bold ${verification.status === "approved" ? "bg-success-soft text-success" : "bg-destructive/10 text-destructive"}`}>
+                      {verification.status === "approved"
+                        ? tr({ ar: "تم اعتماد الإحصائيات", en: "Stats approved" })
+                        : tr({ ar: "تم رفض الطلب", en: "Request rejected" })}
+                    </span>
+                  )}
+                </div>
               </div>
             </article>
-          ) : (
-            <div className="rounded-2xl border border-dashed bg-surface p-6 text-center text-sm text-muted-foreground">
-              {verifyState === "approved" ? tr({ ar: "تم توثيق إحصائيات فاطمة الحداد.", en: "Fatima Al-Haddad's stats were verified." }) : tr({ ar: "تم رفض طلب فاطمة الحداد.", en: "Fatima Al-Haddad's request was rejected." })}
-            </div>
-          )}
-          <article className="flex flex-col gap-4 rounded-2xl border bg-card p-6 shadow-soft sm:flex-row sm:items-center">
-            <img src={creators[2]!.img} alt="" className="h-14 w-14 rounded-full object-cover" />
-            <div className="flex-1"><p className="font-bold">{tr(creators[2]!.name)}</p><p className="text-sm text-muted-foreground"><span dir="ltr">{creators[2]!.handle}</span> · <span className="num">110K → 124K</span></p></div>
-            <span className="rounded-full bg-warning-soft px-3 py-1 text-xs font-bold text-warning">{tr({ ar: "بانتظار المراجعة", en: "Awaiting review" })}</span>
-          </article>
+          ))}
         </div>
       )}
 
@@ -238,15 +411,43 @@ function AdminPage() {
         </div>
       )}
 
-      {proofOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4 backdrop-blur-sm" onClick={() => setProofOpen(false)}>
-          <div className="w-full max-w-sm rounded-2xl border bg-card p-5 shadow-lift" onClick={(e) => e.stopPropagation()}>
-            <div className="mb-3 flex items-center justify-between"><h3 className="font-bold">{tr({ ar: "إثبات الإحصائيات (Insights)", en: "Stats proof (Insights)" })}</h3><button onClick={() => setProofOpen(false)} className="rounded-lg p-1.5 hover:bg-muted"><X className="h-5 w-5" /></button></div>
-            <div className="space-y-3 rounded-xl border bg-surface p-4" dir="ltr">
-              <p className="flex items-center gap-2 text-xs font-semibold text-muted-foreground"><ImageIcon className="h-4 w-4" />insights_screenshot.png · @fatima_foodie</p>
-              {[["Followers", "110,240"], ["Avg. story views (30d)", "19,512"], ["Accounts reached", "212K"], ["Bahrain audience", "76%"]].map(([k, v]) => (
-                <div key={k} className="flex justify-between rounded-lg bg-card px-3 py-2 text-sm"><span className="text-muted-foreground">{k}</span><span className="num font-bold">{v}</span></div>
-              ))}
+      {proofRequest && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-foreground/40 p-4 backdrop-blur-sm" onClick={() => setProofRequest(null)}>
+          <div role="dialog" aria-modal="true" aria-labelledby="insights-proof-title" className="my-auto w-full max-w-2xl rounded-2xl border bg-card p-5 shadow-lift sm:p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <div>
+                <h3 id="insights-proof-title" className="font-bold">{tr({ ar: "إثبات الإحصائيات (Insights)", en: "Stats proof (Insights)" })}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">{tr(proofRequest.creator.name)} · <span dir="ltr">{proofRequest.creator.handle}</span></p>
+              </div>
+              <button onClick={() => setProofRequest(null)} aria-label={tr({ ar: "إغلاق", en: "Close" })} className="rounded-lg p-1.5 hover:bg-muted"><X className="h-5 w-5" /></button>
+            </div>
+            {proofRequest.screenshotDataUrl ? (
+              <img
+                src={proofRequest.screenshotDataUrl}
+                alt={tr({ ar: "لقطة شاشة Insights المرفقة من صانع المحتوى", en: "Creator-uploaded Insights screenshot" })}
+                className="h-96 w-full max-w-sm mx-auto object-contain rounded-xl border bg-muted shadow-sm"
+              />
+            ) : (
+              <div className="flex h-96 w-full max-w-sm mx-auto flex-col items-center justify-center gap-2 rounded-xl border bg-muted px-6 text-center shadow-sm">
+                <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                <p className="font-semibold">{tr({ ar: "لم تُرفق لقطة شاشة فعلية لهذا الطلب", en: "No actual screenshot is attached to this request" })}</p>
+                <p className="text-sm text-muted-foreground">{tr({ ar: "ستظهر الصورة هنا بعد إرسالها من ملف صانع المحتوى.", en: "The uploaded image will appear here after the creator submits it." })}</p>
+              </div>
+            )}
+            {proofRequest.screenshotName && <p className="mt-2 text-center text-xs text-muted-foreground">{proofRequest.screenshotName}</p>}
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              <div className="rounded-xl border bg-surface p-3">
+                <p className="text-xs text-muted-foreground">{tr({ ar: "الأرقام الحالية", en: "Current stats" })}</p>
+                <p className="num mt-1 font-bold">{proofRequest.currentFollowers} {tr({ ar: "متابع", en: "followers" })} • {proofRequest.currentViews} {tr({ ar: "مشاهدات", en: "views" })}</p>
+              </div>
+              <div className="rounded-xl border border-primary/30 bg-primary/5 p-3">
+                <p className="text-xs text-primary">{tr({ ar: "الأرقام الجديدة المطلوبة", en: "Requested stats" })}</p>
+                <p className="num mt-1 font-bold"><strong>{proofRequest.requestedFollowers} {tr({ ar: "متابع", en: "followers" })} • {proofRequest.requestedViews} {tr({ ar: "مشاهدات", en: "views" })}</strong></p>
+              </div>
+            </div>
+            <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button onClick={() => updateVerification(proofRequest, "rejected")} className="rounded-lg border border-destructive px-4 py-2.5 text-sm font-bold text-destructive hover:bg-destructive/10">{tr({ ar: "رفض الطلب ✗", en: "Reject request ✗" })}</button>
+              <button onClick={() => updateVerification(proofRequest, "approved")} className="rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-soft hover:bg-primary/90">{tr({ ar: "اعتماد وتوثيق الإحصائيات ✓", en: "Approve & verify stats ✓" })}</button>
             </div>
           </div>
         </div>

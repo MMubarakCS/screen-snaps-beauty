@@ -1,21 +1,52 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { QrCode, ShieldCheck, Check, Megaphone, Smartphone, Star, Store, Wallet, Timer, TrendingUp, Users, Copy, X, BadgeCheck, Eye, Headphones } from "lucide-react";
 import { useLang } from "@/components/vloop/Shell";
 import { Link } from "@tanstack/react-router";
 import { creators, t, type L } from "@/lib/vloop-data";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
   component: PublicLanding,
 });
 
-function PublicLanding() {
+export function PublicLanding() {
   const { lang } = useLang();
+  const [verifiedStats, setVerifiedStats] = useState<Record<string, { followers: string; storyViews: string }>>({});
   const [claimCode, setClaimCode] = useState("");
   const [phone, setPhone] = useState("");
   const [showQRModal, setShowQRModal] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    try {
+      const savedStats = window.localStorage.getItem("vloop.verified-creator-stats");
+      if (!savedStats) return;
+      const parsed: unknown = JSON.parse(savedStats);
+      if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+        throw new Error("Saved verified creator stats are invalid.");
+      }
+      const verified: Record<string, { followers: string; storyViews: string }> = {};
+      for (const [creatorId, value] of Object.entries(parsed)) {
+        if (
+          typeof value !== "object" ||
+          value === null ||
+          !("followers" in value) ||
+          typeof value.followers !== "string" ||
+          !("storyViews" in value) ||
+          typeof value.storyViews !== "string"
+        ) {
+          throw new Error("Saved verified creator stats are invalid.");
+        }
+        verified[creatorId] = { followers: value.followers, storyViews: value.storyViews };
+      }
+      setVerifiedStats(verified);
+    } catch (error) {
+      console.error("Unable to load verified creator stats.", error);
+      toast.error(lang === "ar" ? "تعذر تحميل الإحصائيات الموثقة" : "Unable to load verified creator stats");
+    }
+  }, [lang]);
 
   const isAr = lang === "ar";
   const faqItems: { question: L; answer: L }[] = [
@@ -313,14 +344,14 @@ function PublicLanding() {
                       <Users className="h-3.5 w-3.5 inline mr-1" />
                       {isAr ? "متابع" : "Followers"}
                     </span>
-                    <strong className="num text-sm">{c.followers}</strong>
+                    <strong className="num text-sm">{verifiedStats[c.id]?.followers ?? c.followers}</strong>
                   </div>
                   <div className="rounded-xl bg-surface p-3">
                     <span className="block text-xs text-muted-foreground mb-1">
                       <Eye className="h-3.5 w-3.5 inline mr-1" />
                       {isAr ? "مشاهدات" : "Views"}
                     </span>
-                    <strong className="num text-sm">{c.storyViews}</strong>
+                    <strong className="num text-sm">{verifiedStats[c.id]?.storyViews ?? c.storyViews}</strong>
                   </div>
                 </div>
               </article>
