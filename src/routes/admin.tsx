@@ -157,7 +157,7 @@ function AdminPage() {
                       { ok: true, l: { ar: "إرفاق رابط القسيمة في الستوري", en: "Attach voucher link in story" }, s: { ar: "تم التأكيد", en: "Confirmed" } },
                     ].map((c, i) => (
                       <li key={i} className="flex items-start gap-2.5">
-                        <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded ${c.ok ? "bg-success text-success-foreground" : "bg-warning text-warning-foreground"}`}>{c.ok ? <Check className="h-3.5 w-3.5" /> : <HelpCircle className="h-3.5 w-3.5" />}</span>
+                        <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded ${c.ok ? "bg-success text-background" : "bg-warning text-background"}`}>{c.ok ? <Check className="h-3.5 w-3.5" /> : <HelpCircle className="h-3.5 w-3.5" />}</span>
                         <span className="flex-1">{tr(c.l)}</span>
                         <span className={`shrink-0 text-xs font-bold ${c.ok ? "text-success" : "text-warning"}`}>{tr(c.s)}</span>
                       </li>
@@ -169,7 +169,7 @@ function AdminPage() {
             <footer className="flex flex-col gap-3 border-t bg-surface px-6 py-4 sm:flex-row sm:flex-wrap sm:justify-end">
               <button onClick={() => resolve("split")} className="rounded-lg border border-warning/50 px-4 py-2.5 text-sm font-bold text-warning transition hover:bg-warning-soft">{tr({ ar: "تسوية ودية مناصفة (75 د.ب / 75 د.ب)", en: "Amicable 50/50 split (75 / 75 BHD)" })}</button>
               <button onClick={() => resolve("merchant")} className="rounded-lg bg-destructive px-4 py-2.5 text-sm font-bold text-destructive-foreground transition hover:bg-destructive/90">{tr({ ar: "استرداد كامل الضمان للمتجر (150 د.ب)", en: "Full refund to merchant (150 BHD)" })}</button>
-              <button onClick={() => resolve("creator")} className="rounded-lg bg-success px-4 py-2.5 text-sm font-bold text-success-foreground transition hover:bg-success/90">{tr({ ar: "تحرير كامل الضمان للمؤثر (150 د.ب)", en: "Release full escrow to creator (150 BHD)" })}</button>
+              <button onClick={() => resolve("creator")} className="rounded-lg bg-success px-4 py-2.5 text-sm font-bold text-background transition hover:bg-success/90">{tr({ ar: "تحرير كامل الضمان للمؤثر (150 د.ب)", en: "Release full escrow to creator (150 BHD)" })}</button>
             </footer>
           </article>
         )
