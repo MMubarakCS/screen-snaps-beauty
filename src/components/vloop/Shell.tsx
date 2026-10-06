@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type MouseEvent, type ReactNode } from "react";
 import { Link, useLocation, useRouter } from "@tanstack/react-router";
-import { QrCode, ChevronDown, Check, LogOut, Settings, Building2, Lock, Menu, X, Store, Video, CircleHelp, UserCog, Link as LinkIcon } from "lucide-react";
+import { QrCode, ChevronDown, Check, LogOut, Settings, Building2, Lock, Menu, X, Store, Video, CircleHelp, UserCog, ShieldCheck, Link as LinkIcon } from "lucide-react";
 import { toast } from "sonner";
 import { CompanyProfileModal, AccountSettingsModal } from "@/components/vloop/AccountModals";
 import { CreatorProfileModal, CreatorSettingsModal } from "@/components/vloop/CreatorModals";
@@ -148,6 +148,45 @@ export function AppHeader() {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+  if (location.pathname.startsWith("/admin")) {
+    return (
+      <header className="sticky top-0 z-40 whitespace-nowrap border-b bg-background/90 backdrop-blur">
+        <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:px-6">
+          <Link to="/admin" className="flex shrink-0 items-center gap-2">
+            <img src="/logo.png" alt="Vloop" className="h-8 w-auto" />
+            <span className="hidden text-lg font-extrabold sm:inline">
+              Vloop <span className="font-light text-muted-foreground">|</span> ڤلوب
+            </span>
+          </Link>
+          <span className="inline-flex items-center gap-1.5 rounded-md bg-foreground px-2.5 py-1 text-xs font-bold text-background">
+            <ShieldCheck className="h-3.5 w-3.5" />
+            {lang === "ar" ? "لوحة الإدارة العليا" : "Super Admin"}
+          </span>
+          <span className="hidden items-center gap-2 rounded-full border border-success/30 bg-success-soft px-3 py-1.5 text-xs font-semibold text-success xl:inline-flex">
+            <span className="h-2 w-2 animate-pulse rounded-full bg-success" />
+            {lang === "ar" ? "نظام الأمانات والتحكيم المالي نشط" : "Escrow & arbitration system active"}
+            <span dir="ltr" className="font-bold">— CBB & NBR Compliant</span>
+          </span>
+          <div className="ms-auto flex items-center gap-3">
+            <div className="flex rounded-lg border p-0.5 text-xs font-bold">
+              {(["ar", "en"] as const).map((l) => (
+                <button key={l} onClick={() => setLang(l)} className={`rounded-md px-2.5 py-1.5 transition ${lang === l ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}>
+                  {l.toUpperCase()}
+                </button>
+              ))}
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-foreground text-sm font-bold text-background">SA</span>
+              <span className="hidden text-start leading-tight md:block">
+                <span className="block text-sm font-bold">{lang === "ar" ? "مدير النظام" : "System Admin"}</span>
+                <span className="block text-xs text-muted-foreground" dir="ltr">admin@vloop.bh</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </header>
+    );
+  }
   return (
     <>
       {/* NAV */}
