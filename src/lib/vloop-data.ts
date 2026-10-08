@@ -23,7 +23,12 @@ export type Creator = {
   id: string;
   img: string;
   name: L;
+  bio: L;
   handle: string;
+  verified: boolean;
+  socials: { instagram?: string; tiktok?: string; snapchat?: string };
+  portfolio: L[];
+  verifiedCollaborations: { icon: string; brand: L; date: L; visitors: number }[];
   tags: string[];
   followers: string;
   storyViews: string;
@@ -35,12 +40,50 @@ export type Creator = {
   audience: L;
 };
 
+export type VerifiedCreatorStats = { followers: string; storyViews: string };
+
+export function parseVerifiedCreatorStats(value: string): Record<string, VerifiedCreatorStats> {
+  const parsed: unknown = JSON.parse(value);
+  if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+    throw new Error("Saved verified creator stats are invalid.");
+  }
+
+  const verified: Record<string, VerifiedCreatorStats> = {};
+  for (const [creatorId, stats] of Object.entries(parsed)) {
+    if (
+      typeof stats !== "object" ||
+      stats === null ||
+      !("followers" in stats) ||
+      typeof stats.followers !== "string" ||
+      !("storyViews" in stats) ||
+      typeof stats.storyViews !== "string"
+    ) {
+      throw new Error("Saved verified creator stats are invalid.");
+    }
+    verified[creatorId] = { followers: stats.followers, storyViews: stats.storyViews };
+  }
+  return verified;
+}
+
 export const creators: Creator[] = [
   {
     id: "1",
     img: c1,
     name: { ar: "فاطمة الحداد", en: "Fatima Al-Haddad" },
+    bio: {
+      ar: "أشارككم ألذ التجارب والمطاعم المحلية في البحرين، من البرجر إلى وجهات الطعام الجديدة.",
+      en: "Sharing Bahrain's best local food experiences, from great burgers to the newest dining spots.",
+    },
     handle: "@fatima_foodie",
+    verified: true,
+    socials: { instagram: "fatima_foodie" },
+    portfolio: [
+      { ar: "تجربة مطعم محلي", en: "Local Restaurant Feature" },
+      { ar: "اكتشاف قائمة جديدة", en: "New Menu Showcase" },
+      { ar: "تغطية وجهة طعام", en: "Food Destination Coverage" },
+      { ar: "تجربة برانش", en: "Brunch Experience" },
+    ],
+    verifiedCollaborations: [],
     tags: ["#BurgerLover", "#BahrainEats"],
     followers: "85K",
     storyViews: "14.2K",
@@ -55,7 +98,39 @@ export const creators: Creator[] = [
     id: "2",
     img: c2,
     name: { ar: "يوسف المناعي", en: "Yousif Al-Mannai" },
+    bio: {
+      ar: "أكتشف وأشارك أفضل المطاعم والمقاهي في البحرين — تجارب حقيقية، أماكن جديدة، وأطباق تستحق التجربة.",
+      en: "Discovering and sharing Bahrain's best restaurants and cafés — honest experiences, new spots, and dishes worth trying.",
+    },
     handle: "@yousif.bites",
+    verified: true,
+    socials: { instagram: "yousif.bites", tiktok: "yousif.vlogs", snapchat: "yousif_snap" },
+    portfolio: [
+      { ar: "تغطية فليم برجر", en: "Flame Burger Feature" },
+      { ar: "تغطية مقهى برو", en: "Brew Café Feature" },
+      { ar: "اكتشاف قائمة جديدة", en: "New Menu Showcase" },
+      { ar: "جولة أكل في المنامة", en: "Manama Food Trail" },
+    ],
+    verifiedCollaborations: [
+      {
+        icon: "🍔",
+        brand: { ar: "شركة فليم برجر ذ.م.م", en: "Flame Burger W.L.L." },
+        date: { ar: "15 أكتوبر 2026", en: "October 15, 2026" },
+        visitors: 164,
+      },
+      {
+        icon: "☕",
+        brand: { ar: "مقهى برو آند كو", en: "Brew & Co Café" },
+        date: { ar: "10 أكتوبر 2026", en: "October 10, 2026" },
+        visitors: 98,
+      },
+      {
+        icon: "🍕",
+        brand: { ar: "كراست آرتيزان بيتزا", en: "Crust Artisan Pizza" },
+        date: { ar: "28 سبتمبر 2026", en: "September 28, 2026" },
+        visitors: 204,
+      },
+    ],
     tags: ["#CoffeeRuns", "#ManamaFood"],
     followers: "62K",
     storyViews: "11.8K",
@@ -70,7 +145,20 @@ export const creators: Creator[] = [
     id: "3",
     img: c3,
     name: { ar: "نور العلوي", en: "Noor Al-Alawi" },
+    bio: {
+      ar: "أشارك لحظات من الحياة اليومية وأجمل وجهات الطعام والضيافة في البحرين.",
+      en: "Sharing everyday moments and Bahrain's loveliest food and hospitality destinations.",
+    },
     handle: "@noor.daily",
+    verified: true,
+    socials: { instagram: "noor.daily" },
+    portfolio: [
+      { ar: "تجربة وجهة محلية", en: "Local Destination Feature" },
+      { ar: "تغطية جلسة برانش", en: "Brunch Coverage" },
+      { ar: "اكتشاف تجربة جديدة", en: "New Experience Showcase" },
+      { ar: "تغطية فعالية", en: "Event Coverage" },
+    ],
+    verifiedCollaborations: [],
     tags: ["#BahrainLife", "#Brunch"],
     followers: "110K",
     storyViews: "19.5K",
@@ -85,7 +173,20 @@ export const creators: Creator[] = [
     id: "4",
     img: c4,
     name: { ar: "خالد البوعينين", en: "Khalid Al-Buainain" },
+    bio: {
+      ar: "جولات وتجارب أكل من قلب البحرين، مع تركيز على الأطباق المحلية والأماكن المميزة.",
+      en: "Food adventures from the heart of Bahrain, focused on local dishes and standout spots.",
+    },
     handle: "@khalid_eats_bh",
+    verified: true,
+    socials: { instagram: "khalid_eats_bh" },
+    portfolio: [
+      { ar: "تجربة مطعم شعبي", en: "Local Restaurant Feature" },
+      { ar: "جولة أكل في البحرين", en: "Bahrain Food Trail" },
+      { ar: "تغطية طبق مميز", en: "Signature Dish Showcase" },
+      { ar: "اكتشاف مطعم جديد", en: "New Restaurant Feature" },
+    ],
+    verifiedCollaborations: [],
     tags: ["#StreetFood", "#BahrainEats"],
     followers: "48K",
     storyViews: "9.6K",

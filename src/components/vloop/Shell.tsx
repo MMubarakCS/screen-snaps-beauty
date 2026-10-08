@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type MouseEvent, type ReactNode } from "react";
 import { Link, useLocation, useRouter } from "@tanstack/react-router";
-import { QrCode, ChevronDown, Check, LogOut, Settings, Building2, Lock, Menu, X, Store, Video, CircleHelp, UserCog, ShieldCheck, Link as LinkIcon, KeyRound, Mail } from "lucide-react";
+import { QrCode, ChevronDown, Check, LogOut, Settings, Building2, Lock, Menu, X, Store, Video, CircleHelp, HelpCircle, User, ShieldCheck, Link as LinkIcon, KeyRound, Mail } from "lucide-react";
 import { toast } from "sonner";
 import {
   DropdownMenu,
@@ -376,13 +376,20 @@ export function AppHeader() {
                   </button>
                   {menu && (
                     <div dir={lang === "ar" ? "rtl" : "ltr"} className="absolute end-0 top-12 w-52 rounded-xl border bg-popover p-1.5 shadow-lift animate-in fade-in zoom-in-95">
-                      <button onClick={() => { setMenu(false); setModal("creator-profile"); }} className="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-start text-sm font-medium hover:bg-muted">
-                        <UserCog className="h-4 w-4 text-muted-foreground" />
-                        {lang === "ar" ? "الملف الشخصي والميديا كيت" : "Media Kit Profile"}
+                      <button onClick={() => { setMenu(false); setModal("creator-profile"); }} className="w-full flex items-center gap-2.5 px-3 py-2 text-start rounded-lg text-sm hover:bg-muted transition">
+                        <User className="size-4 shrink-0" />
+                        {lang === "ar" ? "الملف الشخصي" : "Profile"}
                       </button>
-                      <button onClick={() => { setMenu(false); setModal("creator-settings"); }} className="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-start text-sm font-medium hover:bg-muted">
-                        <Settings className="size-4 shrink-0 text-muted-foreground" />
-                        {lang === "ar" ? "إعدادات الحساب والآيبان" : "Account & Payout Settings"}
+                      <button onClick={() => { setMenu(false); setModal("creator-settings"); }} className="w-full flex items-center gap-2.5 px-3 py-2 text-start rounded-lg text-sm hover:bg-muted transition">
+                        <Settings className="size-4 shrink-0" />
+                        {lang === "ar" ? "إعدادات الحساب والآيبان" : "Account & Payout"}
+                      </button>
+                      <button
+                        onClick={() => { setMenu(false); setHelpOpen(true); }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-start rounded-lg text-sm hover:bg-muted transition"
+                      >
+                        <HelpCircle className="size-4 shrink-0" />
+                        {lang === "ar" ? "المساعدة والدعم" : "Help & Support"}
                       </button>
                       <div className="my-1 border-t border-border"></div>
                       <button
@@ -390,7 +397,7 @@ export function AppHeader() {
                           setMenu(false);
                           setLogoutDialog(true);
                         }}
-                        className="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-start text-sm font-medium text-destructive hover:bg-destructive/10 hover:text-destructive"
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-start rounded-lg text-sm text-destructive hover:bg-destructive/10 hover:text-destructive transition"
                       >
                         <LogOut
                           className="size-4 text-red-600 shrink-0"

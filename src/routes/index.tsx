@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { QrCode, ShieldCheck, Check, Megaphone, Smartphone, Star, Store, Wallet, Timer, TrendingUp, Users, Copy, X, BadgeCheck, Eye, Headphones } from "lucide-react";
 import { useLang } from "@/components/vloop/Shell";
 import { Link } from "@tanstack/react-router";
-import { creators, t, type L } from "@/lib/vloop-data";
+import { creators, parseVerifiedCreatorStats, t, type L } from "@/lib/vloop-data";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { toast } from "sonner";
 
@@ -23,25 +23,7 @@ export function PublicLanding() {
     try {
       const savedStats = window.localStorage.getItem("vloop.verified-creator-stats");
       if (!savedStats) return;
-      const parsed: unknown = JSON.parse(savedStats);
-      if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
-        throw new Error("Saved verified creator stats are invalid.");
-      }
-      const verified: Record<string, { followers: string; storyViews: string }> = {};
-      for (const [creatorId, value] of Object.entries(parsed)) {
-        if (
-          typeof value !== "object" ||
-          value === null ||
-          !("followers" in value) ||
-          typeof value.followers !== "string" ||
-          !("storyViews" in value) ||
-          typeof value.storyViews !== "string"
-        ) {
-          throw new Error("Saved verified creator stats are invalid.");
-        }
-        verified[creatorId] = { followers: value.followers, storyViews: value.storyViews };
-      }
-      setVerifiedStats(verified);
+      setVerifiedStats(parseVerifiedCreatorStats(savedStats));
     } catch (error) {
       console.error("Unable to load verified creator stats.", error);
       toast.error(lang === "ar" ? "تعذر تحميل الإحصائيات الموثقة" : "Unable to load verified creator stats");

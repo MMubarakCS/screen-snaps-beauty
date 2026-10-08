@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import {
   BadgeCheck,
@@ -57,7 +57,6 @@ function MerchantPage() {
   const [applied, setApplied] = useState({ budget: 150, cat: "food-casual-dining" });
   const [searching, setSearching] = useState(false);
   const [booking, setBooking] = useState<Creator | null>(null);
-  const [kit, setKit] = useState<string | null>(null);
   const results = useMemo(
     () =>
       creators.filter(
@@ -308,12 +307,13 @@ function MerchantPage() {
                     </span>
                   </div>
                   <div className="mt-auto grid grid-cols-2 gap-2 pt-5 2xl:gap-4 2xl:pt-8">
-                    <a
-                      href={`/creators/${c.handle.replace("@", "")}`}
+                    <Link
+                      to="/$handle"
+                      params={{ handle: c.handle }}
                       className="flex items-center justify-center rounded-lg border px-2 py-2 text-center text-xs font-semibold transition hover:border-primary hover:text-primary 2xl:px-4 2xl:py-3 2xl:text-sm"
                     >
                       {tr(t.card.kit)}
-                    </a>
+                    </Link>
                     <button
                       onClick={() => setBooking(c)}
                       className="rounded-lg bg-primary px-2 py-2 text-xs font-bold text-primary-foreground transition hover:bg-primary/90 2xl:px-4 2xl:py-3 2xl:text-sm"

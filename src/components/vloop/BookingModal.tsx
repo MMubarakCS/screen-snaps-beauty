@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   X,
   Check,
@@ -9,6 +9,7 @@ import {
   Loader2,
   CheckCircle2,
   Lock,
+  ChevronDown,
 } from "lucide-react";
 import { type Creator, type Lang, type L, presetTerms, fmtBHD, t } from "@/lib/vloop-data";
 
@@ -25,6 +26,126 @@ const FORMATS: { id: string; label: L }[] = [
 ];
 
 type Term = { id: string; text: L; on: boolean; preset: boolean };
+type VoucherSettings = {
+  enabled: boolean;
+  offerDetails: string;
+  expirationHours: "48" | "72" | "168";
+};
+
+function VoucherTrackingSection({
+  lang,
+  settings,
+  onChange,
+}: {
+  lang: Lang;
+  settings: VoucherSettings;
+  onChange: (settings: VoucherSettings) => void;
+}) {
+  const [isOpen, setIsOpen] = useState(true);
+
+  return (
+    <section className="rounded-xl border bg-card">
+      <button
+        type="button"
+        aria-expanded={isOpen}
+        onClick={() => setIsOpen((open) => !open)}
+        className="flex w-full items-center justify-between gap-3 px-4 py-3 text-start text-sm font-bold"
+      >
+        🎟️ قسيمة الخصم وتتبع زوار الفروع / In-Store Voucher Tracking
+        <ChevronDown
+          className={`h-4 w-4 shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`}
+        />
+      </button>
+      {isOpen && (
+        <div className="space-y-4 border-t p-4">
+          <button
+            type="button"
+            role="switch"
+            aria-checked={settings.enabled}
+            onClick={() => onChange({ ...settings, enabled: !settings.enabled })}
+            className="flex w-full items-center justify-between gap-3 text-start"
+          >
+            <span className="text-sm font-semibold">تفعيل قسيمة الخصم لتتبع الزوار ✓</span>
+            <span
+              className={`relative h-6 w-11 shrink-0 rounded-full transition ${
+                settings.enabled ? "bg-primary" : "bg-muted"
+              }`}
+            >
+              <span
+                className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition ${
+                  settings.enabled ? "end-0.5" : "start-0.5"
+                }`}
+              />
+            </span>
+          </button>
+
+          {settings.enabled ? (
+            <div className="space-y-4">
+              <label className="block">
+                <span className="mb-1.5 block text-xs font-semibold text-muted-foreground">
+                  تفاصيل الخصم / Offer Details
+                </span>
+                <input
+                  value={settings.offerDetails}
+                  onChange={(event) => onChange({ ...settings, offerDetails: event.target.value })}
+                  placeholder={
+                    lang === "ar"
+                      ? "خصم 20% على إجمالي الفاتورة أو مشروب مجاني مع كل وجبة"
+                      : "20% off the total bill or a free drink with every meal"
+                  }
+                  className="w-full rounded-lg border bg-card px-3.5 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/20"
+                />
+              </label>
+
+              <label className="block">
+                <span className="mb-1.5 block text-xs font-semibold text-muted-foreground">
+                  مدة صلاحية القسيمة / Expiration Window
+                </span>
+                <select
+                  value={settings.expirationHours}
+                  onChange={(event) => {
+                    const expirationHours = event.target.value;
+                    if (
+                      expirationHours === "48" ||
+                      expirationHours === "72" ||
+                      expirationHours === "168"
+                    ) {
+                      onChange({ ...settings, expirationHours });
+                    }
+                  }}
+                  className="w-full rounded-lg border bg-card px-3.5 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/20"
+                >
+                  <option value="48">48 ساعة بعد نشر التغطية (موصى به)</option>
+                  <option value="72">72 ساعة (3 أيام)</option>
+                  <option value="168">أسبوع كامل (7 أيام)</option>
+                </select>
+              </label>
+
+              <div>
+                <span className="mb-1.5 block text-xs font-semibold text-muted-foreground">
+                  كود الحملة الترويجي / Promo Code
+                </span>
+                <span
+                  dir="ltr"
+                  className="inline-flex rounded-full border border-primary/20 bg-accent px-4 py-2 font-mono text-sm font-bold tracking-wider text-accent-foreground"
+                >
+                  FLAME20
+                </span>
+                <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                  سيتم تزويد صانع المحتوى بهذا الكود والرابط لوضعه في الستوري.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <p className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">
+              حملة إشهار وتوعية فقط بدون تتبع قسائم في الفروع.
+            </p>
+          )}
+        </div>
+      )}
+    </section>
+  );
+}
 
 /* ──────────────────────────────────────────────────────────────────── *
  *  Escrow Breakdown — reused by both modes
@@ -38,11 +159,13 @@ function EscrowBreakdown({ fee, lang, tr }: { fee: number; lang: Lang; tr: (x: L
     <section>
       <h3 className="mb-2 text-sm font-bold">{tr(t.modal.summary)}</h3>
       <dl className="divide-y rounded-xl border bg-surface text-sm">
-        {([
-          [t.modal.fee, fee],
-          [t.modal.platform, platform],
-          [t.modal.vat, vat],
-        ] as [L, number][]).map(([k, v]) => (
+        {(
+          [
+            [t.modal.fee, fee],
+            [t.modal.platform, platform],
+            [t.modal.vat, vat],
+          ] as [L, number][]
+        ).map(([k, v]) => (
           <div key={tr(k)} className="flex justify-between px-4 py-2.5">
             <dt className="text-muted-foreground">{tr(k)}</dt>
             <dd className="num font-medium">{fmtBHD(v, lang)}</dd>
@@ -50,9 +173,7 @@ function EscrowBreakdown({ fee, lang, tr }: { fee: number; lang: Lang; tr: (x: L
         ))}
         <div className="flex justify-between px-4 py-3">
           <dt className="font-bold">{tr(t.modal.total)}</dt>
-          <dd className="num text-base font-extrabold text-success">
-            {fmtBHD(total, lang)}
-          </dd>
+          <dd className="num text-base font-extrabold text-success">{fmtBHD(total, lang)}</dd>
         </div>
       </dl>
       <p className="mt-3 flex items-start gap-2 rounded-lg bg-success-soft p-3 text-xs leading-relaxed text-foreground">
@@ -71,11 +192,21 @@ function ManualMode({
   lang,
   tr,
   onSend,
+  submitDisabled,
+  datePanel,
+  budgetEditor,
+  voucherSettings,
+  onVoucherSettingsChange,
 }: {
   fee: number;
   lang: Lang;
   tr: (x: L) => string;
   onSend: () => void;
+  submitDisabled: boolean;
+  datePanel: ReactNode;
+  budgetEditor: ReactNode;
+  voucherSettings: VoucherSettings;
+  onVoucherSettingsChange: (settings: VoucherSettings) => void;
 }) {
   const [plats, setPlats] = useState<string[]>(["ig"]);
   const [fmt, setFmt] = useState<string[]>(["story"]);
@@ -111,6 +242,14 @@ function ManualMode({
   return (
     <>
       <div className="flex-1 space-y-6 overflow-y-auto px-6 py-5">
+        {datePanel}
+        {budgetEditor}
+        <VoucherTrackingSection
+          lang={lang}
+          settings={voucherSettings}
+          onChange={onVoucherSettingsChange}
+        />
+
         {/* Platform chips */}
         <div>
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -122,9 +261,7 @@ function ManualMode({
               return (
                 <button
                   key={p.id}
-                  onClick={() =>
-                    setPlats((s) => (on ? s.filter((x) => x !== p.id) : [...s, p.id]))
-                  }
+                  onClick={() => setPlats((s) => (on ? s.filter((x) => x !== p.id) : [...s, p.id]))}
                   className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-medium transition ${on ? "border-primary bg-accent text-accent-foreground" : "bg-card text-muted-foreground hover:border-primary/40"}`}
                 >
                   {on && <Check className="h-3.5 w-3.5" />}
@@ -146,9 +283,7 @@ function ManualMode({
               return (
                 <button
                   key={f.id}
-                  onClick={() =>
-                    setFmt((s) => (on ? s.filter((x) => x !== f.id) : [...s, f.id]))
-                  }
+                  onClick={() => setFmt((s) => (on ? s.filter((x) => x !== f.id) : [...s, f.id]))}
                   className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-medium transition ${on ? "border-primary bg-accent text-accent-foreground" : "bg-card text-muted-foreground hover:border-primary/40"}`}
                 >
                   {on && <Check className="h-3.5 w-3.5" />}
@@ -251,7 +386,8 @@ function ManualMode({
       <footer className="border-t bg-card px-6 py-4">
         <button
           onClick={onSend}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-bold text-primary-foreground shadow-soft transition hover:bg-primary/90"
+          disabled={submitDisabled}
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-bold text-primary-foreground shadow-soft transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <ShieldCheck className="h-4 w-4" />
           {tr(t.modal.submit)}
@@ -269,11 +405,21 @@ function AiMode({
   lang,
   tr,
   onSend,
+  submitDisabled,
+  datePanel,
+  budgetEditor,
+  voucherSettings,
+  onVoucherSettingsChange,
 }: {
   fee: number;
   lang: Lang;
   tr: (x: L) => string;
   onSend: () => void;
+  submitDisabled: boolean;
+  datePanel: ReactNode;
+  budgetEditor: ReactNode;
+  voucherSettings: VoucherSettings;
+  onVoucherSettingsChange: (settings: VoucherSettings) => void;
 }) {
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
@@ -286,8 +432,7 @@ function AiMode({
 
   const editTerm = (id: string, v: string) =>
     setAiTerms((s) => s.map((x) => (x.id === id ? { ...x, text: { ar: v, en: v } } : x)));
-  const removeTerm = (id: string) =>
-    setAiTerms((s) => s.filter((x) => x.id !== id));
+  const removeTerm = (id: string) => setAiTerms((s) => s.filter((x) => x.id !== id));
   const addClause = () =>
     setAiTerms((s) => [
       ...s,
@@ -378,6 +523,14 @@ function AiMode({
   return (
     <>
       <div className="flex-1 space-y-6 overflow-y-auto px-6 py-5">
+        {datePanel}
+        {budgetEditor}
+        <VoucherTrackingSection
+          lang={lang}
+          settings={voucherSettings}
+          onChange={onVoucherSettingsChange}
+        />
+
         {/* Prompt box */}
         <div className="space-y-3">
           <textarea
@@ -492,7 +645,8 @@ function AiMode({
       <footer className="border-t bg-card px-6 py-4">
         <button
           onClick={onSend}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-bold text-primary-foreground shadow-soft transition hover:bg-primary/90"
+          disabled={submitDisabled}
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-bold text-primary-foreground shadow-soft transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <ShieldCheck className="h-4 w-4" />
           {tr(t.modal.submit)}
@@ -511,22 +665,34 @@ export function BookingModal({
   fee,
   onClose,
   selectedDate,
+  allowCustomBudget = false,
 }: {
   creator: Creator;
   lang: Lang;
   fee: number;
   onClose: () => void;
   selectedDate?: string;
+  allowCustomBudget?: boolean;
 }) {
   const tr = (x: L) => x[lang];
   const [tab, setTab] = useState<"presets" | "ai">("presets");
   const [sent, setSent] = useState(false);
+  const [budgetInput, setBudgetInput] = useState("150.000");
   const [campaignDate, setCampaignDate] = useState(selectedDate || "");
   const [isEditingDate, setIsEditingDate] = useState(!selectedDate);
+  const [voucherSettings, setVoucherSettings] = useState<VoucherSettings>({
+    enabled: true,
+    offerDetails: "",
+    expirationHours: "48",
+  });
 
-  const platform = fee * 0.08;
+  const parsedBudget = Number(budgetInput);
+  const validBudget = Number.isFinite(parsedBudget) && parsedBudget > 0;
+  const offerBelowThreshold = allowCustomBudget && (!validBudget || parsedBudget < creator.minRate);
+  const effectiveFee = allowCustomBudget ? (validBudget ? parsedBudget : 0) : fee;
+  const platform = effectiveFee * 0.08;
   const vat = platform * 0.1;
-  const total = fee + platform + vat;
+  const total = effectiveFee + platform + vat;
 
   useEffect(() => {
     const k = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -601,60 +767,119 @@ export function BookingModal({
               </div>
             </div>
 
-            {/* Date Picker Section */}
-            <div className="shrink-0 px-6 pt-5">
-              <div className="rounded-xl border bg-surface p-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-bold flex items-center gap-2">
-                    📅 {lang === "ar" ? "تاريخ الحملة المعتمد:" : "Approved Campaign Date:"}
+            {/*
+              Keep the date picker in the active mode's scrollable content instead
+              of pinning it above that content.
+            */}
+            {(() => {
+              const datePanel = (
+                <div className="rounded-xl border bg-surface p-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="flex items-center gap-2 text-sm font-bold">
+                      📅 {lang === "ar" ? "تاريخ الحملة المعتمد:" : "Approved Campaign Date:"}
+                      {!isEditingDate && (
+                        <span className="font-normal text-primary">{campaignDate}</span>
+                      )}
+                    </h3>
                     {!isEditingDate && (
-                      <span className="text-primary font-normal">{campaignDate}</span>
+                      <button
+                        onClick={() => setIsEditingDate(true)}
+                        className="text-xs font-semibold text-muted-foreground transition hover:text-primary"
+                      >
+                        {lang === "ar" ? "تغيير / Edit" : "Edit"}
+                      </button>
                     )}
-                  </h3>
-                  {!isEditingDate && (
-                    <button
-                      onClick={() => setIsEditingDate(true)}
-                      className="text-xs font-semibold text-muted-foreground hover:text-primary transition"
-                    >
-                      {lang === "ar" ? "تغيير / Edit" : "Edit"}
-                    </button>
+                  </div>
+                  {isEditingDate && (
+                    <div className="mt-3 flex gap-2">
+                      <input
+                        type="date"
+                        value={campaignDate}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setCampaignDate(val);
+                          if (val) setIsEditingDate(false);
+                        }}
+                        className="w-full rounded-lg border bg-card px-3.5 py-2.5 text-sm outline-none focus:border-primary"
+                      />
+                    </div>
                   )}
                 </div>
-                {isEditingDate && (
-                  <div className="mt-3 flex gap-2">
+              );
+              const budgetEditor = allowCustomBudget ? (
+                <div>
+                  <label
+                    htmlFor="offered-campaign-budget"
+                    className="mb-1.5 block text-sm font-bold"
+                  >
+                    {lang === "ar" ? "الميزانية المقترحة (د.ب)" : "Offered Campaign Budget (BHD)"}
+                  </label>
+                  <div className="flex items-center gap-2 rounded-xl border bg-card px-3.5 focus-within:border-primary focus-within:ring-2 focus-within:ring-ring/20">
                     <input
-                      type="date"
-                      value={campaignDate}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setCampaignDate(val);
-                        if (val) setIsEditingDate(false);
-                      }}
-                      className="w-full rounded-lg border bg-card px-3.5 py-2.5 text-sm outline-none focus:border-primary"
+                      id="offered-campaign-budget"
+                      type="number"
+                      min="0.001"
+                      step="0.001"
+                      inputMode="decimal"
+                      value={budgetInput}
+                      onChange={(event) => setBudgetInput(event.target.value)}
+                      className="w-full bg-transparent py-3 text-sm outline-none"
                     />
+                    <span className="shrink-0 text-xs font-semibold text-muted-foreground">
+                      {lang === "ar" ? "د.ب" : "BHD"}
+                    </span>
                   </div>
-                )}
-              </div>
-            </div>
+                  {offerBelowThreshold && (
+                    <p
+                      role="alert"
+                      className="mt-2 rounded-lg border border-warning/30 bg-warning-soft p-3 text-xs leading-6 text-foreground"
+                    >
+                      {lang === "ar"
+                        ? "⚠️ بناءً على حجم جمهور صانع المحتوى وتوثيق الحساب، العرض المقترح أقل من نطاق القبول المتاح حالياً. يرجى تقديم عرض مناسب لضمان قبول الحملة."
+                        : "⚠️ Based on the creator’s audience and verified account, this offer is below the currently acceptable range. Please submit a suitable offer to help ensure campaign acceptance."}
+                    </p>
+                  )}
+                </div>
+              ) : null;
 
-            {/* Render the active mode — each has its own isolated state tree */}
-            {tab === "presets" ? (
-              <ManualMode fee={fee} lang={lang} tr={tr} onSend={() => {
-                if (!campaignDate) {
-                  setIsEditingDate(true);
-                  return;
-                }
-                setSent(true);
-              }} />
-            ) : (
-              <AiMode fee={fee} lang={lang} tr={tr} onSend={() => {
-                if (!campaignDate) {
-                  setIsEditingDate(true);
-                  return;
-                }
-                setSent(true);
-              }} />
-            )}
+              return tab === "presets" ? (
+                <ManualMode
+                  fee={effectiveFee}
+                  lang={lang}
+                  tr={tr}
+                  submitDisabled={offerBelowThreshold}
+                  datePanel={datePanel}
+                  budgetEditor={budgetEditor}
+                  voucherSettings={voucherSettings}
+                  onVoucherSettingsChange={setVoucherSettings}
+                  onSend={() => {
+                    if (!campaignDate) {
+                      setIsEditingDate(true);
+                      return;
+                    }
+                    if (!offerBelowThreshold) setSent(true);
+                  }}
+                />
+              ) : (
+                <AiMode
+                  fee={effectiveFee}
+                  lang={lang}
+                  tr={tr}
+                  submitDisabled={offerBelowThreshold}
+                  datePanel={datePanel}
+                  budgetEditor={budgetEditor}
+                  voucherSettings={voucherSettings}
+                  onVoucherSettingsChange={setVoucherSettings}
+                  onSend={() => {
+                    if (!campaignDate) {
+                      setIsEditingDate(true);
+                      return;
+                    }
+                    if (!offerBelowThreshold) setSent(true);
+                  }}
+                />
+              );
+            })()}
           </>
         )}
       </div>
