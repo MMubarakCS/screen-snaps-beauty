@@ -24,9 +24,9 @@ export function CreatorPayoutModal({ available, onClose }: { available: number; 
   }, []);
 
   const submit = async () => {
-    if (!amountOk) return toast.warning(tr({ ar: `أدخل مبلغاً بين 0.001 و ${fmtBHD(available, "ar")}`, en: `Enter an amount up to ${fmtBHD(available, "en")}` }));
-    if (password.length < 6) return toast.warning(tr({ ar: "يرجى إدخال كلمة المرور لتأكيد التحويل", en: "Please enter your password to confirm" }));
-    if (!agree) return toast.warning(tr({ ar: "يرجى الموافقة على الإقرار القانوني", en: "Please accept the legal declaration" }));
+    if (!amountOk) { toast.warning(tr({ ar: `أدخل مبلغاً بين 0.001 و ${fmtBHD(available, "ar")}`, en: `Enter an amount up to ${fmtBHD(available, "en")}` })); return; }
+    if (password.length < 6) { toast.warning(tr({ ar: "يرجى إدخال كلمة المرور لتأكيد التحويل", en: "Please enter your password to confirm" })); return; }
+    if (!agree) { toast.warning(tr({ ar: "يرجى الموافقة على الإقرار القانوني", en: "Please accept the legal declaration" })); return; }
     setStage("processing");
     const res = await requestPayout({ amount: value, iban: IBAN });
     setRef(res.ref);
