@@ -177,7 +177,7 @@ function AdminPage() {
         profileUrl: profileUrl.toString(),
         status:
           (parsedDecisions as Record<string, "approved" | "rejected">)[creator.id] === "approved" || (parsedDecisions as Record<string, "approved" | "rejected">)[creator.id] === "rejected"
-            ? (parsedDecisions as Record<string, "approved" | "rejected">)[creator.id]
+            ? (parsedDecisions as Record<string, "approved" | "rejected">)[creator.id]!
             : "pending",
       };
       setVerifications((current) =>
