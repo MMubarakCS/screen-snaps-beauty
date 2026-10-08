@@ -46,6 +46,7 @@ function PublicCreatorProfile() {
   );
   const [verifiedStats, setVerifiedStats] = useState<VerifiedCreatorStats | null>(null);
   const [bookingOpen, setBookingOpen] = useState(false);
+  const closeBooking = () => setBookingOpen(false);
 
   useEffect(() => {
     try {
@@ -257,7 +258,8 @@ function PublicCreatorProfile() {
           lang={lang}
           fee={150}
           allowCustomBudget
-          onClose={() => setBookingOpen(false)}
+          onSent={closeBooking}
+          onClose={closeBooking}
         />
       )}
     </main>

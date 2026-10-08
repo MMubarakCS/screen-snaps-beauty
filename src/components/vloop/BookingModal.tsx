@@ -12,6 +12,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { type Creator, type Lang, type L, presetTerms, fmtBHD, t } from "@/lib/vloop-data";
+import { toast } from "sonner";
 
 const PLATFORMS: { id: string; label: L }[] = [
   { id: "ig", label: { ar: "إنستغرام Instagram", en: "Instagram" } },
@@ -36,10 +37,12 @@ function VoucherTrackingSection({
   lang,
   settings,
   onChange,
+  offerDetailsInvalid,
 }: {
   lang: Lang;
   settings: VoucherSettings;
   onChange: (settings: VoucherSettings) => void;
+  offerDetailsInvalid: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(true);
 
@@ -93,7 +96,7 @@ function VoucherTrackingSection({
                       ? "خصم 20% على إجمالي الفاتورة أو مشروب مجاني مع كل وجبة"
                       : "20% off the total bill or a free drink with every meal"
                   }
-                  className="w-full rounded-lg border bg-card px-3.5 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/20"
+                  className={`w-full rounded-lg border bg-card px-3.5 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/20 ${offerDetailsInvalid ? "border-red-500" : ""}`}
                 />
               </label>
 
@@ -192,21 +195,21 @@ function ManualMode({
   lang,
   tr,
   onSend,
-  submitDisabled,
   datePanel,
   budgetEditor,
   voucherSettings,
   onVoucherSettingsChange,
+  offerDetailsInvalid,
 }: {
   fee: number;
   lang: Lang;
   tr: (x: L) => string;
-  onSend: () => void;
-  submitDisabled: boolean;
+  onSend: (hasPlatform: boolean, hasDeliverable: boolean) => void;
   datePanel: ReactNode;
   budgetEditor: ReactNode;
   voucherSettings: VoucherSettings;
   onVoucherSettingsChange: (settings: VoucherSettings) => void;
+  offerDetailsInvalid: boolean;
 }) {
   const [plats, setPlats] = useState<string[]>(["ig"]);
   const [fmt, setFmt] = useState<string[]>(["story"]);
@@ -248,6 +251,7 @@ function ManualMode({
           lang={lang}
           settings={voucherSettings}
           onChange={onVoucherSettingsChange}
+          offerDetailsInvalid={offerDetailsInvalid}
         />
 
         {/* Platform chips */}
@@ -385,9 +389,14 @@ function ManualMode({
       {/* Submit */}
       <footer className="border-t bg-card px-6 py-4">
         <button
-          onClick={onSend}
-          disabled={submitDisabled}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-bold text-primary-foreground shadow-soft transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+          type="button"
+          onClick={() =>
+            onSend(
+              plats.length > 0,
+              terms.some((term) => term.on && Boolean(term.text[lang].trim())),
+            )
+          }
+          className="relative z-20 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-bold text-primary-foreground shadow-soft transition hover:bg-primary/90"
         >
           <ShieldCheck className="h-4 w-4" />
           {tr(t.modal.submit)}
@@ -405,21 +414,21 @@ function AiMode({
   lang,
   tr,
   onSend,
-  submitDisabled,
   datePanel,
   budgetEditor,
   voucherSettings,
   onVoucherSettingsChange,
+  offerDetailsInvalid,
 }: {
   fee: number;
   lang: Lang;
   tr: (x: L) => string;
-  onSend: () => void;
-  submitDisabled: boolean;
+  onSend: (hasPlatform: boolean, hasDeliverable: boolean) => void;
   datePanel: ReactNode;
   budgetEditor: ReactNode;
   voucherSettings: VoucherSettings;
   onVoucherSettingsChange: (settings: VoucherSettings) => void;
+  offerDetailsInvalid: boolean;
 }) {
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
@@ -529,6 +538,7 @@ function AiMode({
           lang={lang}
           settings={voucherSettings}
           onChange={onVoucherSettingsChange}
+          offerDetailsInvalid={offerDetailsInvalid}
         />
 
         {/* Prompt box */}
@@ -644,9 +654,14 @@ function AiMode({
       {/* Submit */}
       <footer className="border-t bg-card px-6 py-4">
         <button
-          onClick={onSend}
-          disabled={submitDisabled}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-bold text-primary-foreground shadow-soft transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+          type="button"
+          onClick={() =>
+            onSend(
+              aiPlats.length > 0,
+              active.some((term) => Boolean(term.text[lang].trim())),
+            )
+          }
+          className="relative z-20 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-bold text-primary-foreground shadow-soft transition hover:bg-primary/90"
         >
           <ShieldCheck className="h-4 w-4" />
           {tr(t.modal.submit)}
@@ -664,13 +679,15 @@ export function BookingModal({
   lang,
   fee,
   onClose,
+  onSent,
   selectedDate,
   allowCustomBudget = false,
 }: {
   creator: Creator;
   lang: Lang;
   fee: number;
-  onClose: () => void;
+  onClose?: () => void;
+  onSent?: () => void;
   selectedDate?: string;
   allowCustomBudget?: boolean;
 }) {
@@ -685,9 +702,13 @@ export function BookingModal({
     offerDetails: "",
     expirationHours: "48",
   });
+  const [dateInvalid, setDateInvalid] = useState(false);
+  const [budgetInvalid, setBudgetInvalid] = useState(false);
+  const [offerDetailsInvalid, setOfferDetailsInvalid] = useState(false);
 
   const parsedBudget = Number(budgetInput);
   const validBudget = Number.isFinite(parsedBudget) && parsedBudget > 0;
+  const budgetValue = allowCustomBudget ? parsedBudget : Number(fee);
   const offerBelowThreshold = allowCustomBudget && (!validBudget || parsedBudget < creator.minRate);
   const effectiveFee = allowCustomBudget ? (validBudget ? parsedBudget : 0) : fee;
   const platform = effectiveFee * 0.08;
@@ -695,7 +716,7 @@ export function BookingModal({
   const total = effectiveFee + platform + vat;
 
   useEffect(() => {
-    const k = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    const k = (e: KeyboardEvent) => e.key === "Escape" && onClose?.();
     window.addEventListener("keydown", k);
     document.body.style.overflow = "hidden";
     return () => {
@@ -703,6 +724,42 @@ export function BookingModal({
       document.body.style.overflow = "";
     };
   }, [onClose]);
+
+  const submitBooking = (hasPlatform: boolean, hasDeliverable: boolean) => {
+    if (!campaignDate) {
+      setIsEditingDate(true);
+      setDateInvalid(true);
+      toast.warning("يرجى تحديد تاريخ التغطية المطلوب للحملة");
+      return;
+    }
+    if (!Number.isFinite(budgetValue) || budgetValue <= 0) {
+      setBudgetInvalid(true);
+      toast.warning("يرجى إدخال ميزانية صالحة للحملة");
+      return;
+    }
+    if (voucherSettings.enabled && !voucherSettings.offerDetails.trim()) {
+      setOfferDetailsInvalid(true);
+      toast.warning("يرجى كتابة تفاصيل خصم القسيمة (مثال: خصم 20%) أو إلغاء تفعيل القسيمة");
+      return;
+    }
+    if (!hasPlatform || !hasDeliverable) {
+      toast.warning("يرجى اختيار منصة واحدة وشرط واحد على الأقل للحملة");
+      return;
+    }
+    if (offerBelowThreshold) {
+      toast.warning(
+        lang === "ar"
+          ? `الميزانية يجب ألا تقل عن ${fmtBHD(creator.minRate, lang)}`
+          : `The budget must be at least ${fmtBHD(creator.minRate, lang)}`,
+      );
+      return;
+    }
+
+    setSent(true);
+    toast.success("تم إيداع مبلغ الضمان وإرسال طلب الحجز بنجاح!");
+    onSent?.();
+    onClose?.();
+  };
 
   return (
     <div
@@ -798,9 +855,10 @@ export function BookingModal({
                         onChange={(e) => {
                           const val = e.target.value;
                           setCampaignDate(val);
+                          setDateInvalid(false);
                           if (val) setIsEditingDate(false);
                         }}
-                        className="w-full rounded-lg border bg-card px-3.5 py-2.5 text-sm outline-none focus:border-primary"
+                        className={`w-full rounded-lg border bg-card px-3.5 py-2.5 text-sm outline-none focus:border-primary ${dateInvalid ? "border-red-500" : ""}`}
                       />
                     </div>
                   )}
@@ -814,7 +872,9 @@ export function BookingModal({
                   >
                     {lang === "ar" ? "الميزانية المقترحة (د.ب)" : "Offered Campaign Budget (BHD)"}
                   </label>
-                  <div className="flex items-center gap-2 rounded-xl border bg-card px-3.5 focus-within:border-primary focus-within:ring-2 focus-within:ring-ring/20">
+                  <div
+                    className={`flex items-center gap-2 rounded-xl border bg-card px-3.5 focus-within:border-primary focus-within:ring-2 focus-within:ring-ring/20 ${budgetInvalid ? "border-red-500" : ""}`}
+                  >
                     <input
                       id="offered-campaign-budget"
                       type="number"
@@ -822,7 +882,10 @@ export function BookingModal({
                       step="0.001"
                       inputMode="decimal"
                       value={budgetInput}
-                      onChange={(event) => setBudgetInput(event.target.value)}
+                      onChange={(event) => {
+                        setBudgetInput(event.target.value);
+                        setBudgetInvalid(false);
+                      }}
                       className="w-full bg-transparent py-3 text-sm outline-none"
                     />
                     <span className="shrink-0 text-xs font-semibold text-muted-foreground">
@@ -847,36 +910,34 @@ export function BookingModal({
                   fee={effectiveFee}
                   lang={lang}
                   tr={tr}
-                  submitDisabled={offerBelowThreshold}
                   datePanel={datePanel}
                   budgetEditor={budgetEditor}
                   voucherSettings={voucherSettings}
-                  onVoucherSettingsChange={setVoucherSettings}
-                  onSend={() => {
-                    if (!campaignDate) {
-                      setIsEditingDate(true);
-                      return;
-                    }
-                    if (!offerBelowThreshold) setSent(true);
+                  onVoucherSettingsChange={(settings) => {
+                    setVoucherSettings(settings);
+                    if (settings.offerDetails.trim()) setOfferDetailsInvalid(false);
                   }}
+                  offerDetailsInvalid={offerDetailsInvalid}
+                  onSend={(hasPlatform, hasDeliverable) =>
+                    submitBooking(hasPlatform, hasDeliverable)
+                  }
                 />
               ) : (
                 <AiMode
                   fee={effectiveFee}
                   lang={lang}
                   tr={tr}
-                  submitDisabled={offerBelowThreshold}
                   datePanel={datePanel}
                   budgetEditor={budgetEditor}
                   voucherSettings={voucherSettings}
-                  onVoucherSettingsChange={setVoucherSettings}
-                  onSend={() => {
-                    if (!campaignDate) {
-                      setIsEditingDate(true);
-                      return;
-                    }
-                    if (!offerBelowThreshold) setSent(true);
+                  onVoucherSettingsChange={(settings) => {
+                    setVoucherSettings(settings);
+                    if (settings.offerDetails.trim()) setOfferDetailsInvalid(false);
                   }}
+                  offerDetailsInvalid={offerDetailsInvalid}
+                  onSend={(hasPlatform, hasDeliverable) =>
+                    submitBooking(hasPlatform, hasDeliverable)
+                  }
                 />
               );
             })()}
