@@ -22,6 +22,7 @@ import {
 import { useLang } from "@/components/vloop/Shell";
 import { fmtBHD } from "@/lib/vloop-data";
 import { toast } from "sonner";
+import { CreatorPayoutModal } from "@/components/vloop/CreatorPayoutModal";
 import c2 from "@/assets/creator-2.jpg";
 
 export const Route = createFileRoute("/creator")({
@@ -35,6 +36,7 @@ function CreatorPage() {
   const { lang } = useLang();
   const isAr = lang === "ar";
   const [copiedBio, setCopiedBio] = useState(false);
+  const [payoutOpen, setPayoutOpen] = useState(false);
   const [copiedVoucher, setCopiedVoucher] = useState(false);
   const [copiedVoucherLink, setCopiedVoucherLink] = useState(false);
   const [creatorAvatarPreview, setCreatorAvatarPreview] = useState<string | null>(null);
@@ -610,13 +612,12 @@ function CreatorPage() {
                 {isAr ? "أرباح مكتملة ومعتمدة" : "Completed and approved earnings"}
               </p>
               <button
-                onClick={() =>
-                  toast.info(isAr ? "يتم التحويل لـ Fawri+" : "Processing Fawri+ Transfer")
-                }
-                className="rounded-full bg-success px-3 py-1 text-xs font-bold text-success-foreground hover:bg-success/90"
+                onClick={() => setPayoutOpen(true)}
+                className="rounded-full bg-success px-3 py-1 text-xs font-bold text-background hover:bg-success/90"
               >
-                {isAr ? "سحب الأرباح" : "Withdraw"}
+                {isAr ? "سحب الأرباح (Fawri+ IBAN)" : "Withdraw (Fawri+ IBAN)"}
               </button>
+              {payoutOpen && <CreatorPayoutModal available={450} onClose={() => setPayoutOpen(false)} />}
             </div>
           </div>
 
