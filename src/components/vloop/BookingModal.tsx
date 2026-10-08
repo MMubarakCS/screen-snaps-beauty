@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { type Creator, type Lang, type L, presetTerms, fmtBHD, t } from "@/lib/vloop-data";
 import { toast } from "sonner";
+import { PaymentGatewayModal } from "@/components/vloop/PaymentGatewayModal";
 
 const PLATFORMS: { id: string; label: L }[] = [
   { id: "ig", label: { ar: "إنستغرام Instagram", en: "Instagram" } },
@@ -694,6 +695,7 @@ export function BookingModal({
   const tr = (x: L) => x[lang];
   const [tab, setTab] = useState<"presets" | "ai">("presets");
   const [sent, setSent] = useState(false);
+  const [paying, setPaying] = useState(false);
   const [budgetInput, setBudgetInput] = useState("150.000");
   const [campaignDate, setCampaignDate] = useState(selectedDate || "");
   const [isEditingDate, setIsEditingDate] = useState(!selectedDate);
@@ -755,11 +757,23 @@ export function BookingModal({
       return;
     }
 
-    setSent(true);
-    toast.success("تم إيداع مبلغ الضمان وإرسال طلب الحجز بنجاح!");
-    onSent?.();
-    onClose?.();
+    setPaying(true);
   };
+
+  if (paying) {
+    return (
+      <PaymentGatewayModal
+        lang={lang}
+        fee={effectiveFee}
+        onCancel={() => setPaying(false)}
+        onFunded={() => {
+          setSent(true);
+          onSent?.();
+          onClose?.();
+        }}
+      />
+    );
+  }
 
   return (
     <div
