@@ -105,7 +105,7 @@ function AdminPage() {
         }
         setVerifications((current) =>
           current.map((verification) => {
-            const decision = parsed[verification.id];
+            const decision = (parsed as Record<string, unknown>)[verification.id];
             return decision === "approved" || decision === "rejected"
               ? { ...verification, status: decision }
               : verification;
@@ -164,7 +164,7 @@ function AdminPage() {
         count >= 1000
           ? `${Number((count / 1000).toFixed(count % 1000 === 0 ? 0 : 1))}K`
           : String(count);
-      const savedVerification: Verification = {
+      const savedVerification: InsightsVerification = {
         id: creator.id,
         creator,
         currentFollowers: creator.followers,
@@ -176,8 +176,8 @@ function AdminPage() {
         platform: parsed.platform,
         profileUrl: profileUrl.toString(),
         status:
-          parsedDecisions[creator.id] === "approved" || parsedDecisions[creator.id] === "rejected"
-            ? parsedDecisions[creator.id]
+          (parsedDecisions as Record<string, "approved" | "rejected">)[creator.id] === "approved" || (parsedDecisions as Record<string, "approved" | "rejected">)[creator.id] === "rejected"
+            ? (parsedDecisions as Record<string, "approved" | "rejected">)[creator.id]!
             : "pending",
       };
       setVerifications((current) =>

@@ -217,7 +217,7 @@ export function AppHeader() {
                     <ChevronDown className="h-4 w-4 text-muted-foreground" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent dir={lang === "ar" ? "rtl" : "ltr"} align="end" className="min-w-60">
+                <DropdownMenuContent align="end" className="min-w-60">
                   <DropdownMenuItem onSelect={() => setAdminSettingsOpen(true)} className="w-full flex items-center gap-2.5 px-3 py-2 text-start cursor-pointer">
                     <Settings className="size-4 shrink-0" />
                     {lang === "ar" ? "إعدادات الحساب والأمان" : "Admin Settings"}
