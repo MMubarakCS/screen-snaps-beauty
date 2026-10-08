@@ -17,6 +17,7 @@ import { Route as CreatorRouteImport } from './routes/creator'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as InvoicesRouteImport } from './routes/invoices'
 import { Route as MerchantRouteImport } from './routes/merchant'
+import { Route as ScanRouteImport } from './routes/scan'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -58,6 +59,11 @@ const MerchantRoute = MerchantRouteImport.update({
   path: '/merchant',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ScanRoute = ScanRouteImport.update({
+  id: '/scan',
+  path: '/scan',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -68,6 +74,7 @@ export interface FileRoutesByFullPath {
   '/home': typeof HomeRoute
   '/invoices': typeof InvoicesRoute
   '/merchant': typeof MerchantRoute
+  '/scan': typeof ScanRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByTo {
   '/home': typeof HomeRoute
   '/invoices': typeof InvoicesRoute
   '/merchant': typeof MerchantRoute
+  '/scan': typeof ScanRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -89,6 +97,7 @@ export interface FileRoutesById {
   '/home': typeof HomeRoute
   '/invoices': typeof InvoicesRoute
   '/merchant': typeof MerchantRoute
+  '/scan': typeof ScanRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -101,6 +110,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/invoices'
     | '/merchant'
+    | '/scan'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -111,6 +121,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/invoices'
     | '/merchant'
+    | '/scan'
   id:
     | '__root__'
     | '/'
@@ -121,6 +132,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/invoices'
     | '/merchant'
+    | '/scan'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -132,6 +144,7 @@ export interface RootRouteChildren {
   HomeRoute: typeof HomeRoute
   InvoicesRoute: typeof InvoicesRoute
   MerchantRoute: typeof MerchantRoute
+  ScanRoute: typeof ScanRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -192,6 +205,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MerchantRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/scan': {
+      id: '/scan'
+      path: '/scan'
+      fullPath: '/scan'
+      preLoaderRoute: typeof ScanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -204,6 +224,7 @@ const rootRouteChildren: RootRouteChildren = {
   HomeRoute: HomeRoute,
   InvoicesRoute: InvoicesRoute,
   MerchantRoute: MerchantRoute,
+  ScanRoute: ScanRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useLocation,
   HeadContent,
   Scripts,
   type ErrorComponentProps,
@@ -122,18 +123,28 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const location = useLocation();
+  const isScanPage = location.pathname === "/scan";
 
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <LangProvider>
-        <div className="min-h-screen flex flex-col justify-between bg-background">
-          <AppHeader />
-          <Outlet />
-          <AppFooter />
-          <Toaster position="bottom-center" richColors />
-        </div>
+        {isScanPage ? (
+          <>
+            <Outlet />
+            <Toaster position="bottom-center" richColors />
+          </>
+        ) : (
+          <div className="min-h-screen flex flex-col justify-between bg-background">
+            <AppHeader />
+            <Outlet />
+            <AppFooter />
+            <Toaster position="bottom-center" richColors />
+          </div>
+        )}
       </LangProvider>
     </QueryClientProvider>
   );
 }
+

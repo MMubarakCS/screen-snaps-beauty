@@ -86,7 +86,10 @@ function PublicCreatorProfile() {
     <main className="flex-1 bg-surface pb-10">
       <div className="mx-auto w-[92%] max-w-5xl py-6 sm:py-10">
         <section className="overflow-hidden rounded-3xl border bg-card shadow-soft">
-          <div className="relative h-44 overflow-hidden bg-gradient-to-br from-indigo-500 via-sky-400 to-teal-300 sm:h-64">
+          <div
+            dir={lang === "ar" ? "rtl" : "ltr"}
+            className="relative h-44 overflow-hidden bg-gradient-to-br from-indigo-500 via-sky-400 to-teal-300 sm:h-64"
+          >
             <img
               src={creator.img}
               alt=""
@@ -94,25 +97,30 @@ function PublicCreatorProfile() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-slate-900/15 to-transparent" />
             <div className="absolute inset-x-0 bottom-5 flex items-end justify-between gap-4 px-5 sm:bottom-7 sm:px-8">
-              <div className="flex min-w-0 items-center gap-4 text-white">
+              <div className="flex items-center gap-4 text-start">
                 <img
                   src={creator.img}
                   alt={creator.name[lang]}
-                  className="size-20 shrink-0 rounded-2xl border-4 border-white object-cover shadow-lg sm:size-28"
+                  className="size-20 rounded-2xl border-4 border-card bg-muted object-cover shadow-md shrink-0 sm:size-24"
                 />
-                <div className="min-w-0 pb-1">
-                  <h1 className="flex flex-wrap items-center gap-1.5 text-xl font-extrabold sm:text-3xl">
-                    {creator.name[lang]}
+                <div className="flex min-w-0 flex-col items-start text-start">
+                  <div className="flex items-center gap-1.5">
+                    <h1 className="text-xl font-extrabold leading-normal tracking-tight text-white sm:text-2xl">
+                      {creator.name[lang]}
+                    </h1>
                     {creator.verified && (
                       <BadgeCheck
                         aria-label={isAr ? "حساب موثق" : "Verified creator"}
-                        className="size-5 shrink-0 fill-sky-500 text-white sm:size-6"
+                        className="size-5 shrink-0 text-sky-400"
                       />
                     )}
-                  </h1>
-                  <p className="mt-1 text-sm text-white/85" dir="ltr">
+                  </div>
+                  <span
+                    className="text-start text-xs font-medium text-white/80 sm:text-sm"
+                    style={{ direction: "ltr", unicodeBidi: "isolate" }}
+                  >
                     {creator.handle}
-                  </p>
+                  </span>
                 </div>
               </div>
               {creator.verified && (

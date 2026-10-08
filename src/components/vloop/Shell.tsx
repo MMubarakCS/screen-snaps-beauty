@@ -12,6 +12,7 @@ import {
 import { CompanyProfileModal, AccountSettingsModal } from "@/components/vloop/AccountModals";
 import { CreatorProfileModal, CreatorSettingsModal } from "@/components/vloop/CreatorModals";
 import { HelpModal } from "@/components/vloop/HelpModal";
+import { CashierKioskModal } from "@/components/vloop/CashierKioskModal";
 import c2 from "@/assets/creator-2.jpg";
 import { type Lang, type L, fmtBHD, t, categories } from "@/lib/vloop-data";
 
@@ -118,6 +119,7 @@ export function AppHeader() {
   const [adminSettingsOpen, setAdminSettingsOpen] = useState(false);
   const [adminEmail, setAdminEmail] = useState("admin@vloop.bh");
   const [helpOpen, setHelpOpen] = useState(false);
+  const [kioskModalOpen, setKioskModalOpen] = useState(false);
   const [modal, setModal] = useState<"company" | "settings" | AuthModal | "auth-login" | "creator-profile" | "creator-settings" | null>(null);
   const handleNavClick = (e: MouseEvent<HTMLAnchorElement>, targetId: string) => {
     e.preventDefault();
@@ -416,11 +418,11 @@ export function AppHeader() {
                   {lang === "ar" ? "في الضمان:" : "Escrow:"} <span className="num font-bold">{fmtBHD(350, lang)}</span>
                 </div>
                 <button
-                  onClick={copyKiosk}
+                  onClick={() => setKioskModalOpen(true)}
                   className="hidden items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition hover:border-primary hover:text-primary md:inline-flex"
                 >
-                  {copied ? <Check className="h-4 w-4 text-success" /> : <QrCode className="h-4 w-4" />}
-                  {tr(copied ? t.nav.copied : t.nav.kiosk)}
+                  <QrCode className="h-4 w-4" />
+                  {tr(t.nav.kiosk)}
                 </button>
             <div className="relative">
               <button
@@ -579,11 +581,11 @@ export function AppHeader() {
                   {lang === "ar" ? "في الضمان:" : "Escrow:"} <span className="num font-bold">{fmtBHD(350, lang)}</span>
                 </div>
                 <button
-                  onClick={() => { copyKiosk(); setMobileMenu(false); }}
+                  onClick={() => { setMobileMenu(false); setKioskModalOpen(true); }}
                   className="flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-base font-bold text-primary-foreground shadow-soft transition hover:bg-primary/90"
                 >
-                  {copied ? <Check className="h-5 w-5" /> : <QrCode className="h-5 w-5" />}
-                  {tr(copied ? t.nav.copied : t.nav.kiosk)}
+                  <QrCode className="h-5 w-5" />
+                  {tr(t.nav.kiosk)}
                 </button>
                 <div className="flex rounded-xl border p-1 text-sm font-bold bg-muted/50">
                   {(["ar", "en"] as const).map((l) => (
@@ -645,6 +647,7 @@ export function AppHeader() {
       )}
       {modal === "auth-login" && <AuthLoginModal onClose={() => setModal(null)} lang={lang} />}
       <HelpModal open={helpOpen} onOpenChange={setHelpOpen} lang={lang} />
+      {kioskModalOpen && <CashierKioskModal onClose={() => setKioskModalOpen(false)} lang={lang} />}
     </>
   );
 }
