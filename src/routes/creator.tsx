@@ -374,16 +374,22 @@ function CreatorPage() {
                   onChange={(e) => setCapacity(e.target.value)}
                   className="appearance-none rounded-lg border bg-background px-4 py-2.5 pe-10 text-sm font-bold outline-none focus:border-primary"
                 >
-                  <option value="1">{isAr ? "1 تغطية يومياً" : "1 Campaign / Day"}</option>
-                  <option value="2">{isAr ? "2 تغطية يومياً" : "2 Campaigns / Day"}</option>
-                  <option value="3">{isAr ? "3 تغطية يومياً" : "3 Campaigns / Day"}</option>
+                  <option value="1">
+                    {isAr ? "1 تغطية يومياً (تغطية حصرية)" : "1 campaign per day"}
+                  </option>
+                  <option value="2">{isAr ? "2 تغطيات يومياً" : "2 campaigns per day"}</option>
+                  <option value="3">{isAr ? "3 تغطيات يومياً" : "3 campaigns per day"}</option>
+                  <option value="4">{isAr ? "4 تغطيات يومياً" : "4 campaigns per day"}</option>
+                  <option value="unlimited">
+                    {isAr ? "غير محدود (بدون حد أقصى)" : "Unlimited (no daily cap)"}
+                  </option>
                 </select>
                 <ChevronDown className="absolute end-3 top-3 h-4 w-4 text-muted-foreground pointer-events-none" />
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed max-w-sm">
                 {isAr
-                  ? "بمجرد قبولك لهذا العدد في تاريخ معين، سيتم إغلاق ذلك اليوم تلقائياً أمام المتاجر الأخرى لمنع تراكم الطلبات."
-                  : "Once you accept this number of campaigns on a given date, that day is automatically closed to prevent overbooking."}
+                  ? "اختر الحد الأقصى للطلبات التي تستطيع تنفيذها يومياً؛ عند اختيار رقم محدد سيتم إغلاق ذلك اليوم تلقائياً فور اكتماله، أو اختر 'غير محدود' لإبقاء التقويم متاحاً دائماً."
+                  : "Choose the maximum number of requests you can fulfill daily. When a specific number is selected, that day will automatically close once it is reached, or choose 'Unlimited' to keep the calendar always available."}
               </p>
             </div>
 
@@ -617,7 +623,9 @@ function CreatorPage() {
               >
                 {isAr ? "سحب الأرباح (Fawri+ IBAN)" : "Withdraw (Fawri+ IBAN)"}
               </button>
-              {payoutOpen && <CreatorPayoutModal available={450} onClose={() => setPayoutOpen(false)} />}
+              {payoutOpen && (
+                <CreatorPayoutModal available={450} onClose={() => setPayoutOpen(false)} />
+              )}
             </div>
           </div>
 

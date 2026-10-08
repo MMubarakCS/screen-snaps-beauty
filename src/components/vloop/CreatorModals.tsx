@@ -16,7 +16,7 @@ export function CreatorProfileModal({ onClose }: { onClose: () => void }) {
   const [newFollowers, setNewFollowers] = useState("");
   const [newStoryViews, setNewStoryViews] = useState("");
   const [insightsScreenshot, setInsightsScreenshot] = useState<File | null>(null);
-  const [verifiedCreatorStats, setVerifiedCreatorStats] = useState({ followers: "62K", storyViews: "11.8K" });
+  const verifiedCreatorStats = { followers: "62K", storyViews: "11.8K" };
   const [statsRequestState, setStatsRequestState] = useState<{
     lastRequestedAt: number | null;
     storageAvailable: boolean;
@@ -35,32 +35,6 @@ export function CreatorProfileModal({ onClose }: { onClose: () => void }) {
 
   useEffect(() => {
     try {
-      const savedStats = window.localStorage.getItem("vloop.verified-creator-stats");
-      if (!savedStats) return;
-      const parsed: unknown = JSON.parse(savedStats);
-      if (
-        typeof parsed !== "object" ||
-        parsed === null ||
-        Array.isArray(parsed) ||
-        !("2" in parsed) ||
-        typeof parsed["2"] !== "object" ||
-        parsed["2"] === null ||
-        !("followers" in parsed["2"]) ||
-        typeof parsed["2"].followers !== "string" ||
-        !("storyViews" in parsed["2"]) ||
-        typeof parsed["2"].storyViews !== "string"
-      ) {
-        throw new Error("Saved verified creator stats are invalid.");
-      }
-      setVerifiedCreatorStats({ followers: parsed["2"].followers, storyViews: parsed["2"].storyViews });
-    } catch (error) {
-      console.error("Unable to load verified creator stats in the profile modal.", error);
-      toast.error(isAr ? "تعذر تحميل الإحصائيات الموثقة" : "Unable to load verified creator stats");
-    }
-  }, [isAr]);
-
-  useEffect(() => {
-    try {
       const savedTimestamp = window.localStorage.getItem("creator-stats-update-requested-at");
       const timestamp = savedTimestamp === null ? null : Number(savedTimestamp);
       setStatsRequestState({
@@ -70,7 +44,6 @@ export function CreatorProfileModal({ onClose }: { onClose: () => void }) {
       });
     } catch (error) {
       console.error("Unable to read the stats update request limit.", error);
-      toast.error(isAr ? "تعذر التحقق من موعد طلب تحديث الإحصائيات" : "Unable to verify the stats update request limit");
       setStatsRequestState({ lastRequestedAt: null, storageAvailable: false, ready: true });
     }
   }, [isAr]);
@@ -327,7 +300,7 @@ export function CreatorProfileModal({ onClose }: { onClose: () => void }) {
             >
               {requestCooldownActive
                 ? isAr ? `تم إرسال طلب مؤخراً · متاح بعد ${nextRequestDate}` : `Recently requested · Available after ${nextRequestDate}`
-                : isAr ? "🔄 طلب تحديث الأرقام / Request Stats Update" : "🔄 Request Stats Update / طلب تحديث الأرقام"}
+                : isAr ? "🔄 طلب تحديث الإحصائيات" : "🔄 Request Stats Update"}
             </button>
           </section>
 

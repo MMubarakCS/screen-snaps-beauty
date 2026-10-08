@@ -48,14 +48,14 @@ function VoucherTrackingSection({
   const [isOpen, setIsOpen] = useState(true);
 
   return (
-    <section className="rounded-xl border bg-card">
+    <section dir={lang === "ar" ? "rtl" : "ltr"} className="rounded-xl border bg-card">
       <button
         type="button"
         aria-expanded={isOpen}
         onClick={() => setIsOpen((open) => !open)}
         className="flex w-full items-center justify-between gap-3 px-4 py-3 text-start text-sm font-bold"
       >
-        🎟️ قسيمة الخصم وتتبع زوار الفروع / In-Store Voucher Tracking
+        {lang === "ar" ? "🎟️ قسيمة الخصم وتتبع زوار الفروع" : "🎟️ In-Store Voucher Tracking"}
         <ChevronDown
           className={`h-4 w-4 shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`}
         />
@@ -69,7 +69,9 @@ function VoucherTrackingSection({
             onClick={() => onChange({ ...settings, enabled: !settings.enabled })}
             className="flex w-full items-center justify-between gap-3 text-start"
           >
-            <span className="text-sm font-semibold">تفعيل قسيمة الخصم لتتبع الزوار ✓</span>
+            <span className="text-start text-sm font-semibold">
+              {lang === "ar" ? "تفعيل قسيمة الخصم لتتبع الزوار ✓" : "Enable voucher tracking ✓"}
+            </span>
             <span
               className={`relative h-6 w-11 shrink-0 rounded-full transition ${
                 settings.enabled ? "bg-primary" : "bg-muted"
@@ -86,24 +88,24 @@ function VoucherTrackingSection({
           {settings.enabled ? (
             <div className="space-y-4">
               <label className="block">
-                <span className="mb-1.5 block text-xs font-semibold text-muted-foreground">
-                  تفاصيل الخصم / Offer Details
+                <span className="mb-1.5 block text-start text-xs font-semibold text-muted-foreground">
+                  {lang === "ar" ? "تفاصيل الخصم أو العرض" : "Offer Details"}
                 </span>
                 <input
                   value={settings.offerDetails}
                   onChange={(event) => onChange({ ...settings, offerDetails: event.target.value })}
                   placeholder={
                     lang === "ar"
-                      ? "خصم 20% على إجمالي الفاتورة أو مشروب مجاني مع كل وجبة"
-                      : "20% off the total bill or a free drink with every meal"
+                      ? "مثال: خصم 20% على الفاتورة أو مشروب مجاني"
+                      : "e.g., 20% off the bill or free drink"
                   }
-                  className={`w-full rounded-lg border bg-card px-3.5 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/20 ${offerDetailsInvalid ? "border-red-500" : ""}`}
+                  className={`w-full rounded-lg border bg-card px-3.5 py-2.5 text-start text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/20 ${offerDetailsInvalid ? "border-red-500" : ""}`}
                 />
               </label>
 
               <label className="block">
-                <span className="mb-1.5 block text-xs font-semibold text-muted-foreground">
-                  مدة صلاحية القسيمة / Expiration Window
+                <span className="mb-1.5 block text-start text-xs font-semibold text-muted-foreground">
+                  {lang === "ar" ? "مدة صلاحية القسيمة" : "Expiration Window"}
                 </span>
                 <select
                   value={settings.expirationHours}
@@ -117,17 +119,25 @@ function VoucherTrackingSection({
                       onChange({ ...settings, expirationHours });
                     }
                   }}
-                  className="w-full rounded-lg border bg-card px-3.5 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/20"
+                  className="w-full rounded-lg border bg-card px-3.5 py-2.5 text-start text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/20"
                 >
-                  <option value="48">48 ساعة بعد نشر التغطية (موصى به)</option>
-                  <option value="72">72 ساعة (3 أيام)</option>
-                  <option value="168">أسبوع كامل (7 أيام)</option>
+                  <option value="48">
+                    {lang === "ar"
+                      ? "48 ساعة بعد نشر التغطية (موصى به)"
+                      : "48 hours after coverage is published (recommended)"}
+                  </option>
+                  <option value="72">
+                    {lang === "ar" ? "72 ساعة (3 أيام)" : "72 hours (3 days)"}
+                  </option>
+                  <option value="168">
+                    {lang === "ar" ? "أسبوع كامل (7 أيام)" : "One full week (7 days)"}
+                  </option>
                 </select>
               </label>
 
               <div>
-                <span className="mb-1.5 block text-xs font-semibold text-muted-foreground">
-                  كود الحملة الترويجي / Promo Code
+                <span className="mb-1.5 block text-start text-xs font-semibold text-muted-foreground">
+                  {lang === "ar" ? "كود الحملة الترويجي" : "Campaign Promo Code"}
                 </span>
                 <span
                   dir="ltr"
@@ -135,14 +145,18 @@ function VoucherTrackingSection({
                 >
                   FLAME20
                 </span>
-                <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                  سيتم تزويد صانع المحتوى بهذا الكود والرابط لوضعه في الستوري.
+                <p className="mt-2 text-start text-xs leading-relaxed text-muted-foreground">
+                  {lang === "ar"
+                    ? "سيتم تزويد صانع المحتوى بهذا الكود والرابط لوضعه في ملصق الستوري."
+                    : "The creator will receive this code and link sticker for their stories."}
                 </p>
               </div>
             </div>
           ) : (
-            <p className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">
-              حملة إشهار وتوعية فقط بدون تتبع قسائم في الفروع.
+            <p className="rounded-lg bg-muted/50 p-3 text-start text-xs text-muted-foreground">
+              {lang === "ar"
+                ? "حملة إشهار وتوعية فقط بدون تتبع قسائم في الفروع."
+                : "A brand awareness campaign without in-store voucher tracking."}
             </p>
           )}
         </div>
