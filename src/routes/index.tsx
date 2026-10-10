@@ -111,9 +111,9 @@ export function PublicLanding() {
             {isAr ? "منصة الوساطة والضمان المالي المعتمدة في البحرين" : "Certified Escrow Platform in Bahrain"}
           </div>
           
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground leading-[1.15] text-center max-w-4xl mx-auto mb-6">
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground leading-snug sm:leading-tight text-center max-w-4xl mx-auto mb-6">
             {isAr ? "تسويق المؤثرين الميداني..." : "Field Influencer Marketing..."}
-            <span className="block text-primary mt-1">
+            <span className="block text-primary mt-2 sm:mt-1">
               {isAr ? "في حلقة مضمونة" : "In a Guaranteed Loop"}
             </span>
           </h1>

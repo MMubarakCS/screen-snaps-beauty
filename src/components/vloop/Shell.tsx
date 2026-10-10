@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, type MouseEvent, type ReactNode } from "react";
-import { Link, useLocation, useRouter } from "@tanstack/react-router";
+import { Link, useLocation, useRouter, useNavigate } from "@tanstack/react-router";
 import { QrCode, ChevronDown, Check, LogOut, Settings, Building2, Lock, Menu, X, Store, Video, CircleHelp, HelpCircle, User, ShieldCheck, Link as LinkIcon, KeyRound, Mail } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -12,6 +12,7 @@ import {
 import { CompanyProfileModal, AccountSettingsModal } from "@/components/vloop/AccountModals";
 import { CreatorProfileModal, CreatorSettingsModal } from "@/components/vloop/CreatorModals";
 import { HelpModal } from "@/components/vloop/HelpModal";
+import { LegalModal } from "@/components/vloop/LegalModal";
 import { CashierKioskModal } from "@/components/vloop/CashierKioskModal";
 import c2 from "@/assets/creator-2.jpg";
 import { type Lang, type L, fmtBHD, t, categories } from "@/lib/vloop-data";
@@ -119,6 +120,7 @@ export function AppHeader() {
   const [adminSettingsOpen, setAdminSettingsOpen] = useState(false);
   const [adminEmail, setAdminEmail] = useState("admin@vloop.bh");
   const [helpOpen, setHelpOpen] = useState(false);
+  const [legalModalTab, setLegalModalTab] = useState<string | null>(null);
   const [kioskModalOpen, setKioskModalOpen] = useState(false);
   const [modal, setModal] = useState<"company" | "settings" | AuthModal | "auth-login" | "creator-profile" | "creator-settings" | null>(null);
   const handleNavClick = (e: MouseEvent<HTMLAnchorElement>, targetId: string) => {
@@ -144,13 +146,19 @@ export function AppHeader() {
     };
     const handleOpenHelp = () => setHelpOpen(true);
     const handleOpenCreatorProfile = () => setModal("creator-profile");
+    const handleOpenLegal = (e: Event) => {
+      const tab = (e as CustomEvent).detail?.tab;
+      setLegalModalTab(tab || "escrow");
+    };
     window.addEventListener("open-auth-modal", handleOpenModal);
     window.addEventListener("open-help-modal", handleOpenHelp);
     window.addEventListener("open-creator-profile-modal", handleOpenCreatorProfile);
+    window.addEventListener("open-legal-modal", handleOpenLegal);
     return () => {
       window.removeEventListener("open-auth-modal", handleOpenModal);
       window.removeEventListener("open-help-modal", handleOpenHelp);
       window.removeEventListener("open-creator-profile-modal", handleOpenCreatorProfile);
+      window.removeEventListener("open-legal-modal", handleOpenLegal);
     };
   }, []);
 
@@ -649,6 +657,7 @@ export function AppHeader() {
       )}
       {modal === "auth-login" && <AuthLoginModal onClose={() => setModal(null)} lang={lang} />}
       <HelpModal open={helpOpen} onOpenChange={setHelpOpen} lang={lang} />
+      {legalModalTab && <LegalModal initialTab={legalModalTab} onClose={() => setLegalModalTab(null)} />}
       {kioskModalOpen && <CashierKioskModal onClose={() => setKioskModalOpen(false)} lang={lang} />}
     </>
   );
@@ -914,15 +923,47 @@ function AdminSettingsModal({
 export function AppFooter() {
   const { lang } = useLang();
   const location = useLocation();
+  const navigate = useNavigate();
   const tr = (x: L) => x[lang];
   const handleFooterLink = (event: MouseEvent<HTMLAnchorElement>, link: L) => {
-    if (link.en !== "FAQ") return;
     event.preventDefault();
-    if (location.pathname === "/") {
-      document.getElementById("faq")?.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    if (link.en === "FAQ" || link.ar === "أسئلة شائعة") {
+      if (location.pathname === "/") {
+        document.getElementById("faq")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else {
+        window.dispatchEvent(new CustomEvent("open-help-modal"));
+      }
       return;
     }
-    window.dispatchEvent(new CustomEvent("open-help-modal"));
+
+    if (link.en === "Discover Creators" || link.ar === "اكتشف صناع المحتوى") navigate({ to: "/merchant" });
+    if (link.en === "My Campaigns" || link.ar === "حملاتي") navigate({ to: "/campaigns" });
+    if (link.en === "Escrow System" || link.ar === "نظام الضمان المالي") {
+      if (location.pathname !== "/") {
+        navigate({ to: "/" });
+        setTimeout(() => {
+          document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 100);
+      } else {
+        document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+
+    if (link.en === "Join as Creator" || link.ar === "انضم كصانع محتوى") {
+      window.dispatchEvent(new CustomEvent("open-auth-modal", { detail: "auth-creator" }));
+    }
+    if (link.en === "Smart Bio Link" || link.ar === "رابط البايو الذكي") navigate({ to: "/creator" });
+    if (link.en === "Earnings Calculator" || link.ar === "حاسبة الأرباح") navigate({ to: "/creator" });
+
+    const legalLinks = [
+      "الشروط والأحكام", "سياسة الخصوصية", "متوافق مع ضريبة القيمة المضافة", "لوائح مصرف البحرين المركزي",
+      "Terms of Service", "Privacy Policy", "VAT & NBR Compliant", "CBB Regulations"
+    ];
+
+    if (legalLinks.includes(link.ar) || legalLinks.includes(link.en)) {
+      window.dispatchEvent(new CustomEvent("open-legal-modal", { detail: { tab: link.ar } }));
+    }
   };
   return (
       <footer className="mt-12 border-t bg-surface">
