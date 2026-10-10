@@ -198,7 +198,9 @@ export function AppHeader() {
             <span className="hidden items-center gap-2 rounded-full border border-success/30 bg-success-soft px-3 py-1.5 text-xs font-semibold text-success xl:inline-flex">
               <span className="h-2 w-2 animate-pulse rounded-full bg-success" />
               {lang === "ar" ? "نظام الأمانات والتحكيم المالي نشط" : "Escrow & arbitration system active"}
-              <span dir="ltr" className="font-bold">— CBB & NBR Compliant</span>
+              <span dir={lang === "ar" ? "rtl" : "ltr"} className="font-bold">
+                {lang === "ar" ? "— متوافق مع مصرف البحرين المركزي والجهاز الوطني للإيرادات" : "— CBB & NBR Compliant"}
+              </span>
             </span>
             <div className="ms-auto flex items-center gap-3">
               <div className="flex rounded-lg border p-0.5 text-xs font-bold">
@@ -310,7 +312,7 @@ export function AppHeader() {
                   </Link>
                   <Link to="/campaigns" className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
                     {tr(t.nav.campaigns)}
-                    <span className="h-1.5 w-1.5 rounded-full bg-warning" title="Pending review"></span>
+                    <span className="h-1.5 w-1.5 rounded-full bg-warning" title={tr({ ar: "مراجعة معلّقة", en: "Pending review" })}></span>
                   </Link>
                   <Link to="/invoices" className="rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "!bg-accent !text-accent-foreground" }}>
                     {tr(t.nav.invoices)}
@@ -354,7 +356,7 @@ export function AppHeader() {
                     toast.success(lang === "ar" ? "تم نسخ الرابط!" : "Link copied!");
                   }}
                   className="hidden md:flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm font-bold text-foreground transition hover:bg-muted"
-                  title="Copy Bio-Link"
+                  title={tr({ ar: "نسخ رابط الملف الشخصي", en: "Copy bio link" })}
                 >
                   <LinkIcon className="h-4 w-4" />
                   vloop.me/@yousif.bites
@@ -736,7 +738,7 @@ function AuthStartModal({
                 <Store className="size-5" />
               </div>
               <div className="min-w-0">
-                <h4 className="text-sm font-bold text-foreground">{isAr ? "أنا صاحب منشأة / متجر" : "I am a Merchant / Brand"}</h4>
+                <h4 className="text-sm font-bold text-foreground">{isAr ? "أنا صاحب منشأة تجارية" : "I am a business owner"}</h4>
                 <p className="mt-0.5 text-xs text-muted-foreground">{isAr ? "حجز المؤثرين وإطلاق الحملات بضمان مالي" : "Book creators and launch escrow-secured campaigns"}</p>
               </div>
             </div>
@@ -756,7 +758,7 @@ function AuthStartModal({
                 <Video className="size-5" />
               </div>
               <div className="min-w-0">
-                <h4 className="text-sm font-bold text-foreground">{isAr ? "أنا صانع محتوى / مؤثر" : "I am a Creator / Influencer"}</h4>
+                <h4 className="text-sm font-bold text-foreground">{isAr ? "أنا صانع محتوى" : "I am a content creator"}</h4>
                 <p className="mt-0.5 text-xs text-muted-foreground">{isAr ? "استقبال الطلبات وتحقيق دخل مضمون مسبقاً" : "Receive bookings and earn guaranteed income"}</p>
               </div>
             </div>

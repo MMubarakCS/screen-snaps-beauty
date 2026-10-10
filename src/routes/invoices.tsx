@@ -21,7 +21,7 @@ export const Route = createFileRoute("/invoices")({
 type Inv = { id: string; campaign: L; creator: (typeof creators)[number]; date: L; iso: string; net: number };
 
 const invoices: Inv[] = [
-  { id: "VLP-2026-0841", campaign: { ar: "ستوري إنستغرام", en: "Instagram Story" }, creator: creators[1]!, date: { ar: "28 سبتمبر 2026", en: "28 Sep 2026" }, iso: "2026-09-28", net: 150 },
+  { id: "VLP-2026-0841", campaign: { ar: "قصة إنستغرام مصوّرة", en: "Instagram Story" }, creator: creators[1]!, date: { ar: "28 سبتمبر 2026", en: "28 Sep 2026" }, iso: "2026-09-28", net: 150 },
   { id: "VLP-2026-0812", campaign: { ar: "تيك توك", en: "TikTok" }, creator: creators[0]!, date: { ar: "12 سبتمبر 2026", en: "12 Sep 2026" }, iso: "2026-09-12", net: 140 },
   { id: "VLP-2026-0779", campaign: { ar: "فيديو ريلز", en: "Reels Video" }, creator: creators[2]!, date: { ar: "30 أغسطس 2026", en: "30 Aug 2026" }, iso: "2026-08-30", net: 150 },
   { id: "VLP-2026-0703", campaign: { ar: "تغطية ميدانية", en: "Field Coverage" }, creator: creators[3]!, date: { ar: "14 يوليو 2026", en: "14 Jul 2026" }, iso: "2026-07-14", net: 95 },
@@ -54,8 +54,10 @@ function Invoices() {
   }, [q, period]);
 
   const exportCsv = () => {
-    const head = "Invoice,Campaign,Creator,Date,Net BHD,Fee BHD,VAT BHD,Total BHD,Status";
-    const body = rows.map((i) => [i.id, i.campaign.en, i.creator.handle, i.iso, i.net.toFixed(3), fee(i.net).toFixed(3), vat(i.net).toFixed(3), total(i.net).toFixed(3), "Paid"].join(",")).join("\n");
+    const head = lang === "ar"
+      ? "رقم الفاتورة,الحملة,صانع المحتوى,التاريخ,الصافي د.ب,الرسوم د.ب,ضريبة القيمة المضافة د.ب,الإجمالي د.ب,الحالة"
+      : "Invoice,Campaign,Creator,Date,Net BHD,Fee BHD,VAT BHD,Total BHD,Status";
+    const body = rows.map((i) => [i.id, i.campaign[lang], i.creator.handle, i.iso, i.net.toFixed(3), fee(i.net).toFixed(3), vat(i.net).toFixed(3), total(i.net).toFixed(3), tr({ ar: "مدفوعة", en: "Paid" })].join(",")).join("\n");
     const url = URL.createObjectURL(new Blob([`${head}\n${body}`], { type: "text/csv" }));
     const a = document.createElement("a");
     a.href = url; a.download = "vloop-statement.csv"; a.click(); URL.revokeObjectURL(url);
@@ -71,8 +73,8 @@ function Invoices() {
   const Paid = () => <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-success-soft px-2.5 py-1 text-xs font-bold text-success"><Check className="h-3 w-3" />{tr({ ar: "مدفوعة", en: "Paid" })}</span>;
   const Actions = ({ i }: { i: Inv }) => (
     <div className="flex gap-1.5">
-      <button onClick={() => setView(i)} aria-label="View" title={tr({ ar: "معاينة الفاتورة", en: "View" })} className="rounded-lg border p-2 text-muted-foreground hover:border-primary hover:text-primary"><Eye className="h-4 w-4" /></button>
-      <button onClick={() => { setView(i); setTimeout(() => window.print(), 300); }} aria-label="Download" title={tr({ ar: "تحميل PDF", en: "Download" })} className="rounded-lg border p-2 text-muted-foreground hover:border-primary hover:text-primary"><Download className="h-4 w-4" /></button>
+      <button onClick={() => setView(i)} aria-label={tr({ ar: "معاينة الفاتورة", en: "View invoice" })} title={tr({ ar: "معاينة الفاتورة", en: "View" })} className="rounded-lg border p-2 text-muted-foreground hover:border-primary hover:text-primary"><Eye className="h-4 w-4" /></button>
+      <button onClick={() => { setView(i); setTimeout(() => window.print(), 300); }} aria-label={tr({ ar: "تحميل الفاتورة", en: "Download invoice" })} title={tr({ ar: "تحميل PDF", en: "Download" })} className="rounded-lg border p-2 text-muted-foreground hover:border-primary hover:text-primary"><Download className="h-4 w-4" /></button>
     </div>
   );
 
@@ -82,7 +84,7 @@ function Invoices() {
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl 2xl:text-5xl">{tr({ ar: "الفواتير الضريبية والمعاملات", en: "Tax Invoices & Billing" })}</h1>
-          <p className="mt-1 text-sm text-muted-foreground 2xl:mt-3 2xl:text-lg">{tr({ ar: "فواتير رسمية متوافقة مع متطلبات الجهاز الوطني للإيرادات (NBR) في مملكة البحرين.", en: "Official tax invoices compliant with Bahrain National Bureau for Revenue (NBR) standards." })}</p>
+          <p className="mt-1 text-sm text-muted-foreground 2xl:mt-3 2xl:text-lg">{tr({ ar: "فواتير رسمية متوافقة مع متطلبات الجهاز الوطني للإيرادات في مملكة البحرين.", en: "Official tax invoices compliant with Bahrain National Bureau for Revenue (NBR) standards." })}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <span className="num rounded-full border bg-surface px-3 py-1.5 text-xs text-muted-foreground">{tr({ ar: "س.ت 104829-1 | الرقم الضريبي: 200019283100003", en: "CR 104829-1 | VAT No: 200019283100003" })}</span>
@@ -137,7 +139,7 @@ function Invoices() {
                       <td className="px-4 py-3"><div className="flex items-center gap-3"><img src={i.creator.img} className="size-10 shrink-0 rounded-full object-cover" /><div className="flex flex-col items-start text-start"><span className="flex items-center gap-1 text-sm font-bold">{tr(i.creator.name)} <BadgeCheck className="size-3.5 text-primary" /></span><span className="text-xs text-muted-foreground" style={{ direction: "ltr", unicodeBidi: "isolate" }}>{i.creator.handle}</span><span className="mt-0.5 text-[11px] text-muted-foreground/80">{tr({ ar: "خدمات تسويق وترويج رقمي", en: "Digital Marketing Services" })}</span></div></div></td>
                       <td className="px-4 py-3 text-muted-foreground">{tr(i.date)}</td>
                       <td className="num px-4 py-3 text-start">{fmtBHD(i.net, lang)}</td>
-                      <td className="num px-4 py-3 text-start">{fmtBHD(fee(i.net), lang)}<span className="block text-xs text-muted-foreground">+{fmtBHD(vat(i.net), lang)} VAT</span></td>
+                      <td className="num px-4 py-3 text-start">{fmtBHD(fee(i.net), lang)}<span className="block text-xs text-muted-foreground">+{fmtBHD(vat(i.net), lang)} {tr({ ar: "ضريبة القيمة المضافة", en: "VAT" })}</span></td>
                       <td className="num px-4 py-3 text-start font-extrabold">{fmtBHD(total(i.net), lang)}</td>
                       <td className="px-4 py-3"><Paid /></td>
                       <td className="px-4 py-3"><Actions i={i} /></td>
@@ -226,7 +228,7 @@ function InvoiceModal({ inv, onClose }: { inv: Inv; onClose: () => void }) {
           </div>
           <dl className="divide-y rounded-xl border text-sm">
             {lines.map(([k, v]) => <div key={k.en} className="flex justify-between gap-4 px-4 py-3"><dt>{tr(k)}</dt><dd className="num whitespace-nowrap font-medium">{fmtBHD(v, lang)}</dd></div>)}
-            <div className="flex justify-between gap-4 bg-surface px-4 py-3.5"><dt className="font-bold">{tr({ ar: "الإجمالي المدفوع", en: "Total Paid" })}<span className="block text-xs font-normal text-muted-foreground">{tr({ ar: "عبر BenefitPay / بوابة البطاقات", en: "via BenefitPay / Card Gateway" })}</span></dt><dd className="num text-lg font-extrabold text-success">{fmtBHD(total(inv.net), lang)}</dd></div>
+            <div className="flex justify-between gap-4 bg-surface px-4 py-3.5"><dt className="font-bold">{tr({ ar: "الإجمالي المدفوع", en: "Total Paid" })}<span className="block text-xs font-normal text-muted-foreground">{tr({ ar: "عبر بنفت بي أو بوابة البطاقات", en: "via BenefitPay or card gateway" })}</span></dt><dd className="num text-lg font-extrabold text-success">{fmtBHD(total(inv.net), lang)}</dd></div>
           </dl>
           <div className="mt-5 flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-success/40 p-3 text-center text-sm font-bold text-success">
             <Stamp className="h-5 w-5" />{tr({ ar: "تمت التسوية بنجاح عبر حساب الضمان المالي - ڤلوب البحرين", en: "Successfully settled via Vloop Bahrain escrow account" })}
@@ -234,7 +236,7 @@ function InvoiceModal({ inv, onClose }: { inv: Inv; onClose: () => void }) {
         </div>
         <footer className="no-print flex justify-end gap-3 border-t px-6 py-4">
           <button onClick={onClose} className="inline-flex items-center gap-1.5 rounded-lg border px-4 py-2 text-sm font-semibold hover:bg-muted"><X className="h-4 w-4" />{tr({ ar: "إغلاق", en: "Close" })}</button>
-          <button onClick={() => window.print()} className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-foreground hover:bg-primary/90"><Printer className="h-4 w-4" />{tr({ ar: "طباعة / تحميل PDF", en: "Print / Download PDF" })}</button>
+          <button onClick={() => window.print()} className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-foreground hover:bg-primary/90"><Printer className="h-4 w-4" />{tr({ ar: "طباعة الفاتورة أو تحميلها بصيغة PDF", en: "Print / Download PDF" })}</button>
         </footer>
       </div>
     </div>

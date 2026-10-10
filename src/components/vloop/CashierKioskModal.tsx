@@ -82,7 +82,7 @@ export function CashierKioskModal({ onClose, lang }: { onClose: () => void; lang
                 {isAr ? "إعداد كشك الكاشير لمسح القسائم" : "Cashier Kiosk Provisioning"}
               </h2>
               <p className="text-xs text-muted-foreground">
-                {isAr ? "Cashier Kiosk Provisioning" : "إعداد كشك الكاشير لمسح القسائم"}
+                {isAr ? "أنشئ رابطاً آمناً لكل فرع" : "Create a secure link for each branch"}
               </p>
             </div>
           </div>

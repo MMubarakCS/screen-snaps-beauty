@@ -200,9 +200,9 @@ export const creators: Creator[] = [
 ];
 
 export const formats: { id: string; label: L }[] = [
-  { id: "ig", label: { ar: "3 لقطات ستوري إنستغرام", en: "3× Instagram Stories" } },
-  { id: "reel", label: { ar: "فيديو ريلز / تيك توك", en: "Reels / TikTok Video" } },
-  { id: "snap", label: { ar: "ستوري سناب شات", en: "Snapchat Story" } },
+  { id: "ig", label: { ar: "3 لقطات للقصة المصوّرة على إنستغرام", en: "3× Instagram Stories" } },
+  { id: "reel", label: { ar: "فيديو قصير", en: "Reels / TikTok Video" } },
+  { id: "snap", label: { ar: "قصة مصوّرة على سناب شات", en: "Snapchat Story" } },
 ];
 
 export const presetTerms: { id: string; label: L; on: boolean }[] = [
@@ -210,7 +210,7 @@ export const presetTerms: { id: string; label: L; on: boolean }[] = [
     id: "t1",
     on: true,
     label: {
-      ar: "الإشارة للحساب الرسمي للمطعم (@mention) وإرفاق ملصق رابط القسيمة في الستوري.",
+      ar: "الإشارة إلى الحساب الرسمي للمطعم وإرفاق ملصق رابط القسيمة في القصة المصوّرة.",
       en: "Mention the restaurant's official account (@mention) and attach the voucher link sticker in the story.",
     },
   },
@@ -234,7 +234,7 @@ export const presetTerms: { id: string; label: L; on: boolean }[] = [
     id: "t4",
     on: false,
     label: {
-      ar: "إبراز عرض وجبة الغداء / العرض الخاص خلال فترة التغطية.",
+      ar: "إبراز عرض وجبة الغداء أو العرض الخاص خلال فترة التغطية.",
       en: "Highlight the lunch deal / special offer during coverage.",
     },
   },
@@ -270,7 +270,7 @@ export const t = {
   m2: {
     label: { ar: "زيارات موثقة للمتجر", en: "Verified In-Store Footfall" },
     unit: { ar: "عميل", en: "customers" },
-    sub: { ar: "تتبع عبر قسائم QR أحادية الاستخدام", en: "Tracked via single-use QR vouchers" },
+    sub: { ar: "تتبع عبر قسائم أحادية الاستخدام برموز الاستجابة السريعة", en: "Tracked via single-use QR vouchers" },
   },
   m3: {
     label: { ar: "مراجعات محتوى معلقة", en: "Pending Content Reviews" },
@@ -305,7 +305,7 @@ export const t = {
   },
   card: {
     followers: { ar: "متابع", en: "Followers" },
-    views: { ar: "متوسط مشاهدات الستوري", en: "Avg. Story Views" },
+    views: { ar: "متوسط مشاهدات القصص", en: "Avg. Story Views" },
     reliability: { ar: "درجة الموثوقية", en: "Reliability Score" },
     completed: { ar: "حملة مكتملة", en: "completed campaigns" },
     match: { ar: "يطابق ميزانيتك", en: "Matches your" },

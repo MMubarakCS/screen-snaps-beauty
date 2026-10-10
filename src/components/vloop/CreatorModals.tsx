@@ -162,7 +162,7 @@ export function CreatorProfileModal({ onClose }: { onClose: () => void }) {
         <div className="flex items-center justify-between border-b p-4">
           <h2 className="text-xl font-bold flex items-center gap-2">
             <UserCog className="h-5 w-5 text-primary" />
-            {isAr ? "الملف الشخصي والميديا كيت" : "Media Kit Profile"}
+            {isAr ? "الملف الشخصي والإعلامي" : "Media Kit Profile"}
           </h2>
           <button onClick={onClose} className="rounded-full p-2 text-muted-foreground hover:bg-muted">
             <X className="h-5 w-5" />
@@ -236,7 +236,7 @@ export function CreatorProfileModal({ onClose }: { onClose: () => void }) {
 
           <div>
             <label className="mb-1.5 block text-sm font-bold text-foreground">
-              {isAr ? "نبذة عنك (Bio)" : "Bio"}
+              {isAr ? "نبذة عنك" : "Bio"}
             </label>
             <textarea 
               defaultValue="محب للمأكولات الشعبية وتجارب القهوة المختصة في البحرين ☕🍔"
@@ -278,7 +278,7 @@ export function CreatorProfileModal({ onClose }: { onClose: () => void }) {
               </div>
               <div className="rounded-lg border bg-background p-3">
                 <p className="text-xs font-medium text-muted-foreground">
-                  {isAr ? "متوسط مشاهدات الستوري" : "Avg. Story Views"}
+                  {isAr ? "متوسط مشاهدات القصص" : "Avg. Story Views"}
                 </p>
                 <p className="mt-1 text-xl font-extrabold text-foreground" dir="ltr">{verifiedCreatorStats.storyViews}</p>
               </div>
@@ -289,7 +289,7 @@ export function CreatorProfileModal({ onClose }: { onClose: () => void }) {
             </p>
             <p className="text-xs leading-relaxed text-muted-foreground">
               {isAr
-                ? "الأرقام معتمدة رسمياً. يُسمح بطلب تحديث الإحصائيات مرة واحدة كل 30 يوماً عبر تقديم لقطة شاشة حديثة (Insights Screenshot) للتدقيق الإداري."
+                ? "الأرقام معتمدة رسمياً. يُسمح بطلب تحديث الإحصائيات مرة واحدة كل 30 يوماً عبر تقديم لقطة شاشة حديثة من المنصة للتدقيق الإداري."
                 : "These metrics are officially verified. You may request an update once every 30 days by submitting a recent Insights Screenshot for admin review."}
             </p>
             <button
@@ -306,7 +306,7 @@ export function CreatorProfileModal({ onClose }: { onClose: () => void }) {
 
           <div>
             <label className="mb-1.5 block text-sm font-bold text-foreground">
-              {isAr ? "تصنيفات المحتوى (Tags)" : "Category Tags"}
+              {isAr ? "تصنيفات المحتوى" : "Category Tags"}
             </label>
             <input defaultValue="#BurgerLover, #CoffeeRuns, #BahrainEats" className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:border-primary" dir="ltr" />
           </div>
@@ -361,9 +361,9 @@ export function CreatorProfileModal({ onClose }: { onClose: () => void }) {
               <legend className="mb-2 text-sm font-semibold">{isAr ? "المنصة" : "Platform"}</legend>
               <div className="grid grid-cols-3 gap-2">
                 {([
-                  ["instagram", isAr ? "إنستغرام Instagram" : "Instagram"],
-                  ["tiktok", isAr ? "تيك توك TikTok" : "TikTok"],
-                  ["snapchat", isAr ? "سناب شات Snapchat" : "Snapchat"],
+                  ["instagram", isAr ? "إنستغرام" : "Instagram"],
+                  ["tiktok", isAr ? "تيك توك" : "TikTok"],
+                  ["snapchat", isAr ? "سناب شات" : "Snapchat"],
                 ] as const).map(([platform, label]) => (
                   <button
                     key={platform}
@@ -379,7 +379,7 @@ export function CreatorProfileModal({ onClose }: { onClose: () => void }) {
             </fieldset>
             <div>
               <label htmlFor="stats-profile-url" className="mb-1.5 block text-sm font-semibold">
-                {isAr ? "رابط الحساب المباشر / Direct Profile URL" : "Direct Profile URL"}
+                {isAr ? "رابط الحساب المباشر" : "Direct Profile URL"}
               </label>
               <input
                 id="stats-profile-url"
@@ -401,14 +401,14 @@ export function CreatorProfileModal({ onClose }: { onClose: () => void }) {
             </div>
             <div>
               <label htmlFor="new-story-views" className="mb-1.5 block text-sm font-semibold">
-                {isAr ? "متوسط مشاهدات الستوري الجديد" : "New Avg. Story Views"}
+                {isAr ? "متوسط مشاهدات القصص الجديد" : "New Avg. Story Views"}
               </label>
               <input id="new-story-views" type="text" required inputMode="decimal" placeholder="19.5K" value={newStoryViews} onChange={(event) => setNewStoryViews(event.target.value)} className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:border-primary" dir="ltr" />
             </div>
             </div>
             <div>
               <label htmlFor="insights-screenshot" className="mb-1.5 block text-sm font-semibold">
-                {isAr ? "لقطة شاشة حديثة من Insights" : "Recent Insights Screenshot"}
+                {isAr ? "لقطة شاشة حديثة من الإحصاءات" : "Recent Insights Screenshot"}
               </label>
               <label htmlFor="insights-screenshot" className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed bg-surface p-5 text-center transition hover:border-primary/50 hover:bg-muted/50">
                 <Upload className="h-6 w-6 text-muted-foreground" />
@@ -437,7 +437,7 @@ export function CreatorProfileModal({ onClose }: { onClose: () => void }) {
 export function CreatorSettingsModal({ onClose }: { onClose: () => void }) {
   const { lang } = useLang();
   const isAr = lang === "ar";
-  const [selectedBank, setSelectedBank] = useState("بنك البحرين الوطني NBB");
+  const [selectedBank, setSelectedBank] = useState("nbb");
   const [otherBankName, setOtherBankName] = useState("");
   
   return (
@@ -464,7 +464,7 @@ export function CreatorSettingsModal({ onClose }: { onClose: () => void }) {
           <div className="rounded-xl border bg-surface p-4 space-y-4">
             <h3 className="font-bold text-sm text-foreground flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-success block"></span>
-              {isAr ? "بيانات التحويل البنكي المحلي (Fawri+)" : "Local Bank Payout Details (Fawri+)"}
+              {isAr ? "بيانات التحويل البنكي المحلي عبر فوري+" : "Local Bank Payout Details (Fawri+)"}
             </h3>
             
             <div>
@@ -476,12 +476,12 @@ export function CreatorSettingsModal({ onClose }: { onClose: () => void }) {
                 onChange={(e) => setSelectedBank(e.target.value)}
                 className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
               >
-                <option>بنك البحرين الوطني NBB</option>
-                <option>بنك البحرين والكويت BBK</option>
-                <option>بنك الإثمار Ithmaar</option>
-                <option>بيت التمويل الكويتي KFH</option>
-                <option>إلى بنك Ila Bank</option>
-                <option value="other">{isAr ? "بنك محلي آخر / Other Bank" : "Other Bank / بنك محلي آخر"}</option>
+                <option value="nbb">{isAr ? "بنك البحرين الوطني" : "National Bank of Bahrain"}</option>
+                <option value="bbk">{isAr ? "بنك البحرين والكويت" : "Bank of Bahrain and Kuwait"}</option>
+                <option value="ithmaar">{isAr ? "بنك الإثمار" : "Ithmaar Bank"}</option>
+                <option value="kfh">{isAr ? "بيت التمويل الكويتي" : "Kuwait Finance House"}</option>
+                <option value="ila">{isAr ? "بنك إيلا" : "Ila Bank"}</option>
+                <option value="other">{isAr ? "بنك محلي آخر" : "Other local bank"}</option>
               </select>
             </div>
 
@@ -490,7 +490,7 @@ export function CreatorSettingsModal({ onClose }: { onClose: () => void }) {
                 <input
                   value={otherBankName}
                   onChange={(e) => setOtherBankName(e.target.value)}
-                  placeholder={isAr ? "اكتب اسم البنك / Bank Name" : "Bank Name / اكتب اسم البنك"}
+                  placeholder={isAr ? "اكتب اسم البنك" : "Enter bank name"}
                   aria-label={isAr ? "اسم البنك" : "Bank Name"}
                   className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
                 />
@@ -499,7 +499,7 @@ export function CreatorSettingsModal({ onClose }: { onClose: () => void }) {
             
             <div>
               <label className="mb-1.5 block text-xs font-semibold text-foreground">
-                {isAr ? "رقم الآيبان (IBAN)" : "IBAN"}
+                {isAr ? "رقم الحساب المصرفي الدولي" : "IBAN"}
               </label>
               <input defaultValue="BH67NBOB00000012345678" className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:border-primary font-mono tracking-widest uppercase" dir="ltr" />
             </div>

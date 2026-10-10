@@ -114,7 +114,11 @@ function AdminPage() {
       }
     } catch (error) {
       console.error("Unable to load stats verification decisions.", error);
-      toast.error("Unable to load saved stats verification decisions.");
+      toast.error(
+        lang === "ar"
+          ? "تعذر تحميل قرارات التحقق من الإحصائيات المحفوظة"
+          : "Unable to load saved stats verification decisions.",
+      );
     }
 
     try {
@@ -187,9 +191,13 @@ function AdminPage() {
       );
     } catch (error) {
       console.error("Unable to load the creator stats verification request.", error);
-      toast.error("Unable to load the saved stats verification request.");
+      toast.error(
+        lang === "ar"
+          ? "تعذر تحميل طلب التحقق من الإحصائيات المحفوظ"
+          : "Unable to load the saved stats verification request.",
+      );
     }
-  }, []);
+  }, [lang]);
 
   const updateVerification = (verification: InsightsVerification, status: "approved" | "rejected") => {
     try {
@@ -294,7 +302,7 @@ function AdminPage() {
             <p className="mt-1 text-sm text-muted-foreground">
               {dispute === "creator" ? tr({ ar: "القرار: تحرير كامل الضمان للمؤثر.", en: "Ruling: full escrow released to creator." })
                 : dispute === "merchant" ? tr({ ar: "القرار: استرداد كامل الضمان للمتجر.", en: "Ruling: full escrow refunded to merchant." })
-                : tr({ ar: "القرار: تسوية ودية مناصفة 75.000 / 75.000 د.ب.", en: "Ruling: amicable 50/50 split, 75.000 / 75.000 BHD." })}
+                : tr({ ar: "القرار: تسوية ودية مناصفة، 75.000 د.ب لكل طرف.", en: "Ruling: amicable 50/50 split, 75.000 / 75.000 BHD." })}
             </p>
             <button onClick={() => setDispute(null)} className="mt-5 rounded-lg border px-4 py-2 text-sm font-semibold hover:bg-muted">{tr({ ar: "إعادة فتح العرض التجريبي", en: "Reset demo" })}</button>
           </div>
@@ -327,13 +335,13 @@ function AdminPage() {
                 </div>
                 <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-4">
                   <p className="mb-1 flex items-center gap-2 text-sm font-bold text-destructive"><ShieldAlert className="h-4 w-4" />{tr({ ar: "سبب النزاع (اعتراض التاجر)", en: "Cause of dispute (merchant objection)" })}</p>
-                  <p className="text-sm leading-relaxed">{tr({ ar: "يدعي التاجر عدم تصوير وجبة الغداء الساخنة وعدم إبراز السعر 2.5 د.ب في الستوري.", en: "The merchant claims the hot lunch meal was not filmed and the 2.5 BHD price was not highlighted in the story." })}</p>
+                  <p className="text-sm leading-relaxed">{tr({ ar: "يدعي التاجر عدم تصوير وجبة الغداء الساخنة وعدم إبراز السعر 2.5 د.ب في القصة المصوّرة.", en: "The merchant claims the hot lunch meal was not filmed and the 2.5 BHD price was not highlighted in the story." })}</p>
                 </div>
               </div>
               <div className="space-y-4">
                 <h4 className="text-sm font-bold text-muted-foreground">{tr({ ar: "مراجعة الأدلة", en: "Evidence Review" })}</h4>
                 <div className="flex flex-wrap gap-2">
-                  {[{ l: { ar: "مشاهدة ستوري إنستغرام", en: "View Instagram Story" }, u: "https://instagram.com/stories/yousif.bites/" }, { l: { ar: "مشاهدة فيديو تيك توك", en: "View TikTok Video" }, u: "https://tiktok.com/@yousif.vlogs" }].map((x) => (
+                  {[{ l: { ar: "مشاهدة القصة المصوّرة على إنستغرام", en: "View Instagram Story" }, u: "https://instagram.com/stories/yousif.bites/" }, { l: { ar: "مشاهدة فيديو تيك توك", en: "View TikTok Video" }, u: "https://tiktok.com/@yousif.vlogs" }].map((x) => (
                     <a key={x.u} href={x.u} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-semibold transition hover:border-primary hover:text-primary"><ExternalLink className="h-4 w-4" />{tr(x.l)}</a>
                   ))}
                 </div>
@@ -343,7 +351,7 @@ function AdminPage() {
                     {[
                       { ok: true, l: { ar: "تصوير واجهة المحل والديكورات", en: "Film storefront and décor" }, s: { ar: "تم التأكيد", en: "Confirmed" } },
                       { ok: false, l: { ar: "تصوير وجبة الغداء بسعر 2.5 د.ب", en: "Film the 2.5 BHD lunch meal" }, s: { ar: "محل الخلاف", en: "Disputed" } },
-                      { ok: true, l: { ar: "إرفاق رابط القسيمة في الستوري", en: "Attach voucher link in story" }, s: { ar: "تم التأكيد", en: "Confirmed" } },
+                      { ok: true, l: { ar: "إرفاق رابط القسيمة في القصة المصوّرة", en: "Attach voucher link in story" }, s: { ar: "تم التأكيد", en: "Confirmed" } },
                     ].map((c, i) => (
                       <li key={i} className="flex items-start gap-2.5">
                         <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded ${c.ok ? "bg-success text-background" : "bg-warning text-background"}`}>{c.ok ? <Check className="h-3.5 w-3.5" /> : <HelpCircle className="h-3.5 w-3.5" />}</span>
@@ -356,7 +364,7 @@ function AdminPage() {
               </div>
             </div>
             <footer className="flex flex-col gap-3 border-t bg-surface px-6 py-4 sm:flex-row sm:flex-wrap sm:justify-end">
-              <button onClick={() => resolve("split")} className="rounded-lg border border-warning/50 px-4 py-2.5 text-sm font-bold text-warning transition hover:bg-warning-soft">{tr({ ar: "تسوية ودية مناصفة (75 د.ب / 75 د.ب)", en: "Amicable 50/50 split (75 / 75 BHD)" })}</button>
+              <button onClick={() => resolve("split")} className="rounded-lg border border-warning/50 px-4 py-2.5 text-sm font-bold text-warning transition hover:bg-warning-soft">{tr({ ar: "تسوية ودية مناصفة (75 د.ب لكل طرف)", en: "Amicable 50/50 split (75 / 75 BHD)" })}</button>
               <button onClick={() => resolve("merchant")} className="rounded-lg bg-destructive px-4 py-2.5 text-sm font-bold text-destructive-foreground transition hover:bg-destructive/90">{tr({ ar: "استرداد كامل الضمان للمتجر (150 د.ب)", en: "Full refund to merchant (150 BHD)" })}</button>
               <button onClick={() => resolve("creator")} className="rounded-lg bg-success px-4 py-2.5 text-sm font-bold text-background transition hover:bg-success/90">{tr({ ar: "تحرير كامل الضمان للمؤثر (150 د.ب)", en: "Release full escrow to creator (150 BHD)" })}</button>
             </footer>
@@ -436,7 +444,7 @@ function AdminPage() {
           <div className="overflow-x-auto rounded-2xl border bg-card shadow-soft">
             <table className="w-full min-w-[720px] text-sm">
               <thead className="bg-surface text-xs text-muted-foreground">
-                <tr>{[{ ar: "المستخدم", en: "User" }, { ar: "نوع الحساب", en: "Account type" }, { ar: "الموثوقية / النشاط", en: "Reliability / Activity" }, { ar: "الحالة", en: "Status" }, { ar: "الإجراءات", en: "Actions" }].map((h, i) => <th key={i} className="px-4 py-3 text-start font-semibold">{tr(h)}</th>)}</tr>
+                <tr>{[{ ar: "المستخدم", en: "User" }, { ar: "نوع الحساب", en: "Account type" }, { ar: "الموثوقية والنشاط", en: "Reliability / Activity" }, { ar: "الحالة", en: "Status" }, { ar: "الإجراءات", en: "Actions" }].map((h, i) => <th key={i} className="px-4 py-3 text-start font-semibold">{tr(h)}</th>)}</tr>
               </thead>
               <tbody>
                 {paginatedUsers.length ? paginatedUsers.map((u) => (

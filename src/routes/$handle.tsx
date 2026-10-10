@@ -173,7 +173,7 @@ function PublicCreatorProfile() {
           <StatCard Icon={Users} label={isAr ? "المتابعون" : "Followers"} value={followers} />
           <StatCard
             Icon={Eye}
-            label={isAr ? "مشاهدات الستوري" : "Story views"}
+            label={isAr ? "مشاهدات القصص" : "Story views"}
             value={storyViews}
           />
           <div className="flex min-h-24 items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800 sm:justify-center">
@@ -225,7 +225,7 @@ function PublicCreatorProfile() {
                     <Check className="size-4 shrink-0" />
                     <span>
                       {isAr
-                        ? `${collaboration.visitors} زائر موثق بالـ QR`
+                        ? `${collaboration.visitors} زائر موثق برمز استجابة سريعة`
                         : `${collaboration.visitors} visitors verified by QR`}
                     </span>
                   </div>

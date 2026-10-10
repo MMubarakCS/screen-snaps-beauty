@@ -38,7 +38,7 @@ export function InsightsProofModal({
       <div role="dialog" aria-modal="true" aria-labelledby="insights-proof-title" className="my-auto w-full max-w-2xl rounded-2xl border bg-card p-5 shadow-lift sm:p-6" onClick={(event) => event.stopPropagation()}>
         <div className="mb-4 flex items-center justify-between gap-3">
           <div>
-            <h3 id="insights-proof-title" className="font-bold">{tr({ ar: "إثبات الإحصائيات (Insights)", en: "Stats proof (Insights)" })}</h3>
+            <h3 id="insights-proof-title" className="font-bold">{tr({ ar: "إثبات الإحصائيات", en: "Stats proof (Insights)" })}</h3>
             <p className="mt-1 font-semibold text-foreground">{tr(verification.creator.name)}</p>
             <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
               <span dir="ltr">{verification.creator.handle}</span>
@@ -60,7 +60,7 @@ export function InsightsProofModal({
         {verification.screenshotDataUrl ? (
           <img
             src={verification.screenshotDataUrl}
-            alt={tr({ ar: "لقطة شاشة Insights المرفقة من صانع المحتوى", en: "Creator-uploaded Insights screenshot" })}
+            alt={tr({ ar: "لقطة شاشة الإحصاءات المرفقة من صانع المحتوى", en: "Creator-uploaded Insights screenshot" })}
             className="mx-auto h-96 w-full max-w-sm rounded-xl border bg-muted object-contain shadow-sm"
           />
         ) : (

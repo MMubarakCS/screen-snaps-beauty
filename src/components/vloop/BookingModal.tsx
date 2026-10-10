@@ -16,14 +16,14 @@ import { toast } from "sonner";
 import { PaymentGatewayModal } from "@/components/vloop/PaymentGatewayModal";
 
 const PLATFORMS: { id: string; label: L }[] = [
-  { id: "ig", label: { ar: "إنستغرام Instagram", en: "Instagram" } },
-  { id: "tt", label: { ar: "تيك توك TikTok", en: "TikTok" } },
-  { id: "snap", label: { ar: "سناب شات Snapchat", en: "Snapchat" } },
+  { id: "ig", label: { ar: "إنستغرام", en: "Instagram" } },
+  { id: "tt", label: { ar: "تيك توك", en: "TikTok" } },
+  { id: "snap", label: { ar: "سناب شات", en: "Snapchat" } },
 ];
 
 const FORMATS: { id: string; label: L }[] = [
-  { id: "story", label: { ar: "3 لقطات ستوري", en: "3× Story Snips" } },
-  { id: "reel", label: { ar: "فيديو ريلز/تيك توك", en: "Reels / TikTok Video" } },
+  { id: "story", label: { ar: "3 مقاطع قصة مصوّرة", en: "3× Story Snips" } },
+  { id: "reel", label: { ar: "فيديو قصير", en: "Short-form Video" } },
   { id: "field", label: { ar: "تغطية ميدانية", en: "Field Coverage" } },
 ];
 
@@ -147,7 +147,7 @@ function VoucherTrackingSection({
                 </span>
                 <p className="mt-2 text-start text-xs leading-relaxed text-muted-foreground">
                   {lang === "ar"
-                    ? "سيتم تزويد صانع المحتوى بهذا الكود والرابط لوضعه في ملصق الستوري."
+                    ? "سيتم تزويد صانع المحتوى بهذا الكود والرابط لوضعه في ملصق القصة المصوّرة."
                     : "The creator will receive this code and link sticker for their stories."}
                 </p>
               </div>
@@ -272,7 +272,7 @@ function ManualMode({
         {/* Platform chips */}
         <div>
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            المنصة / Platform
+            {lang === "ar" ? "منصة النشر" : "Publishing Platform"}
           </p>
           <div className="flex flex-wrap gap-2">
             {PLATFORMS.map((p) => {
@@ -370,7 +370,7 @@ function ManualMode({
                     />
                     <button
                       onClick={() => removeTerm(x.id)}
-                      aria-label="Remove"
+                      aria-label={lang === "ar" ? "حذف الشرط" : "Remove clause"}
                       className="mt-0.5 rounded p-1 text-muted-foreground opacity-0 transition hover:bg-muted hover:text-destructive group-hover:opacity-100"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -509,7 +509,7 @@ function AiMode({
           on: true,
           preset: false,
           text: {
-            ar: `ذكر السعر (${price} د.ب) نصياً وصوتياً في الستوري.`,
+            ar: `ذكر السعر (${price} د.ب) نصياً وصوتياً في القصة المصوّرة.`,
             en: `State the price (${price} BHD) both on-screen and verbally.`,
           },
         });
@@ -531,7 +531,7 @@ function AiMode({
         on: true,
         preset: false,
         text: {
-          ar: "الإشارة للحساب الرسمي (@mention) وإرفاق ملصق رابط القسيمة.",
+          ar: "الإشارة إلى الحساب الرسمي وإرفاق ملصق رابط القسيمة في القصة المصوّرة.",
           en: "Mention the official account (@mention) and attach the voucher link sticker.",
         },
       });
@@ -643,7 +643,7 @@ function AiMode({
                     />
                     <button
                       onClick={() => removeTerm(x.id)}
-                      aria-label="Remove"
+                      aria-label={lang === "ar" ? "حذف الشرط" : "Remove clause"}
                       className="rounded p-1.5 text-muted-foreground opacity-0 transition hover:bg-muted hover:text-destructive group-hover:opacity-100"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -745,21 +745,37 @@ export function BookingModal({
     if (!campaignDate) {
       setIsEditingDate(true);
       setDateInvalid(true);
-      toast.warning("يرجى تحديد تاريخ التغطية المطلوب للحملة");
+      toast.warning(
+        lang === "ar"
+          ? "يرجى تحديد تاريخ التغطية المطلوب للحملة"
+          : "Please select the campaign coverage date",
+      );
       return;
     }
     if (!Number.isFinite(budgetValue) || budgetValue <= 0) {
       setBudgetInvalid(true);
-      toast.warning("يرجى إدخال ميزانية صالحة للحملة");
+      toast.warning(
+        lang === "ar"
+          ? "يرجى إدخال ميزانية صالحة للحملة"
+          : "Please enter a valid campaign budget",
+      );
       return;
     }
     if (voucherSettings.enabled && !voucherSettings.offerDetails.trim()) {
       setOfferDetailsInvalid(true);
-      toast.warning("يرجى كتابة تفاصيل خصم القسيمة (مثال: خصم 20%) أو إلغاء تفعيل القسيمة");
+      toast.warning(
+        lang === "ar"
+          ? "يرجى كتابة تفاصيل خصم القسيمة (مثال: خصم 20% على الفاتورة) أو إلغاء تفعيل القسيمة"
+          : "Please describe the voucher offer (e.g., 20% off the total bill) or disable voucher tracking",
+      );
       return;
     }
     if (!hasPlatform || !hasDeliverable) {
-      toast.warning("يرجى اختيار منصة واحدة وشرط واحد على الأقل للحملة");
+      toast.warning(
+        lang === "ar"
+          ? "يرجى اختيار منصة واحدة وشرط واحد على الأقل للحملة"
+          : "Please select at least one platform and one campaign deliverable",
+      );
       return;
     }
     if (offerBelowThreshold) {
@@ -812,7 +828,7 @@ export function BookingModal({
           </div>
           <button
             onClick={onClose}
-            aria-label="Close"
+            aria-label={lang === "ar" ? "إغلاق" : "Close"}
             className="rounded-lg p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground"
           >
             <X className="h-5 w-5" />
@@ -871,7 +887,7 @@ export function BookingModal({
                         onClick={() => setIsEditingDate(true)}
                         className="text-xs font-semibold text-muted-foreground transition hover:text-primary"
                       >
-                        {lang === "ar" ? "تغيير / Edit" : "Edit"}
+                        {lang === "ar" ? "تغيير" : "Edit"}
                       </button>
                     )}
                   </div>

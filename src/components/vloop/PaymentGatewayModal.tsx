@@ -51,7 +51,7 @@ export function PaymentGatewayModal({ lang, fee, onCancel, onFunded }: { lang: L
             <h2 className="text-base font-bold">{tr({ ar: "بوابة الدفع الإلكتروني والضمان المالي", en: "Secure Escrow Payment Gateway" })}</h2>
             <span className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-success-soft px-2 py-0.5 text-[11px] font-bold text-success"><ShieldCheck className="h-3 w-3" />SSL 256-bit</span>
           </div>
-          {stage === "form" && <button onClick={onCancel} aria-label="Close" className="rounded-lg p-2 text-muted-foreground hover:bg-muted"><X className="h-5 w-5" /></button>}
+          {stage === "form" && <button onClick={onCancel} aria-label={tr({ ar: "إغلاق", en: "Close" })} className="rounded-lg p-2 text-muted-foreground hover:bg-muted"><X className="h-5 w-5" /></button>}
         </header>
 
         {stage === "done" ? (
@@ -73,12 +73,12 @@ export function PaymentGatewayModal({ lang, fee, onCancel, onFunded }: { lang: L
                 <p className="text-xs font-semibold text-muted-foreground">{tr({ ar: "إجمالي مبلغ الضمان", en: "Total escrow amount" })}</p>
                 <p className="num text-3xl font-extrabold text-foreground">{fmtBHD(b.total, lang)}</p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {tr({ ar: "أجر المعلن", en: "Creator fee" })} (<span className="num">{fmtBHD(b.fee, lang)}</span>) + {tr({ ar: "رسوم المنصة والضريبة", en: "platform fee & VAT" })} (<span className="num">{fmtBHD(b.charges, lang)}</span>)
+                  {tr({ ar: "أجر صانع المحتوى", en: "Creator fee" })} (<span className="num">{fmtBHD(b.fee, lang)}</span>) + {tr({ ar: "رسوم المنصة وضريبة القيمة المضافة", en: "platform fee & VAT" })} (<span className="num">{fmtBHD(b.charges, lang)}</span>)
                 </p>
               </div>
 
               <div className="grid grid-cols-2 gap-2 rounded-xl bg-muted p-1">
-                {([["benefitpay", Smartphone, { ar: "BenefitPay (فوري+)", en: "BenefitPay (Fawri+)" }], ["card", CreditCard, { ar: "بطاقة بنكية", en: "Bank Card" }]] as const).map(([id, Icon, l]) => (
+                {([["benefitpay", Smartphone, { ar: "بنفت بي", en: "BenefitPay" }], ["card", CreditCard, { ar: "بطاقة بنكية", en: "Bank Card" }]] as const).map(([id, Icon, l]) => (
                   <button key={id} onClick={() => setMethod(id)} disabled={stage !== "form"} className={`flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-bold transition ${method === id ? "bg-card text-foreground shadow-soft" : "text-muted-foreground hover:text-foreground"}`}>
                     <Icon className="h-4 w-4" />{tr(l)}
                   </button>
@@ -88,7 +88,7 @@ export function PaymentGatewayModal({ lang, fee, onCancel, onFunded }: { lang: L
               {method === "benefitpay" ? (
                 <div className="flex flex-col items-center gap-3 text-center">
                   <div className="relative rounded-2xl border-2 border-foreground bg-background p-3">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=BEN-2026-98124" alt="BenefitPay QR" className="h-44 w-44" />
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=BEN-2026-98124" alt={tr({ ar: "رمز دفع بنفت بي", en: "BenefitPay QR code" })} className="h-44 w-44" />
                     <span className="absolute -bottom-3 start-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-foreground px-3 py-1 text-[11px] font-bold text-background rtl:translate-x-1/2">
                       {tr({ ar: "مسح عبر تطبيق بنفت بي", en: "Scan with BenefitPay" })}
                     </span>
@@ -97,7 +97,7 @@ export function PaymentGatewayModal({ lang, fee, onCancel, onFunded }: { lang: L
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <p className="text-xs text-muted-foreground">{tr({ ar: "مدى / فيزا / ماستركارد — تمت تعبئة بطاقة اختبار آمنة (وضع تجريبي)", en: "Mada / Visa / Mastercard — a safe test card is pre-filled (sandbox)" })}</p>
+                  <p className="text-xs text-muted-foreground">{tr({ ar: "بطاقات مدى وفيزا وماستركارد — تمت تعبئة بيانات بطاقة اختبار آمنة (وضع تجريبي)", en: "Mada / Visa / Mastercard — a safe test card is pre-filled (sandbox)" })}</p>
                   <label className="block"><span className="mb-1.5 block text-xs font-semibold text-muted-foreground">{tr({ ar: "رقم البطاقة", en: "Card number" })}</span><input dir="ltr" inputMode="numeric" value={card.number} onChange={(e) => setCard({ ...card, number: e.target.value })} className={`${input} num text-start`} /></label>
                   <div className="grid grid-cols-2 gap-3">
                     <label className="block"><span className="mb-1.5 block text-xs font-semibold text-muted-foreground">{tr({ ar: "تاريخ الانتهاء", en: "Expiry" })} (MM/YY)</span><input dir="ltr" value={card.exp} onChange={(e) => setCard({ ...card, exp: e.target.value })} className={`${input} num text-start`} /></label>
@@ -110,7 +110,7 @@ export function PaymentGatewayModal({ lang, fee, onCancel, onFunded }: { lang: L
             <footer className="border-t px-6 py-4">
               <button onClick={pay} disabled={stage === "processing"} className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-bold text-primary-foreground shadow-soft hover:bg-primary/90 disabled:opacity-80">
                 {stage === "processing" ? <><Loader2 className="h-4 w-4 animate-spin" />{tr({ ar: "جاري معالجة العملية البنكية...", en: "Processing Transaction..." })}</>
-                  : method === "benefitpay" ? tr({ ar: "دفع سريع عبر بنفت بي (BenefitPay App)", en: "Quick pay via BenefitPay App" })
+                  : method === "benefitpay" ? tr({ ar: "دفع سريع عبر تطبيق بنفت بي", en: "Quick pay via BenefitPay" })
                   : <>{tr({ ar: "ادفع", en: "Pay" })} <span className="num">{fmtBHD(b.total, lang)}</span></>}
               </button>
             </footer>

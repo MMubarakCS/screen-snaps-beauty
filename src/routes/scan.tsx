@@ -93,7 +93,7 @@ function ScanPage() {
             </div>
             <div className="leading-tight">
               <span className="block text-sm font-bold text-white">
-                Vloop Scanner <span className="font-normal text-white/40">|</span> <span className="text-white/80">كشك الكاشير</span>
+                {isAr ? "ماسح ڤلوب" : "Vloop Scanner"} <span className="font-normal text-white/40">|</span> <span className="text-white/80">{isAr ? "كشك الكاشير" : "Cashier Kiosk"}</span>
               </span>
             </div>
           </div>
@@ -138,10 +138,10 @@ function ScanPage() {
                     {isAr ? "خصم 20% على إجمالي الفاتورة" : "20% off total bill"}
                   </div>
                   <p className="text-sm text-emerald-200/70">
-                    {isAr ? "تم تسجيل الزيارة بنجاح (+1 Footfall)" : "Visit recorded successfully (+1 Footfall)"}
+                    {isAr ? "تم تسجيل زيارة موثقة بنجاح (+1)" : "Visit recorded successfully (+1 Footfall)"}
                   </p>
                   <p dir="ltr" className="num text-xs text-emerald-400/60" style={{ direction: "ltr", unicodeBidi: "isolate" }}>
-                    Token: {lastToken}
+                    {isAr ? "الرمز:" : "Token:"} {lastToken}
                   </p>
                 </div>
                 <button
@@ -177,7 +177,7 @@ function ScanPage() {
                     {isAr ? "لا يُسمح بتكرار استخدام القسيمة لنفس العميل." : "Duplicate voucher usage is not permitted for the same customer."}
                   </p>
                   <p dir="ltr" className="num text-xs text-red-400/60" style={{ direction: "ltr", unicodeBidi: "isolate" }}>
-                    Token: {lastToken}
+                    {isAr ? "الرمز:" : "Token:"} {lastToken}
                   </p>
                 </div>
                 <button
@@ -234,7 +234,7 @@ function ScanPage() {
             {/* Status indicator */}
             <div className="flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-400">
               <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_8px_2px_rgba(52,211,153,0.5)]" />
-              {isAr ? "الكاميرا جاهزة — وجّه العدسة نحو رمز QR الخاص بالزبون" : "Camera ready — point at customer's QR code"}
+              {isAr ? "الكاميرا جاهزة — وجّه العدسة نحو رمز الاستجابة السريعة الخاص بالزبون" : "Camera ready — point at customer's QR code"}
             </div>
 
             {/* Manual Entry Fallback */}
@@ -273,7 +273,7 @@ function ScanPage() {
                   className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-white transition hover:bg-white/10 active:scale-[0.98]"
                 >
                   <QRSimIcon />
-                  {isAr ? "محاكاة مسح QR" : "Simulate QR Scan"}
+                  {isAr ? "محاكاة مسح رمز الاستجابة السريعة" : "Simulate QR Scan"}
                 </button>
                 <button
                   onClick={() => setMode("manual")}

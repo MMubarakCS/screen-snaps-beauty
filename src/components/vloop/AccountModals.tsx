@@ -13,6 +13,7 @@ function useNoScroll() {
 }
 
 function ModalFrame({ title, icon, onClose, children, footer }: { title: string; icon: ReactNode; onClose: () => void; children: ReactNode; footer: ReactNode }) {
+  const { lang } = useLang();
   useNoScroll();
   useEffect(() => {
     const k = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -25,7 +26,7 @@ function ModalFrame({ title, icon, onClose, children, footer }: { title: string;
         <header className="flex items-center gap-3 border-b px-6 py-4">
           {icon}
           <h2 className="flex-1 text-base font-bold 2xl:text-lg">{title}</h2>
-          <button onClick={onClose} aria-label="Close" className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"><X className="h-5 w-5" /></button>
+          <button onClick={onClose} aria-label={lang === "ar" ? "إغلاق" : "Close"} className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"><X className="h-5 w-5" /></button>
         </header>
         <div className="flex-1 space-y-4 overflow-y-auto px-6 py-5">{children}</div>
         <footer className="flex justify-end gap-3 border-t px-6 py-4">{footer}</footer>
@@ -106,7 +107,7 @@ export function CompanyProfileModal({ onClose }: { onClose: () => void }) {
           )}
           <label className={`${btnGhost} inline-flex cursor-pointer items-center gap-2`}>
             <Camera className="h-4 w-4" />
-            {tr({ ar: "تغيير الشعار / Upload Logo", en: "تغيير الشعار / Upload Logo" })}
+            {tr({ ar: "تغيير الشعار", en: "Upload Logo" })}
             <input
               type="file"
               accept="image/*"
@@ -121,13 +122,13 @@ export function CompanyProfileModal({ onClose }: { onClose: () => void }) {
       </div>
       <Field label={tr({ ar: "اسم المنشأة التجاري", en: "Business Name" })}><input value={f.name} onChange={set("name")} className={input} /></Field>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label={tr({ ar: "رقم السجل التجاري (CR)", en: "Commercial Registration (CR)" })}>
+        <Field label={tr({ ar: "رقم السجل التجاري", en: "Commercial Registration (CR)" })}>
           <div className="flex items-center justify-between rounded-lg border bg-surface px-3.5 py-2.5 text-sm">
             <span className="num font-semibold">104829-1</span>
             <span className="inline-flex items-center gap-1 rounded-full bg-success-soft px-2 py-0.5 text-xs font-bold text-success"><BadgeCheck className="h-3.5 w-3.5" />{tr({ ar: "موثّق", en: "Verified" })}</span>
           </div>
         </Field>
-        <Field label={tr({ ar: "الرقم الضريبي (VAT/TIN)", en: "VAT / TIN" })}><input value={f.vat} onChange={set("vat")} dir="ltr" className={`${input} num text-start`} /></Field>
+        <Field label={tr({ ar: "رقم ضريبة القيمة المضافة", en: "VAT / TIN" })}><input value={f.vat} onChange={set("vat")} dir="ltr" className={`${input} num text-start`} /></Field>
       </div>
       <Field label={tr({ ar: "النشاط والفئة", en: "Activity & Category" })}>
         <select value={f.cat} onChange={set("cat")} className={input}>
@@ -187,7 +188,7 @@ export function AccountSettingsModal({ onClose }: { onClose: () => void }) {
         <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} dir="ltr" className={`${input} text-start`} />
       </section>
       <section>
-        <h3 className="mb-2 flex items-center gap-2 text-sm font-bold"><Bell className="h-4 w-4 text-primary" />{tr({ ar: "إشعارات النظام والبريد الإلكتروني / Email Notifications", en: "إشعارات النظام والبريد الإلكتروني / Email Notifications" })}</h3>
+        <h3 className="mb-2 flex items-center gap-2 text-sm font-bold"><Bell className="h-4 w-4 text-primary" />{tr({ ar: "إشعارات النظام والبريد الإلكتروني", en: "System & Email Notifications" })}</h3>
         <div className="space-y-2">
           <Check2 on={n1} set={setN1} label={tr({ ar: "تنبيه فوري عبر البريد عند تقديم صانع المحتوى لإثبات النشر.", en: "Instant email alert when a creator submits proof of posting." })} />
           <Check2 on={n2} set={setN2} label={tr({ ar: "تنبيه تحذيري عبر البريد قبل انتهاء مهلة الـ 24 ساعة بـ 4 ساعات.", en: "Email warning 4 hours before the 24-hour window ends." })} />

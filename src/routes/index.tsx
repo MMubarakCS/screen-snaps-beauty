@@ -38,7 +38,7 @@ export function PublicLanding() {
         en: "Q: How does Vloop protect my funds as a business owner?",
       },
       answer: {
-        ar: "ج: تظل أموالك محجوزة بأمان في صندوق الأمانات (Escrow)، ولا يتم تحريرها للمعلن إلا بعد نشر التغطية وموافقتك عليها أو مرور 24 ساعة دون تقديم اعتراض مستند لشروط العقد.",
+        ar: "ج: تظل أموالك محجوزة بأمان في صندوق الأمانات، ولا يتم تحريرها لصانع المحتوى إلا بعد نشر التغطية وموافقتك عليها أو مرور 24 ساعة دون تقديم اعتراض مستند إلى شروط العقد.",
         en: "A: Your funds remain securely held in escrow and are released to the creator only after the coverage is published and approved by you, or after 24 hours pass without a dispute based on the contract terms.",
       },
     },
@@ -58,7 +58,7 @@ export function PublicLanding() {
         en: "Q: As a creator, when and how do I receive my earnings?",
       },
       answer: {
-        ar: "ج: بمجرد اعتماد الحملة (سواء بالموافقة المباشرة أو بعد انتهاء مهلة الـ 24 ساعة التلقائية)، يتحول المبلغ فوراً إلى \"الرصيد المتاح للسحب\" لتتمكن من تحويله لحسابك البنكي المحلي عبر Fawri+ IBAN بدون أي خصومات أو عمولات على أجرك المتفق عليه.",
+        ar: "ج: بمجرد اعتماد الحملة، سواء بالموافقة المباشرة أو بعد انتهاء مهلة المراجعة التلقائية البالغة 24 ساعة، يُضاف المبلغ فوراً إلى رصيدك المتاح للسحب، ويمكنك تحويله إلى حسابك البنكي المحلي عبر خدمة فوري+ باستخدام رقم الحساب المصرفي الدولي، دون أي خصومات أو عمولات من أجرك المتفق عليه.",
         en: "A: Once a campaign is approved—directly or after the 24-hour review window—the amount moves immediately to your available balance for withdrawal to your local bank account via Fawri+ IBAN, with no deductions or fees from your agreed earnings.",
       },
     },
@@ -68,7 +68,7 @@ export function PublicLanding() {
         en: "Q: Do restaurant customers need an app or account to use a discount code?",
       },
       answer: {
-        ar: "ج: لا، الزبون يكتفي بإدخال رقم هاتفه في صفحة العرض المباشرة عبر المتصفح ليحصل على قسيمة الـ QR لمرة واحدة خلال 3 ثوانٍ وبدون انتظار أي رمز OTP.",
+        ar: "ج: لا، يكفي أن يُدخل الزبون رقم هاتفه في صفحة العرض عبر المتصفح ليحصل على قسيمة برمز استجابة سريعة لمرة واحدة خلال 3 ثوانٍ، دون انتظار رمز تحقق.",
         en: "A: No. Customers only enter their phone number on the offer page in their browser to receive a single-use QR voucher within 3 seconds, without waiting for an OTP.",
       },
     },
@@ -78,7 +78,7 @@ export function PublicLanding() {
         en: "Q: How are disputes or breaches of campaign terms handled?",
       },
       answer: {
-        ar: "ج: يتيح النظام للتاجر زر \"تقديم اعتراض\" خلال مهلة الـ 24 ساعة يوقف تحرير الأموال فوراً، ويتدخل فريق التحكيم لمطابقة التغطية المنشورة مع قائمة الشروط الرقمية الملزمة المعتمدة مسبقاً (NLP Brief).",
+        ar: "ج: يتيح النظام للتاجر تقديم اعتراض خلال مهلة الـ 24 ساعة لإيقاف تحرير الأموال فوراً، ثم يطابق فريق التحكيم التغطية المنشورة مع قائمة الشروط الرقمية الملزمة والمعتمدة مسبقاً.",
         en: "A: Merchants can raise a dispute during the 24-hour review window, immediately pausing fund release. Our arbitration team then checks the published coverage against the approved, binding digital brief (NLP Brief).",
       },
     },
@@ -120,7 +120,7 @@ export function PublicLanding() {
           
           <p className="mx-auto max-w-3xl text-lg sm:text-xl text-muted-foreground leading-relaxed mb-10">
             {isAr
-              ? "المنصة السحابية الأولى لحملات المؤثرين بنظام الأمانات المالية (Escrow) وتتبع مبيعات الفروع الميدانية عبر قسائم QR الذكية."
+              ? "منصة سحابية لحملات صنّاع المحتوى تضمن حفظ الأموال في صندوق أمانات، وتتبع زيارات الفروع عبر قسائم الخصم ذات رموز الاستجابة السريعة."
               : "The premier cloud platform for influencer campaigns with financial escrow and field branch sales tracking via smart QR vouchers."}
           </p>
           
@@ -155,7 +155,7 @@ export function PublicLanding() {
               <form onSubmit={handleClaim} className="flex flex-col md:flex-row gap-3">
                 <input
                   type="text"
-                  placeholder={isAr ? "كود الحملة أو رمز المشهور (مثال: FLAME20)" : "Campaign Code (e.g. FLAME20)"}
+                  placeholder={isAr ? "رمز الحملة أو صانع المحتوى (مثال: FLAME20)" : "Campaign Code (e.g. FLAME20)"}
                   value={claimCode}
                   onChange={(e) => setClaimCode(e.target.value)}
                   className="flex-1 rounded-xl border bg-background/50 px-4 py-3.5 text-base font-semibold outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
@@ -173,12 +173,12 @@ export function PublicLanding() {
                   type="submit"
                   className="rounded-xl bg-foreground px-6 py-3.5 text-base font-bold text-background shadow-soft transition hover:bg-foreground/90 whitespace-nowrap shrink-0"
                 >
-                  {isAr ? "استلام الـ QR Code فوراً ✨" : "Claim QR Code ✨"}
+                  {isAr ? "استلام القسيمة فوراً ✨" : "Claim QR Code ✨"}
                 </button>
               </form>
               <p className="mt-4 flex items-center justify-center gap-1.5 text-sm font-medium text-muted-foreground">
                 <ShieldCheck className="h-4 w-4 text-success" />
-                {isAr ? "محمي بنظام التحقق السريع — بدون الحاجة لإنشاء حساب أو انتظار كود OTP." : "Secured by rapid verification — no account creation or OTP needed."}
+                {isAr ? "محمي بنظام تحقق سريع — دون الحاجة إلى إنشاء حساب أو انتظار رمز تحقق." : "Secured by rapid verification — no account creation or OTP needed."}
               </p>
             </div>
           </div>
@@ -196,13 +196,13 @@ export function PublicLanding() {
             },
             {
               icon: QrCode,
-              t: isAr ? "تتبع فوري بالـ QR" : "Instant QR Tracking",
+              t: isAr ? "تتبع فوري برموز الاستجابة السريعة" : "Instant QR Tracking",
               d: isAr ? "قياس زوار الفروع دون الحاجة لكاشير إلكتروني معقد." : "Measure branch visits without complex POS integration."
             },
             {
               icon: Store,
               t: isAr ? "فواتير ضريبية معتمدة" : "Certified Tax Invoices",
-              d: isAr ? "متوافقة 100% مع معايير الجهاز الوطني للإيرادات (NBR)." : "100% compliant with National Bureau of Revenue (NBR)."
+              d: isAr ? "متوافقة 100% مع معايير الجهاز الوطني للإيرادات." : "100% compliant with National Bureau of Revenue (NBR)."
             },
             {
               icon: Timer,
@@ -246,7 +246,7 @@ export function PublicLanding() {
       {/* 3-STEP LOOP */}
       <section id="how-it-works" className="mx-auto mt-8 w-[92%] max-w-[1200px] scroll-mt-24 pb-12 lg:pb-16">
         <div className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl font-extrabold mb-4">{isAr ? "كيف تعمل المنصة (The 3-Step Guaranteed Loop)" : "How It Works (The 3-Step Guaranteed Loop)"}</h2>
+          <h2 className="text-3xl sm:text-4xl font-extrabold mb-4">{isAr ? "كيف تعمل المنصة: الدورة المضمونة في ثلاث خطوات" : "How It Works (The 3-Step Guaranteed Loop)"}</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             {isAr ? "دورة متكاملة تضمن حقوق الطرفين وتوفر تتبعاً دقيقاً لنتائج الحملات الإعلانية." : "An integrated loop that secures rights for both parties and tracks ad results accurately."}
           </p>
@@ -256,8 +256,8 @@ export function PublicLanding() {
           {[
             {
               i: Wallet,
-              t: isAr ? "حجز آمن بضمان مالي" : "Escrow Deposit",
-              d: isAr ? "يتم حجز مبلغ الحملة في محفظة آمنة (Escrow) لضمان جدية العمل وحفظ حقوق الطرفين." : "Campaign funds are held securely to ensure commitment and protect both parties.",
+              t: isAr ? "حجز آمن في صندوق الأمانات" : "Escrow Deposit",
+              d: isAr ? "يُحجز مبلغ الحملة بأمان لضمان جدية العمل وحفظ حقوق الطرفين." : "Campaign funds are held securely to ensure commitment and protect both parties.",
               c: "text-sky bg-sky/10 border-sky/20",
               ic: "text-sky",
             },
@@ -271,7 +271,7 @@ export function PublicLanding() {
             {
               i: Store,
               t: isAr ? "مبيعات وزوار موثقون" : "Single-Use Footfall Tracking",
-              d: isAr ? "تتبع فوري للمبيعات والزوار من خلال مسح قسائم الخصم الذكية (QR) في الفروع." : "Real-time tracking of sales and footfall through smart QR discount scans at branches.",
+              d: isAr ? "تتبع فوري للمبيعات والزيارات عبر مسح قسائم الخصم الذكية في الفروع." : "Real-time tracking of sales and footfall through smart QR discount scans at branches.",
               c: "text-success bg-success-soft border-success/20",
               ic: "text-success",
             },

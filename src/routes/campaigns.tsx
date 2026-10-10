@@ -53,7 +53,7 @@ const noor = creators[2]!;
 
 const deliverables: L[] = [
   {
-    ar: "الإشارة للحساب الرسمي (@flame_burger) وملصق رابط القسيمة.",
+    ar: "الإشارة إلى الحساب الرسمي (@flame_burger) وإرفاق ملصق رابط القسيمة.",
     en: "Mention the official account (@flame_burger) and the voucher link sticker.",
   },
   {
@@ -227,7 +227,7 @@ function Campaigns() {
                     </p>
                     <div className="flex gap-1 mt-1.5">
                       {[
-                        { ar: "ستوري إنستغرام", en: "Instagram Story" },
+                        { ar: "قصة إنستغرام مصوّرة", en: "Instagram Story" },
                         { ar: "فيديو تيك توك", en: "TikTok Video" },
                       ].map((f) => (
                         <span
@@ -294,16 +294,18 @@ function Campaigns() {
                     </span>
                     <div>
                       <p className="text-xs text-muted-foreground">
-                        {tr({ ar: "قسائم QR الممسوحة حتى الآن", en: "QR vouchers scanned so far" })}
+                        {tr({ ar: "قسائم الخصم الممسوحة حتى الآن", en: "QR vouchers scanned so far" })}
                       </p>
                       <p className="num text-lg font-extrabold">
-                        42 {tr({ ar: "زائر", en: "visitors" })}{" "}
-                        <span className="text-sm font-bold text-success">(+42 Footfall)</span>
+                        42 {tr({ ar: "زيارة", en: "visitors" })}{" "}
+                        <span className="text-sm font-bold text-success">
+                          (+42 {tr({ ar: "زيارة", en: "footfall" })})
+                        </span>
                       </p>
                     </div>
                     <span className="ms-auto flex items-center gap-1 text-xs font-semibold text-success">
                       <span className="h-2 w-2 animate-pulse rounded-full bg-success" />
-                      Live
+                      {tr({ ar: "مباشر", en: "Live" })}
                     </span>
                   </div>
                 </div>
@@ -577,7 +579,7 @@ function Campaigns() {
                       <div className="flex flex-wrap items-center gap-3 sm:gap-6">
                         <span className="inline-flex items-center gap-1.5 rounded-lg bg-success-soft px-3 py-1.5 text-sm font-semibold text-success">
                           <Footprints className="h-4 w-4" />
-                          🎟️ {ft} {tr({ ar: "زائر موثق", en: "verified visitors" })} (Footfall)
+                          🎟️ {ft} {tr({ ar: "زيارة موثقة", en: "verified visitors" })}
                           <span className="relative ms-1 flex h-2 w-2 shrink-0">
                             {voucherHoursLeft > 0 && (
                               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-60" />
@@ -697,7 +699,7 @@ function DisputeModal({ onClose, onConfirm }: { onClose: () => void; onConfirm: 
           </h2>
           <button
             onClick={onClose}
-            aria-label="Close"
+            aria-label={tr({ ar: "إغلاق", en: "Close" })}
             className="rounded-lg p-2 text-muted-foreground hover:bg-muted"
           >
             <X className="h-5 w-5" />
@@ -790,7 +792,7 @@ function BriefModal({ onClose }: { onClose: () => void }) {
           </h2>
           <button
             onClick={onClose}
-            aria-label="Close"
+            aria-label={tr({ ar: "إغلاق", en: "Close" })}
             className="rounded-lg p-2 text-muted-foreground hover:bg-muted"
           >
             <X className="h-5 w-5" />

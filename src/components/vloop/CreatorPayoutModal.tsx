@@ -38,8 +38,8 @@ export function CreatorPayoutModal({ available, onClose }: { available: number; 
       <div className="flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-t-2xl border bg-card text-start shadow-lift sm:rounded-2xl 2xl:max-w-xl" onClick={(e) => e.stopPropagation()}>
         <header className="flex items-center gap-3 border-b px-6 py-4">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary"><Landmark className="h-5 w-5" /></span>
-          <h2 className="flex-1 text-base font-bold">{tr({ ar: "طلب سحب الأرباح والتحويل البنكي المحلي (Fawri+)", en: "Earnings Withdrawal & Local Bank Transfer (Fawri+)" })}</h2>
-          {stage !== "processing" && <button onClick={onClose} aria-label="Close" className="rounded-lg p-2 text-muted-foreground hover:bg-muted"><X className="h-5 w-5" /></button>}
+          <h2 className="flex-1 text-base font-bold">{tr({ ar: "طلب سحب الأرباح والتحويل البنكي المحلي عبر فوري+", en: "Earnings Withdrawal & Local Bank Transfer (Fawri+)" })}</h2>
+          {stage !== "processing" && <button onClick={onClose} aria-label={tr({ ar: "إغلاق", en: "Close" })} className="rounded-lg p-2 text-muted-foreground hover:bg-muted"><X className="h-5 w-5" /></button>}
         </header>
 
         {stage === "done" ? (
@@ -51,7 +51,7 @@ export function CreatorPayoutModal({ available, onClose }: { available: number; 
               <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{tr({ ar: "الرقم المرجعي", en: "Reference ID" })}</dt><dd className="font-mono font-bold" dir="ltr">{ref}</dd></div>
               <div className="flex justify-between gap-3"><dt className="text-muted-foreground">{tr({ ar: "وقت الوصول المتوقع", en: "Expected arrival" })}</dt><dd className="font-semibold">{tr({ ar: "خلال دقائق معدودة عبر فوري+", en: "Within minutes via Fawri+" })}</dd></div>
             </dl>
-            <button onClick={onClose} className="mt-6 w-full rounded-lg bg-primary px-4 py-3 text-sm font-bold text-primary-foreground hover:bg-primary/90">{tr({ ar: "تم / إغلاق", en: "Done / Close" })}</button>
+            <button onClick={onClose} className="mt-6 w-full rounded-lg bg-primary px-4 py-3 text-sm font-bold text-primary-foreground hover:bg-primary/90">{tr({ ar: "تم", en: "Done" })}</button>
           </div>
         ) : (
           <>
@@ -71,7 +71,7 @@ export function CreatorPayoutModal({ available, onClose }: { available: number; 
                 <dl className="space-y-2 text-sm">
                   {[
                     [{ ar: "اسم المستفيد المعتمد", en: "Beneficiary name" }, tr({ ar: "يوسف المناعي", en: "Yousif Al-Mannai" })],
-                    [{ ar: "البنك المحلي", en: "Local bank" }, tr({ ar: "بنك البحرين الوطني (NBB)", en: "National Bank of Bahrain (NBB)" })],
+                    [{ ar: "البنك المحلي", en: "Local bank" }, tr({ ar: "بنك البحرين الوطني", en: "National Bank of Bahrain (NBB)" })],
                     [{ ar: "الآيبان المسجل", en: "Registered IBAN" }, IBAN],
                     [{ ar: "وسيلة التحويل", en: "Transfer method" }, tr({ ar: "شبكة فوري+ السريعة", en: "Fawri+ Instant Settlement" })],
                   ].map(([k, v], i) => (

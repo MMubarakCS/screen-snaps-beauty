@@ -55,6 +55,15 @@ function CreatorPage() {
   // Decline modal states
   const [declineReason, setDeclineReason] = useState(0);
   const [otherReasonText, setOtherReasonText] = useState("");
+  const [proofUrls, setProofUrls] = useState<Record<"instagram" | "tiktok" | "snapchat", string>>({
+    instagram: "",
+    tiktok: "",
+    snapchat: "",
+  });
+  const [proofError, setProofError] = useState<{
+    type: "missing" | "invalid";
+    platform: "instagram" | "tiktok" | "snapchat";
+  } | null>(null);
 
   // Blackout / Vacation dates
   const [blackoutDates, setBlackoutDates] = useState<{ from: string; to: string }[]>([
@@ -92,7 +101,7 @@ function CreatorPage() {
   const campaignPlatforms: ("instagram" | "tiktok" | "snapchat")[] = ["instagram", "tiktok"];
   const proofPlatformFields = {
     instagram: {
-      label: isAr ? "رابط ستوري إنستغرام" : "Instagram Story URL",
+      label: isAr ? "رابط القصة المصوّرة على إنستغرام" : "Instagram Story URL",
       placeholder: "https://instagram.com/...",
     },
     tiktok: {
@@ -100,7 +109,7 @@ function CreatorPage() {
       placeholder: "https://tiktok.com/...",
     },
     snapchat: {
-      label: isAr ? "رابط ستوري سناب شات" : "Snapchat Story URL",
+      label: isAr ? "رابط القصة المصوّرة على سناب شات" : "Snapchat Story URL",
       placeholder: "https://snapchat.com/...",
     },
   };
@@ -182,7 +191,7 @@ function CreatorPage() {
       isAr
         ? asset === "code"
           ? "تم نسخ الكود بنجاح"
-          : "تم نسخ رابط ملصق الستوري بنجاح"
+          : "تم نسخ رابط ملصق القصة المصوّرة بنجاح"
         : asset === "code"
           ? "Promo code copied successfully"
           : "Story sticker link copied successfully",
@@ -203,12 +212,55 @@ function CreatorPage() {
   };
 
   const submitProof = () => {
+    for (const platform of campaignPlatforms) {
+      const value = proofUrls[platform].trim();
+      if (!value) {
+        setProofError({ type: "missing", platform });
+        toast.warning(
+          isAr
+            ? "يرجى إدخال رابط التغطية لكل منصة مطلوبة"
+            : "Please enter a coverage link for each required platform",
+        );
+        return;
+      }
+
+      try {
+        const url = new URL(value);
+        const allowedHost = {
+          instagram: "instagram.com",
+          tiktok: "tiktok.com",
+          snapchat: "snapchat.com",
+        }[platform];
+        if (
+          url.protocol !== "https:" ||
+          (url.hostname !== allowedHost && !url.hostname.endsWith(`.${allowedHost}`))
+        ) {
+          throw new Error("The proof link is not a valid platform URL.");
+        }
+      } catch {
+        setProofError({ type: "invalid", platform });
+        toast.warning(
+          isAr
+            ? "يرجى إدخال رابط HTTPS صحيح للحساب أو المنشور على المنصة المحددة"
+            : "Please enter a valid HTTPS link to the profile or post on the selected platform",
+        );
+        return;
+      }
+    }
+
+    setProofError(null);
     setProofModal(false);
+    setProofUrls({ instagram: "", tiktok: "", snapchat: "" });
     toast.success(
       isAr
         ? "تم إرسال الإثبات بنجاح وبدأت مهلة الاعتماد"
         : "Proof submitted, approval period started",
     );
+  };
+
+  const closeProofModal = () => {
+    setProofModal(false);
+    setProofError(null);
   };
 
   const openProfileModal = () => {
@@ -259,7 +311,7 @@ function CreatorPage() {
                 className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2 text-xs font-semibold text-foreground shadow-sm transition hover:bg-muted sm:w-fit sm:text-sm"
               >
                 <Pencil className="size-3.5" />
-                {isAr ? "تعديل الميديا كيت" : "Edit Media Kit"}
+                {isAr ? "تعديل الملف الإعلامي" : "Edit Media Kit"}
               </button>
             </div>
 
@@ -267,19 +319,19 @@ function CreatorPage() {
             <div className="mt-5 flex flex-col justify-between gap-3 border-t border-border pt-4 text-xs md:flex-row md:items-center">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="inline-flex items-center gap-1 rounded-lg bg-muted px-2.5 py-1 font-medium text-muted-foreground">
-                  Instagram:{" "}
+                  {isAr ? "إنستغرام:" : "Instagram:"}{" "}
                   <strong className="text-foreground" dir="ltr">
                     @yousif.bites
                   </strong>
                 </span>
                 <span className="inline-flex items-center gap-1 rounded-lg bg-muted px-2.5 py-1 font-medium text-muted-foreground">
-                  TikTok:{" "}
+                  {isAr ? "تيك توك:" : "TikTok:"}{" "}
                   <strong className="text-foreground" dir="ltr">
                     @yousif.vlogs
                   </strong>
                 </span>
                 <span className="inline-flex items-center gap-1 rounded-lg bg-muted px-2.5 py-1 font-medium text-muted-foreground">
-                  Snapchat:{" "}
+                  {isAr ? "سناب شات:" : "Snapchat:"}{" "}
                   <strong className="text-foreground" dir="ltr">
                     @yousif_snap
                   </strong>
@@ -294,7 +346,7 @@ function CreatorPage() {
                 </span>
                 <span className="rounded-full border border-slate-200 bg-slate-100 px-3 py-1 font-bold text-slate-700">
                   {isAr
-                    ? `${verifiedStats?.storyViews ?? "11.8K"} مشاهدات الستوري`
+                    ? `${verifiedStats?.storyViews ?? "11.8K"} مشاهدة للقصص`
                     : `${verifiedStats?.storyViews ?? "11.8K"} story views`}
                 </span>
                 <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 font-bold text-emerald-700">
@@ -377,7 +429,7 @@ function CreatorPage() {
                   <option value="1">
                     {isAr ? "1 تغطية يومياً (تغطية حصرية)" : "1 campaign per day"}
                   </option>
-                  <option value="2">{isAr ? "2 تغطيات يومياً" : "2 campaigns per day"}</option>
+                  <option value="2">{isAr ? "تغطيتان يومياً" : "2 campaigns per day"}</option>
                   <option value="3">{isAr ? "3 تغطيات يومياً" : "3 campaigns per day"}</option>
                   <option value="4">{isAr ? "4 تغطيات يومياً" : "4 campaigns per day"}</option>
                   <option value="unlimited">
@@ -554,7 +606,7 @@ function CreatorPage() {
                       }}
                       className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-foreground hover:bg-primary/90"
                     >
-                      {isAr ? "حفظ الإجازة / Add" : "Add / حفظ الإجازة"}
+                      {isAr ? "حفظ الإجازة" : "Save time off"}
                     </button>
                     <button
                       type="button"
@@ -584,7 +636,7 @@ function CreatorPage() {
           <div className="rounded-2xl border bg-card p-5 shadow-soft transition hover:shadow-lift 2xl:p-8">
             <div className="flex items-center justify-between">
               <p className="text-sm font-semibold text-muted-foreground">
-                {isAr ? "أرباح محجوزة في الضمان" : "Secured in Escrow"}
+                {isAr ? "أرباح محجوزة في صندوق الأمانات" : "Secured in Escrow"}
               </p>
               <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-warning-soft text-warning">
                 <Lock className="h-4.5 w-4.5" />
@@ -621,7 +673,7 @@ function CreatorPage() {
                 onClick={() => setPayoutOpen(true)}
                 className="rounded-full bg-success px-3 py-1 text-xs font-bold text-background hover:bg-success/90"
               >
-                {isAr ? "سحب الأرباح (Fawri+ IBAN)" : "Withdraw (Fawri+ IBAN)"}
+                {isAr ? "سحب الأرباح عبر فوري+ باستخدام رقم الحساب المصرفي الدولي" : "Withdraw via Fawri+ IBAN"}
               </button>
               {payoutOpen && (
                 <CreatorPayoutModal available={450} onClose={() => setPayoutOpen(false)} />
@@ -709,7 +761,7 @@ function CreatorPage() {
                               {isAr ? "شركة فليم برجر ذ.م.م" : "Flame Burger Co."}
                             </h3>
                             <p className="text-sm text-muted-foreground">
-                              {isAr ? "Burger & Casual Dining" : "Burger & Casual Dining"}
+                              {isAr ? "البرجر والمطاعم غير الرسمية" : "Burger & Casual Dining"}
                             </p>
                           </div>
                         </div>
@@ -740,12 +792,12 @@ function CreatorPage() {
                     <div className="mt-8 rounded-xl border bg-surface p-5">
                       <h4 className="mb-4 text-sm font-bold text-foreground flex items-center gap-2">
                         <BadgeCheck className="h-4 w-4 text-primary" />
-                        {isAr ? "المخرجات المطلوبة (Brief)" : "Deliverables Checklist"}
+                        {isAr ? "قائمة المخرجات المطلوبة" : "Deliverables Checklist"}
                       </h4>
                       <ul className="space-y-3">
                         {[
                           isAr
-                            ? "3 لقطات ستوري إنستغرام تغطي تحضير الوجبات والأجواء الداخلية."
+                            ? "3 لقطات للقصة المصوّرة على إنستغرام تغطي تحضير الوجبات والأجواء الداخلية."
                             : "3 Instagram Story shots covering food prep and interior.",
                           isAr
                             ? "الإشارة للحساب الرسمي (@flame_burger) وإرفاق ملصق رابط القسيمة."
@@ -856,7 +908,7 @@ function CreatorPage() {
                         <div className="flex items-center justify-between gap-3 rounded-lg border bg-card p-3">
                           <div className="min-w-0">
                             <p className="text-xs text-muted-foreground">
-                              {isAr ? "رابط القسيمة للستوري" : "Story Voucher Link"}
+                              {isAr ? "رابط القسيمة للقصة المصوّرة" : "Story Voucher Link"}
                             </p>
                             <p dir="ltr" className="mt-1 truncate text-sm font-medium">
                               https://vloop.me/c/flame20
@@ -874,13 +926,13 @@ function CreatorPage() {
                             ) : (
                               <Copy className="h-3.5 w-3.5" />
                             )}
-                            {isAr ? "نسخ رابط ملصق الستوري" : "Copy Link"}
+                            {isAr ? "نسخ رابط ملصق القصة المصوّرة" : "Copy Link"}
                           </button>
                         </div>
                       </div>
                       <p className="text-xs leading-relaxed text-muted-foreground">
                         {isAr
-                          ? "أرفق هذا الرابط في ملصق الستوري ليتمكن المتابعون من حجز قسائم الخصم."
+                          ? "أرفق هذا الرابط في ملصق القصة المصوّرة ليتمكن المتابعون من حجز قسائم الخصم."
                           : "Attach this link in the Story sticker so followers can claim discount vouchers."}
                       </p>
                     </div>
@@ -954,11 +1006,11 @@ function CreatorPage() {
             <div className="space-y-3">
               {[
                 isAr
-                  ? "الميزانية لا تناسب حجم ومستوى المتجر (طلب تسعيرة خاصة)."
+                  ? "الميزانية لا تتناسب مع متطلبات الحملة."
                   : "Budget does not match brand requirements.",
                 isAr
-                  ? "تضارب في المواعيد / الجدول ممتلئ في هذا اليوم."
-                  : "Schedule conflict / fully booked.",
+                  ? "تعارض في المواعيد؛ جدولي ممتلئ في ذلك اليوم."
+                  : "I have a scheduling conflict and am fully booked on that date.",
                 isAr
                   ? "محتوى العرض لا يتناسب مع طبيعة وأسلوب حسابي."
                   : "Content doesn't align with my style.",
@@ -1036,7 +1088,7 @@ function CreatorPage() {
                 {isAr ? "رفع إثبات النشر" : "Submit Proof of Delivery"}
               </h3>
               <button
-                onClick={() => setProofModal(false)}
+                onClick={closeProofModal}
                 className="rounded-full p-2 text-muted-foreground hover:bg-muted"
               >
                 <X className="h-5 w-5" />
@@ -1062,8 +1114,17 @@ function CreatorPage() {
                       <LinkIcon className="h-4 w-4 text-muted-foreground shrink-0" />
                       <input
                         type="url"
+                        value={proofUrls[platform]}
+                        onChange={(event) => {
+                          setProofUrls((current) => ({
+                            ...current,
+                            [platform]: event.target.value,
+                          }));
+                          setProofError(null);
+                        }}
                         placeholder={field.placeholder}
-                        className="w-full bg-transparent p-2.5 text-sm outline-none"
+                        aria-invalid={proofError?.platform === platform}
+                        className={`w-full bg-transparent p-2.5 text-sm outline-none ${proofError?.platform === platform ? "text-destructive" : ""}`}
                         dir="ltr"
                       />
                     </div>
@@ -1071,10 +1132,21 @@ function CreatorPage() {
                 );
               })}
             </div>
+            {proofError && (
+              <p role="alert" className="mt-3 text-xs font-medium text-destructive">
+                {proofError.type === "missing"
+                  ? isAr
+                    ? "أدخل رابط التغطية لكل منصة مطلوبة."
+                    : "Enter a coverage link for each required platform."
+                  : isAr
+                    ? "تحقق من صحة الرابط واستخدام HTTPS ورابط المنصة المحددة."
+                    : "Check that the link is valid, uses HTTPS, and belongs to the selected platform."}
+              </p>
+            )}
 
             <div className="mt-8 flex justify-end gap-3">
               <button
-                onClick={() => setProofModal(false)}
+                onClick={closeProofModal}
                 className="rounded-lg px-4 py-2 text-sm font-bold text-muted-foreground hover:bg-muted"
               >
                 {isAr ? "إلغاء" : "Cancel"}

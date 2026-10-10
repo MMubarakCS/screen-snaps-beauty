@@ -42,11 +42,11 @@ const helpQuestions = [
   {
     icon: QrCode,
     question: {
-      ar: "كيف يتم تتبع زوار المطعم عبر QR؟",
+      ar: "كيف يتم تتبع زوار المطعم عبر رموز الاستجابة السريعة؟",
       en: "How does QR footfall tracking work?",
     },
     answer: {
-      ar: "يستخدم الزبون قسيمة QR لمرة واحدة عند الزيارة، ويسجل النظام الاسترداد لقياس الزيارات.",
+      ar: "يستخدم الزبون قسيمة برمز استجابة سريعة لمرة واحدة عند الزيارة، ويسجل النظام الاسترداد لقياس الزيارات.",
       en: "Customers use a single-use QR voucher during their visit, and each redemption is recorded to measure footfall.",
     },
   },
@@ -77,7 +77,10 @@ export function HelpModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] max-w-2xl gap-0 overflow-y-auto rounded-2xl p-0 sm:rounded-2xl">
+      <DialogContent
+        closeLabel={isAr ? "إغلاق" : "Close"}
+        className="max-h-[90dvh] w-[calc(100%-2rem)] max-w-2xl gap-0 overflow-y-auto rounded-2xl p-0 sm:rounded-2xl"
+      >
         <div className="border-b bg-surface px-5 py-5 pe-12 sm:px-7">
           <DialogHeader className="space-y-2 text-start">
             <DialogTitle className="text-xl font-extrabold sm:text-2xl">
