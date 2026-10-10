@@ -21,7 +21,6 @@ import {
   ShieldCheck,
   Instagram,
   Video,
-  Download,
 } from "lucide-react";
 import { useLang } from "@/components/vloop/Shell";
 import { creators, fmtBHD, type L } from "@/lib/vloop-data";
@@ -80,7 +79,7 @@ function Campaigns() {
   const [toast, setToast] = useState<L | null>(null);
   const [briefModal, setBriefModal] = useState(false);
   const [completedPage, setCompletedPage] = useState(1);
-  const COMPLETED_PER_PAGE = 4;
+  const COMPLETED_PER_PAGE = 5;
 
   useEffect(() => {
     if (status !== "pending") return;
@@ -608,10 +607,6 @@ function Campaigns() {
                           <CheckCircle2 className="h-3.5 w-3.5" />
                           {tr({ ar: "تم التحرير:", en: "Released:" })} {fmtBHD(150, lang)}
                         </span>
-                        <button className="inline-flex items-center gap-1.5 rounded-lg border bg-card px-4 py-2 text-xs font-semibold shadow-soft hover:bg-accent hover:text-accent-foreground transition">
-                          <Download className="h-3.5 w-3.5" />
-                          {tr({ ar: "تحميل الفاتورة (PDF)", en: "Tax Invoice" })}
-                        </button>
                       </div>
                     </div>
                   ))}
@@ -621,9 +616,13 @@ function Campaigns() {
                     <button
                       onClick={() => setCompletedPage((p) => Math.max(1, p - 1))}
                       disabled={safePage <= 1}
-                      className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-sm font-semibold transition hover:border-primary hover:text-primary disabled:opacity-40 disabled:pointer-events-none"
+                      className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-sm font-semibold transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-40 disabled:pointer-events-none"
                     >
-                      <ChevronRight className="h-4 w-4" />
+                      {lang === "ar" ? (
+                        <ChevronRight className="h-4 w-4" />
+                      ) : (
+                        <ChevronLeft className="h-4 w-4" />
+                      )}
                       {tr({ ar: "السابق", en: "Previous" })}
                     </button>
                     <span className="num text-sm text-muted-foreground">
@@ -635,10 +634,14 @@ function Campaigns() {
                     <button
                       onClick={() => setCompletedPage((p) => Math.min(totalPages, p + 1))}
                       disabled={safePage >= totalPages}
-                      className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-sm font-semibold transition hover:border-primary hover:text-primary disabled:opacity-40 disabled:pointer-events-none"
+                      className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-sm font-semibold transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-40 disabled:pointer-events-none"
                     >
                       {tr({ ar: "التالي", en: "Next" })}
-                      <ChevronLeft className="h-4 w-4" />
+                      {lang === "ar" ? (
+                        <ChevronLeft className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
                     </button>
                   </div>
                 )}

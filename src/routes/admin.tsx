@@ -2,8 +2,21 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
-  Lock, TrendingUp, AlertTriangle, BadgeCheck, ExternalLink, Check, HelpCircle, Scale,
-  Search, ShieldAlert, Ban, Gavel, Users,
+  Lock,
+  TrendingUp,
+  AlertTriangle,
+  BadgeCheck,
+  ExternalLink,
+  Check,
+  HelpCircle,
+  Scale,
+  ChevronLeft,
+  ChevronRight,
+  Search,
+  ShieldAlert,
+  Ban,
+  Gavel,
+  Users,
 } from "lucide-react";
 import { useLang } from "@/components/vloop/Shell";
 import { creators, fmtBHD, type L } from "@/lib/vloop-data";
@@ -486,8 +499,9 @@ function AdminPage() {
             <button
               disabled={userPage <= 1}
               onClick={() => setUserPage((page) => Math.max(1, page - 1))}
-              className="rounded-lg border px-3 py-2 text-sm font-semibold hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-sm font-semibold hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
             >
+              {lang === "ar" ? <ChevronRight className="size-4" /> : <ChevronLeft className="size-4" />}
               {tr({ ar: "السابق", en: "Previous" })}
             </button>
             <span className="text-sm font-semibold text-muted-foreground">
@@ -496,9 +510,10 @@ function AdminPage() {
             <button
               disabled={userPage >= usersPageCount}
               onClick={() => setUserPage((page) => Math.min(usersPageCount, page + 1))}
-              className="rounded-lg border px-3 py-2 text-sm font-semibold hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-sm font-semibold hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
             >
               {tr({ ar: "التالي", en: "Next" })}
+              {lang === "ar" ? <ChevronLeft className="size-4" /> : <ChevronRight className="size-4" />}
             </button>
           </nav>
         </div>

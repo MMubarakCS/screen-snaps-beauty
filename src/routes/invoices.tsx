@@ -1,6 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Download, Eye, FileSpreadsheet, Search, Wallet, Percent, Receipt, Check, X, Printer, BadgeCheck, Stamp } from "lucide-react";
+import {
+  Download,
+  Eye,
+  FileSpreadsheet,
+  Search,
+  Wallet,
+  Percent,
+  Receipt,
+  Check,
+  X,
+  Printer,
+  BadgeCheck,
+  Stamp,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { useLang } from "@/components/vloop/Shell";
 import { creators, fmtBHD, type L } from "@/lib/vloop-data";
 
@@ -26,7 +41,88 @@ const invoices: Inv[] = [
   { id: "VLP-2026-0779", campaign: { ar: "فيديو ريلز", en: "Reels Video" }, creator: creators[2]!, date: { ar: "30 أغسطس 2026", en: "30 Aug 2026" }, iso: "2026-08-30", net: 150 },
   { id: "VLP-2026-0703", campaign: { ar: "تغطية ميدانية", en: "Field Coverage" }, creator: creators[3]!, date: { ar: "14 يوليو 2026", en: "14 Jul 2026" }, iso: "2026-07-14", net: 95 },
   { id: "VLP-2026-0651", campaign: { ar: "سناب شات", en: "Snapchat" }, creator: creators[1]!, date: { ar: "2 يونيو 2026", en: "2 Jun 2026" }, iso: "2026-06-02", net: 120 },
+  {
+    id: "VLP-2026-0638",
+    campaign: { ar: "تغطية افتتاح", en: "Opening Coverage" },
+    creator: creators[2]!,
+    date: { ar: "27 مايو 2026", en: "27 May 2026" },
+    iso: "2026-05-27",
+    net: 135,
+  },
+  {
+    id: "VLP-2026-0604",
+    campaign: { ar: "ريلز مطعم", en: "Restaurant Reels" },
+    creator: creators[0]!,
+    date: { ar: "15 مايو 2026", en: "15 May 2026" },
+    iso: "2026-05-15",
+    net: 160,
+  },
+  {
+    id: "VLP-2026-0577",
+    campaign: { ar: "قصة ترويجية", en: "Promotional Story" },
+    creator: creators[3]!,
+    date: { ar: "30 أبريل 2026", en: "30 Apr 2026" },
+    iso: "2026-04-30",
+    net: 110,
+  },
+  {
+    id: "VLP-2026-0532",
+    campaign: { ar: "تجربة مقهى", en: "Cafe Experience" },
+    creator: creators[1]!,
+    date: { ar: "12 أبريل 2026", en: "12 Apr 2026" },
+    iso: "2026-04-12",
+    net: 125,
+  },
+  {
+    id: "VLP-2026-0498",
+    campaign: { ar: "فيديو تيك توك", en: "TikTok Video" },
+    creator: creators[2]!,
+    date: { ar: "25 مارس 2026", en: "25 Mar 2026" },
+    iso: "2026-03-25",
+    net: 145,
+  },
+  {
+    id: "VLP-2026-0460",
+    campaign: { ar: "زيارة متجر", en: "Store Visit" },
+    creator: creators[0]!,
+    date: { ar: "8 مارس 2026", en: "8 Mar 2026" },
+    iso: "2026-03-08",
+    net: 100,
+  },
+  {
+    id: "VLP-2026-0417",
+    campaign: { ar: "تغطية فعالية", en: "Event Coverage" },
+    creator: creators[3]!,
+    date: { ar: "19 فبراير 2026", en: "19 Feb 2026" },
+    iso: "2026-02-19",
+    net: 175,
+  },
+  {
+    id: "VLP-2026-0381",
+    campaign: { ar: "قصة إنستغرام", en: "Instagram Story" },
+    creator: creators[1]!,
+    date: { ar: "3 فبراير 2026", en: "3 Feb 2026" },
+    iso: "2026-02-03",
+    net: 90,
+  },
+  {
+    id: "VLP-2026-0349",
+    campaign: { ar: "فيديو مراجعة", en: "Review Video" },
+    creator: creators[2]!,
+    date: { ar: "17 يناير 2026", en: "17 Jan 2026" },
+    iso: "2026-01-17",
+    net: 155,
+  },
+  {
+    id: "VLP-2026-0302",
+    campaign: { ar: "حملة سناب شات", en: "Snapchat Campaign" },
+    creator: creators[0]!,
+    date: { ar: "5 يناير 2026", en: "5 Jan 2026" },
+    iso: "2026-01-05",
+    net: 115,
+  },
 ];
+const ITEMS_PER_PAGE = 5;
 const fee = (n: number) => n * 0.08;
 const vat = (n: number) => fee(n) * 0.1;
 const total = (n: number) => n + fee(n) + vat(n);
@@ -38,6 +134,7 @@ function Invoices() {
   const [period, setPeriod] = useState("all");
   const [status, setStatus] = useState("all");
   const [view, setView] = useState<Inv | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const rows = useMemo(() => {
     const now = new Date("2026-10-03");
@@ -52,6 +149,12 @@ function Invoices() {
       return true;
     });
   }, [q, period]);
+  const totalPages = Math.ceil(rows.length / ITEMS_PER_PAGE);
+  const safePage = Math.min(currentPage, Math.max(1, totalPages));
+  const paginatedInvoices = rows.slice(
+    (safePage - 1) * ITEMS_PER_PAGE,
+    safePage * ITEMS_PER_PAGE,
+  );
 
   const exportCsv = () => {
     const head = lang === "ar"
@@ -108,15 +211,15 @@ function Invoices() {
         <div className="grid gap-3 rounded-2xl border bg-surface p-4 md:grid-cols-[1fr_auto_auto_auto]">
           <div className="flex items-center gap-2 rounded-lg border bg-card px-3 focus-within:border-primary">
             <Search className="h-4 w-4 text-muted-foreground" />
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={tr({ ar: "ابحث برقم الفاتورة، اسم الحملة، أو صانع المحتوى...", en: "Search by invoice no., campaign, or creator..." })} className="w-full bg-transparent py-2.5 text-sm outline-none" />
+            <input value={q} onChange={(e) => { setQ(e.target.value); setCurrentPage(1); }} placeholder={tr({ ar: "ابحث برقم الفاتورة، اسم الحملة، أو صانع المحتوى...", en: "Search by invoice no., campaign, or creator..." })} className="w-full bg-transparent py-2.5 text-sm outline-none" />
           </div>
-          <select value={period} onChange={(e) => setPeriod(e.target.value)} className={sel}>
+          <select value={period} onChange={(e) => { setPeriod(e.target.value); setCurrentPage(1); }} className={sel}>
             <option value="all">{tr({ ar: "جميع الفترات", en: "All Time" })}</option>
             <option value="month">{tr({ ar: "هذا الشهر", en: "This Month" })}</option>
             <option value="3m">{tr({ ar: "آخر 3 أشهر", en: "Last 3 Months" })}</option>
             <option value="2026">2026</option>
           </select>
-          <select value={status} onChange={(e) => setStatus(e.target.value)} className={sel}>
+          <select value={status} onChange={(e) => { setStatus(e.target.value); setCurrentPage(1); }} className={sel}>
             <option value="all">{tr({ ar: "الكل", en: "All" })}</option>
             <option value="paid">{tr({ ar: "مدفوعة ومكتملة", en: "Paid" })}</option>
           </select>
@@ -133,7 +236,7 @@ function Invoices() {
                   <tr>{[{ ar: "رقم الفاتورة", en: "Invoice ID" }, { ar: "الحملة وصانع المحتوى", en: "Campaign / Creator" }, { ar: "تاريخ الإصدار", en: "Issue Date" }, { ar: "أجر الحملة", en: "Campaign Net" }, { ar: "رسوم المنصة + الضريبة", en: "Fee & VAT" }, { ar: "الإجمالي الكلي", en: "Total" }, { ar: "الحالة", en: "Status" }, { ar: "الإجراءات", en: "Actions" }].map((h) => <th key={h.en} className="px-4 py-3 text-start font-semibold">{tr(h)}</th>)}</tr>
                 </thead>
                 <tbody className="divide-y">
-                  {rows.map((i) => (
+                  {paginatedInvoices.map((i) => (
                     <tr key={i.id} className="transition hover:bg-surface">
                       <td dir="ltr" className="px-4 py-3 text-start font-mono font-bold">#{i.id}</td>
                       <td className="px-4 py-3"><div className="flex items-center gap-3"><img src={i.creator.img} className="size-10 shrink-0 rounded-full object-cover" /><div className="flex flex-col items-start text-start"><span className="flex items-center gap-1 text-sm font-bold">{tr(i.creator.name)} <BadgeCheck className="size-3.5 text-primary" /></span><span className="text-xs text-muted-foreground" style={{ direction: "ltr", unicodeBidi: "isolate" }}>{i.creator.handle}</span><span className="mt-0.5 text-[11px] text-muted-foreground/80">{tr({ ar: "خدمات تسويق وترويج رقمي", en: "Digital Marketing Services" })}</span></div></div></td>
@@ -149,7 +252,7 @@ function Invoices() {
               </table>
             </div>
             <div className="space-y-3 lg:hidden">
-              {rows.map((i) => (
+              {paginatedInvoices.map((i) => (
                 <article key={i.id} className="rounded-2xl border bg-card p-4 shadow-soft">
                   <div className="flex items-center justify-between"><span dir="ltr" className="font-mono text-sm font-bold">#{i.id}</span><div className="flex items-center gap-2"><span className="text-xs text-muted-foreground">{tr(i.date)}</span><Paid /></div></div>
                   <div className="mt-3 flex items-center gap-3"><img src={i.creator.img} className="size-10 shrink-0 rounded-full object-cover" /><div className="flex flex-col items-start text-start"><span className="flex items-center gap-1 text-sm font-bold">{tr(i.creator.name)} <BadgeCheck className="size-3.5 text-primary" /></span><span className="text-xs text-muted-foreground" style={{ direction: "ltr", unicodeBidi: "isolate" }}>{i.creator.handle}</span><span className="mt-0.5 text-[11px] text-muted-foreground/80">{tr({ ar: "خدمات تسويق وترويج رقمي", en: "Digital Marketing Services" })}</span></div></div>
@@ -163,9 +266,28 @@ function Invoices() {
             </div>
 
             <div className="mt-4 flex items-center justify-between rounded-2xl border bg-card px-4 py-3 text-sm shadow-soft">
-              <button className="rounded-lg border bg-surface px-4 py-2 font-semibold hover:bg-muted disabled:opacity-50" disabled>{tr({ ar: "السابق", en: "Previous" })}</button>
-              <span className="font-medium text-muted-foreground">{tr({ ar: "صفحة 1 من 3", en: "Page 1 of 3" })}</span>
-              <button className="rounded-lg border bg-surface px-4 py-2 font-semibold hover:bg-muted">{tr({ ar: "التالي", en: "Next" })}</button>
+              <button
+                onClick={() => setCurrentPage((page) => Math.max(page - 1, 1))}
+                disabled={safePage === 1}
+                className="inline-flex items-center gap-1 rounded-lg border bg-surface px-4 py-2 font-semibold hover:bg-muted disabled:cursor-not-allowed disabled:pointer-events-none disabled:opacity-40"
+              >
+                {lang === "ar" ? <ChevronRight className="size-4" /> : <ChevronLeft className="size-4" />}
+                {tr({ ar: "السابق", en: "Previous" })}
+              </button>
+              <span className="font-medium text-muted-foreground">
+                {tr({
+                  ar: `صفحة ${safePage} من ${totalPages}`,
+                  en: `Page ${safePage} of ${totalPages}`,
+                })}
+              </span>
+              <button
+                onClick={() => setCurrentPage((page) => Math.min(page + 1, totalPages))}
+                disabled={safePage === totalPages}
+                className="inline-flex items-center gap-1 rounded-lg border bg-surface px-4 py-2 font-semibold hover:bg-muted disabled:cursor-not-allowed disabled:pointer-events-none disabled:opacity-40"
+              >
+                {tr({ ar: "التالي", en: "Next" })}
+                {lang === "ar" ? <ChevronLeft className="size-4" /> : <ChevronRight className="size-4" />}
+              </button>
             </div>
           </>
         )}
